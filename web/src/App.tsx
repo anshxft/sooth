@@ -1,5 +1,6 @@
 import { Link, Route, Switch } from 'wouter'
 import { useAccount } from './lib/near'
+import { Agents } from './pages/Agents'
 import { Arena } from './pages/Arena'
 import { Question } from './pages/Question'
 
@@ -33,8 +34,9 @@ export default function App() {
       <Switch>
         <Route path="/" component={Arena} />
         <Route path="/q/:id">{(params) => <Question id={params.id} />}</Route>
+        <Route path="/agents" component={Agents} />
         <Route>
-          {/* ponytail: placeholder until the Agents / Benchmark / Ask pages land */}
+          {/* ponytail: placeholder until the Benchmark / Ask pages land */}
           <main className="mx-auto max-w-[1280px] p-4">
             <p className="label">Coming next. <Link href="/" className="underline">Back to arena</Link></p>
           </main>
