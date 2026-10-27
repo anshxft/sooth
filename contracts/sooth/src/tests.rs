@@ -506,6 +506,104 @@ fn tally_before_reveal_closes_fails() {
     tally_at(&mut c, qid, REVEAL_AT);
 }
 
+// ------------------------------------------------------------------ F5: finalize
+
+/// Challenge window (180 s) after a tally at TALLY_AT.
+const FINALIZE_AT: u64 = TALLY_AT + 181 * NS_PER_SEC;
+
+fn finalize_at(c: &mut Contract, qid: u64, now: u64) -> QuestionView {
+    call_at(&account("cranker"), ZERO, now);
+    c.finalize(qid);
+    c.get_question(qid).unwrap()
+}
+
+/// 3 honest agents say YES; mallory says NO at 60 % (weight share for YES ≈ 81 %, so it auto-resolves).
+fn settled_question(c: &mut Contract) -> u64 {
+    agents(c, &["atlas", "nova", "sage", "mallory"]);
+    let qid = ask(c, T0);
+    vote(c, qid, 1, T0, &[("atlas", Answer::Yes, 90), ("nova", Answer::Yes, 85), ("sage", Answer::Yes, 80), ("mallory", Answer::No, 60)]);
+    assert_eq!(tally_at(c, qid, TALLY_AT).status, Status::Provisional);
+    qid
+}
+
+#[test]
+fn finalize_rewards_the_right_and_slashes_the_liar() {
+    let mut c = new_contract();
+    let qid = settled_question(&mut c);
+    let q = finalize_at(&mut c, qid, FINALIZE_AT);
+    assert!(last_event("finalized"));
+    assert_eq!(q.status, Status::Finalized);
+    let outcome = q.outcome.clone().unwrap();
+    assert_eq!((outcome.answer, outcome.resolved_by), (Answer::Yes, ResolvedBy::Auto));
+    assert_eq!(c.get_result(qid).unwrap().answer, Answer::Yes);
+
+    let mallory = c.get_agent(account("mallory")).unwrap();
+    assert_eq!(mallory.locked_balance, ZERO);
+    assert_eq!(mallory.stats.wrong, 1);
+    assert_eq!(mallory.stats.slashed, NearToken::from_millinear(300)); // 0.5 stake × 60 %
+    assert_eq!(mallory.free_balance, NearToken::from_millinear(4_695)); // 5 − 0.5 − 0.005 + 0.2 back
+
+    // Money in = money out: fee + slashes = protocol fee + rewards + dust.
+    let earned: u128 = ["atlas", "nova", "sage"].iter().map(|n| c.get_agent(account(n)).unwrap().stats.earned.as_yoctonear()).sum();
+    let fee = q.fee.as_yoctonear();
+    assert_eq!(
+        fee + mallory.stats.slashed.as_yoctonear(),
+        q.protocol_fee.unwrap().as_yoctonear() + earned + q.dust.unwrap().as_yoctonear()
+    );
+    let atlas = c.get_agent(account("atlas")).unwrap();
+    assert!(atlas.stats.earned > ZERO && atlas.stats.correct == 1 && atlas.locked_balance == ZERO);
+}
+
+#[test]
+#[should_panic(expected = "Not ready to finalize")]
+fn finalize_during_challenge_window_fails() {
+    let mut c = new_contract();
+    let qid = settled_question(&mut c);
+    finalize_at(&mut c, qid, TALLY_AT + 10 * NS_PER_SEC);
+}
+
+fn escalated_question(c: &mut Contract) -> u64 {
+    agents(c, &["atlas", "nova", "sage"]);
+    let qid = ask(c, T0);
+    let split = [("atlas", Answer::Yes, 80), ("nova", Answer::No, 80), ("sage", Answer::Yes, 60)];
+    vote(c, qid, 1, T0, &split);
+    tally_at(c, qid, TALLY_AT);
+    vote(c, qid, 2, TALLY_AT, &split);
+    assert_eq!(tally_at(c, qid, TALLY_AT + 301 * NS_PER_SEC).status, Status::Escalated);
+    qid
+}
+
+#[test]
+fn dao_resolves_an_escalated_question() {
+    let mut c = new_contract();
+    let qid = escalated_question(&mut c);
+    call_at(&account("dao"), ZERO, TALLY_AT + 400 * NS_PER_SEC);
+    c.dao_resolve(qid, Answer::No);
+    let q = c.get_question(qid).unwrap();
+    assert_eq!(q.status, Status::Finalized);
+    assert_eq!(q.outcome.unwrap().resolved_by, ResolvedBy::Dao);
+    assert_eq!(q.payouts.len(), 6); // 3 agents × 2 rounds, each settled on its own
+    assert_eq!(c.get_agent(account("nova")).unwrap().stats.correct, 2);
+}
+
+#[test]
+#[should_panic(expected = "Only the DAO can resolve")]
+fn only_the_dao_can_resolve() {
+    let mut c = new_contract();
+    let qid = escalated_question(&mut c);
+    call_at(&account("atlas"), ZERO, TALLY_AT + 400 * NS_PER_SEC);
+    c.dao_resolve(qid, Answer::Yes);
+}
+
+#[test]
+#[should_panic(expected = "Question is not escalated")]
+fn dao_cannot_override_an_agent_verdict() {
+    let mut c = new_contract();
+    let qid = settled_question(&mut c);
+    call_at(&account("dao"), ZERO, FINALIZE_AT);
+    c.dao_resolve(qid, Answer::No);
+}
+
 #[test]
 fn hex_sha256_is_standard_sha256() {
     assert_eq!(hex_sha256("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");

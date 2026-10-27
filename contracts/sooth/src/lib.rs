@@ -11,7 +11,7 @@ pub use types::*;
 use near_sdk::json_types::{U64, U128};
 use near_sdk::serde_json::{Value, json};
 use near_sdk::store::{IterableMap, LookupMap};
-use near_sdk::{AccountId, NearToken, PanicOnDefault, Promise, assert_one_yocto, env, near, require};
+use near_sdk::{AccountId, Gas, NearToken, PanicOnDefault, Promise, assert_one_yocto, env, near, require};
 
 const MAX_PAGE: u32 = 50;
 /// `list_questions` looks at most this many ids back, so a status filter cannot run out of gas.
@@ -298,6 +298,32 @@ impl Contract {
         }
     }
 
+    // ------------------------------------------------------------------ finalize (F5)
+
+    /// Anyone can crank this once the challenge window has passed.
+    pub fn finalize(&mut self, question_id: u64) {
+        let now = env::block_timestamp();
+        let q = self.questions.get(&question_id).unwrap_or_else(|| env::panic_str("Question not found"));
+        require!(q.phase(now) == Phase::AwaitingFinalize, "Not ready to finalize");
+        let round = q.current_round();
+        let tally = round.tally.clone().unwrap_or_else(|| env::panic_str("Not ready to finalize"));
+        let answer = tally.winner.unwrap_or_else(|| env::panic_str("Not ready to finalize"));
+        let resolved_by = if round.round == 1 { ResolvedBy::Auto } else { ResolvedBy::Round2 };
+        let outcome = Outcome { answer, share_bps: tally.share_bps, avg_conf_bps: tally.avg_conf_bps, resolved_by };
+        self.close(question_id, outcome, now);
+    }
+
+    /// The human court for questions agents could not settle in two rounds.
+    pub fn dao_resolve(&mut self, question_id: u64, answer: Answer) {
+        require!(env::predecessor_account_id() == self.config.dao_account, "Only the DAO can resolve");
+        let now = env::block_timestamp();
+        let q = self.questions.get(&question_id).unwrap_or_else(|| env::panic_str("Question not found"));
+        require!(q.status == Status::Escalated, "Question is not escalated");
+        // share / confidence are those of the last agent round, shown for context.
+        let (share_bps, avg_conf_bps) = q.current_round().tally.as_ref().map_or((0, 0), |t| (t.share_bps, t.avg_conf_bps));
+        self.close(question_id, Outcome { answer, share_bps, avg_conf_bps, resolved_by: ResolvedBy::Dao }, now);
+    }
+
     // -------------------------------------------------------------------- views
 
     pub fn get_config(&self) -> Config {
@@ -403,6 +429,44 @@ impl Contract {
         Promise::new(asker).transfer(NearToken::from_yoctonear(settlement.refund_to_asker)).detach();
         if settlement.slashed_to_treasury > 0 {
             Promise::new(treasury).transfer(NearToken::from_yoctonear(settlement.slashed_to_treasury)).detach();
+        }
+    }
+
+    /// Settle against the final answer, credit agents, pay the treasury, notify the consumer.
+    /// Rewards stay inside the contract as free balance; agents withdraw them with a full key.
+    fn close(&mut self, question_id: u64, outcome: Outcome, now: u64) {
+        let fee_bps = self.config.protocol_fee_bps;
+        let treasury = self.config.treasury.clone();
+        let q = self.questions.get_mut(&question_id).unwrap_or_else(|| env::panic_str("Question not found"));
+        let fee = q.fee.as_yoctonear();
+        let s = payout::settle(fee, fee_bps, &q.rounds, outcome.answer);
+        require!(payout::conserved(fee, &s), "Settlement does not balance");
+
+        q.status = Status::Finalized;
+        q.outcome = Some(outcome.clone());
+        q.payouts = s.payouts.clone();
+        q.protocol_fee = Some(NearToken::from_yoctonear(s.protocol_fee));
+        q.dust = Some(NearToken::from_yoctonear(s.dust));
+        q.finalized_at = Some(now);
+        let (asker, callback) = (q.asker.clone(), q.callback.clone());
+        emit(
+            "finalized",
+            json!({ "question_id": question_id, "answer": outcome.answer, "resolved_by": outcome.resolved_by,
+                    "payouts": &s.payouts, "protocol_fee": U128(s.protocol_fee), "dust": U128(s.dust) }),
+        );
+
+        self.apply_payouts(&s.payouts);
+        let to_treasury = s.protocol_fee + s.dust + s.slashed_to_treasury;
+        if to_treasury > 0 {
+            Promise::new(treasury).transfer(NearToken::from_yoctonear(to_treasury)).detach();
+        }
+        if s.refund_to_asker > 0 {
+            Promise::new(asker).transfer(NearToken::from_yoctonear(s.refund_to_asker)).detach();
+        }
+        if let Some(cb) = callback {
+            // Fire and forget: a failing consumer must not undo the settlement.
+            let args = json!({ "question_id": question_id, "answer": outcome.answer }).to_string().into_bytes();
+            Promise::new(cb.contract_id).function_call(cb.method, args, ZERO, Gas::from_tgas(10)).detach();
         }
     }
 
