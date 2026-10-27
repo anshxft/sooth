@@ -1,6 +1,7 @@
 import { Link, Route, Switch } from 'wouter'
 import { useAccount } from './lib/near'
 import { Arena } from './pages/Arena'
+import { Question } from './pages/Question'
 
 const NAV = [
   ['/', 'Arena'],
@@ -31,8 +32,9 @@ export default function App() {
       </header>
       <Switch>
         <Route path="/" component={Arena} />
+        <Route path="/q/:id">{(params) => <Question id={params.id} />}</Route>
         <Route>
-          {/* ponytail: placeholder until the Question / Agents / Benchmark / Ask pages land */}
+          {/* ponytail: placeholder until the Agents / Benchmark / Ask pages land */}
           <main className="mx-auto max-w-[1280px] p-4">
             <p className="label">Coming next. <Link href="/" className="underline">Back to arena</Link></p>
           </main>

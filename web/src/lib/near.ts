@@ -13,15 +13,22 @@ export type Phase =
   | 'Scheduled' | 'Commit' | 'Reveal' | 'AwaitingTally' | 'Challenge' | 'AwaitingFinalize' | 'Dao' | 'Finalized' | 'Refunded'
 export type Outcome = { answer: Answer; share_bps: number; avg_conf_bps: number; resolved_by: 'auto' | 'round2' | 'dao' }
 export type Commit = { account_id: string; hash: string; stake: string; committed_at: string }
-export type Reveal = { account_id: string; answer: Answer; confidence: number; weight: string; rep_bps: number; evidence_uri: string }
-export type Tally = { winner: Answer | null; share_bps: number; avg_conf_bps: number; confident: boolean }
-export type Round = { round: number; min_stake: string; commit_start: string; commit_end: string; reveal_end: string; commits: Commit[]; reveals: Reveal[]; tally: Tally | null }
-export type Payout = { account_id: string; round: number; stake: string; delta: string; reason: string }
-export type QuestionSummary = {
-  id: number; text: string; category: string; status: string; phase: Phase; round: number; fee: string
-  resolve_after: string; phase_ends_at: string | null; commits: number; reveals: number; outcome: Outcome | null
+export type Reveal = {
+  account_id: string; answer: Answer; confidence: number; weight: string; rep_bps: number; evidence_hash: string; evidence_uri: string; revealed_at: string
 }
-export type QuestionView = QuestionSummary & { asker: string; template: string; params: string; rounds: Round[]; payouts: Payout[] }
+export type Tally = {
+  weights: Record<Answer, string>; winner: Answer | null; share_bps: number; avg_conf_bps: number; revealed: number; confident: boolean; tallied_at: string
+}
+export type Round = { round: number; min_stake: string; commit_start: string; commit_end: string; reveal_end: string; commits: Commit[]; reveals: Reveal[]; tally: Tally | null }
+export type Payout = { account_id: string; round: number; stake: string; delta: string; reason: 'correct' | 'wrong' | 'no_reveal' | 'challenge_won' | 'challenge_lost' }
+type QuestionBase = { id: number; text: string; category: string; status: string; phase: Phase; round: number; fee: string; resolve_after: string; outcome: Outcome | null }
+export type QuestionSummary = QuestionBase & { phase_ends_at: string | null; commits: number; reveals: number }
+export type QuestionView = QuestionBase & {
+  asker: string; template: string; params: string; created_at: string; timings: { commit_secs: number; reveal_secs: number; challenge_secs: number }
+  rounds: Round[]; challenge_end: string | null; payouts: Payout[]; protocol_fee: string | null; dust: string | null; finalized_at: string | null
+  phase_ends_at?: string | null // not in get_question; Arena copies it from the list summary
+}
+export type Config = { protocol_fee_bps: number; min_agents: number; auto_share_bps: number; auto_conf_bps: number; treasury: string; dao_account: string }
 export type AgentView = {
   account_id: string; name: string; model: string; free_balance: string; locked_balance: string; rep_bps: number; accuracy_bps: number
   stats: { answered: number; correct: number; wrong: number; no_reveal: number; earned: string; slashed: string }
@@ -43,9 +50,17 @@ export function toNear(yocto: string, digits = 3): string {
 
 export const nsToMs = (ns: string) => Number(BigInt(ns) / 1_000_000n)
 export const pct = (bps: number) => (bps / 100).toFixed(1)
+export const qid = (id: number) => `Q-${String(id).padStart(4, '0')}`
 
-/** Re-runs `load` every few seconds; keeps the last good value when a poll fails. */
-export function usePoll<T>(load: () => Promise<T>, key: string): { data: T | null; error: string | null } {
+/** "mm:ss" left until `endsAtNs`, or '' when there is no deadline. */
+export function countdown(endsAtNs: string | null | undefined, now: number): string {
+  if (!endsAtNs) return ''
+  const s = Math.max(0, Math.round((nsToMs(endsAtNs) - now) / 1000))
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+}
+
+/** Re-runs `load` every `everyMs` (0 = load once); keeps the last good value when a poll fails. */
+export function usePoll<T>(load: () => Promise<T>, key: string, everyMs = POLL_MS): { data: T | null; error: string | null } {
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
@@ -55,7 +70,7 @@ export function usePoll<T>(load: () => Promise<T>, key: string): { data: T | nul
         .then((value) => alive && (setData(value), setError(null)))
         .catch((e: unknown) => alive && setError(e instanceof Error ? e.message : 'Request failed'))
     run()
-    const id = setInterval(run, POLL_MS)
+    const id = everyMs > 0 ? setInterval(run, everyMs) : undefined
     return () => {
       alive = false
       clearInterval(id)
@@ -64,6 +79,14 @@ export function usePoll<T>(load: () => Promise<T>, key: string): { data: T | nul
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
   return { data, error }
+}
+
+const AGENTS_POLL_MS = 30_000
+
+/** Registered agents by account id (name, model, rep). Changes slowly, so polled rarely. */
+export function useAgents(): Map<string, AgentView> {
+  const { data } = usePoll(() => view<AgentView[]>('leaderboard', { limit: 50 }), 'agents', AGENTS_POLL_MS)
+  return new Map((data ?? []).map((a) => [a.account_id, a]))
 }
 
 /** Current time, ticking once a second (for countdowns). */

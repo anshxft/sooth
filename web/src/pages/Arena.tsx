@@ -1,7 +1,7 @@
 import { Link } from 'wouter'
 import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
-  nsToMs, pct, toNear, useNow, usePoll, view,
+  countdown, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn } from '../lib/utils'
 
@@ -12,23 +12,16 @@ const STEP_OF: Record<Phase, number> = {
   Scheduled: -1, Commit: 0, Reveal: 1, AwaitingTally: 2, Challenge: 2, AwaitingFinalize: 2, Dao: 2, Finalized: 3, Refunded: 3,
 }
 
-function countdown(endsAtNs: string | null, now: number): string {
-  if (!endsAtNs) return ''
-  const s = Math.max(0, Math.round((nsToMs(endsAtNs) - now) / 1000))
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-}
-
 export function Arena() {
   const now = useNow()
   const list = usePoll(() => view<QuestionSummary[]>('list_questions', { limit: 20 }), 'list')
-  const agents = usePoll(() => view<AgentView[]>('leaderboard', { limit: 50 }), 'agents')
+  const names = useAgents()
   const summaries = list.data ?? []
   const live = summaries.find((s) => LIVE_PHASES.includes(s.phase)) ?? summaries[0]
   const question = usePoll(
     () => (live ? view<QuestionView>('get_question', { question_id: live.id }) : Promise.resolve(null)),
     `q${live?.id}`,
   )
-  const names = new Map((agents.data ?? []).map((a) => [a.account_id, a]))
   // get_question has no phase_ends_at; the list summary does.
   const q = question.data && live ? { ...question.data, phase_ends_at: live.phase_ends_at } : question.data
 
@@ -44,7 +37,7 @@ export function Arena() {
         <div className="col-span-3 hidden md:block" />
         <div className="col-span-3 hidden place-items-center text-xl md:grid" aria-hidden="true">◎</div>
         <div className="col-span-9 flex items-end justify-end p-3 md:col-span-3">
-          <span className="label">{live ? `Q-${String(live.id).padStart(4, '0')} / ${live.phase}` : 'No questions yet'}</span>
+          <span className="label">{live ? `${qid(live.id)} / ${live.phase}` : 'No questions yet'}</span>
         </div>
 
         <div className="col-span-12 px-4 pb-2 pt-3">
@@ -117,7 +110,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
     <div className="col-span-12 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h2 className="text-[clamp(1.4rem,2.8vw,2.2rem)] font-semibold leading-tight tracking-[-0.03em]">{q.text}</h2>
-        <span className="label border border-ink px-2 py-1">{q.category} · Q-{String(q.id).padStart(4, '0')}</span>
+        <span className="label border border-ink px-2 py-1">{q.category} · {qid(q.id)}</span>
       </div>
       <ol className="blueprint mt-4 grid-cols-4 rounded-none!">
         {STEPS.map((s, i) => (
@@ -204,7 +197,7 @@ function Meter({ bps, tall = false }: { bps: number; tall?: boolean }) {
 }
 
 /** Leading answer of the current round and its share of revealed weight, in basis points. */
-function leader(q: QuestionView): { answer: Answer; bps: number } {
+export function leader(q: QuestionView): { answer: Answer; bps: number } {
   const reveals = q.rounds.at(-1)?.reveals ?? []
   const totals = new Map<Answer, bigint>()
   for (const r of reveals) totals.set(r.answer, (totals.get(r.answer) ?? 0n) + BigInt(r.weight))
