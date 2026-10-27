@@ -1,0 +1,185 @@
+{
+  "version": 1,
+  "registered_on": "2026-10-27",
+  "post_on": "2026-11-07",
+  "timings": { "commit_secs": 3600, "reveal_secs": 1800, "challenge_secs": 1800 },
+  "fee_near": "0.2",
+  "min_stake_near": "0.1",
+  "fill_rules": {
+    "crypto_threshold": "P0 = CoinGecko /coins/{coin}/history?date=07-11-2026 market_data.current_price.usd (00:00 UTC, 7 Nov). threshold = round(P0 * multiplier / step) * step. Fill {threshold} in text and params.",
+    "sports_fixture": "Pick a real fixture from the competition's official schedule on 7 Nov. It must end between 8 Nov 12:00 UTC and 10 Nov 12:00 UTC. resolve_after = scheduled start + 4 h. Fill {team_a}, {team_b}, {competition}, {date}. Text keeps the 'draw / abandoned / postponed resolves NO' clause.",
+    "news_event": "Pick one official, date-certain event between 8 and 10 Nov 2026 with a public result (central bank decision, official statistics release, scheduled launch). Write it as YES/NO naming the source; <= 280 chars. resolve_after = announced time + 4 h."
+  },
+  "questions": [
+    {
+      "key": "C1", "category": "crypto", "template": "crypto_price",
+      "text": "Was the BTC price above ${threshold} at 00:00 UTC on 9 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "bitcoin", "date": "2026-11-09", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "bitcoin", "multiplier": 1.00, "step": 500 },
+      "resolve_after": "2026-11-09T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/bitcoin/history?date=09-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "C2", "category": "crypto", "template": "crypto_price",
+      "text": "Was the BTC price above ${threshold} at 00:00 UTC on 10 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "bitcoin", "date": "2026-11-10", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "bitcoin", "multiplier": 1.03, "step": 500 },
+      "resolve_after": "2026-11-10T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/bitcoin/history?date=10-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "C3", "category": "crypto", "template": "crypto_price",
+      "text": "Was the ETH price above ${threshold} at 00:00 UTC on 9 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "ethereum", "date": "2026-11-09", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "ethereum", "multiplier": 0.98, "step": 25 },
+      "resolve_after": "2026-11-09T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/ethereum/history?date=09-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "C4", "category": "crypto", "template": "crypto_price",
+      "text": "Was the ETH price above ${threshold} at 00:00 UTC on 10 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "ethereum", "date": "2026-11-10", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "ethereum", "multiplier": 1.00, "step": 25 },
+      "resolve_after": "2026-11-10T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/ethereum/history?date=10-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "C5", "category": "crypto", "template": "crypto_price",
+      "text": "Was the SOL price above ${threshold} at 00:00 UTC on 9 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "solana", "date": "2026-11-09", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "solana", "multiplier": 1.02, "step": 1 },
+      "resolve_after": "2026-11-09T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/solana/history?date=09-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "C6", "category": "crypto", "template": "crypto_price",
+      "text": "Was the NEAR price above ${threshold} at 00:00 UTC on 10 Nov 2026, per the CoinGecko daily snapshot?",
+      "params": { "coin": "near", "date": "2026-11-10", "threshold_usd": "{threshold}" },
+      "fill": { "rule": "crypto_threshold", "coin": "near", "multiplier": 1.00, "step": 0.05 },
+      "resolve_after": "2026-11-10T01:00:00Z",
+      "resolution_source": "CoinGecko /coins/near/history?date=10-11-2026 market_data.current_price.usd",
+      "expected": null
+    },
+    {
+      "key": "W1", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 5 mm in Chennai on 8 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 13.08, "lon": 80.27, "date": "2026-11-08", "timezone": "Asia/Kolkata", "min_mm": 5 },
+      "resolve_after": "2026-11-08T20:30:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W2", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 1 mm in Chennai on 9 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 13.08, "lon": 80.27, "date": "2026-11-09", "timezone": "Asia/Kolkata", "min_mm": 1 },
+      "resolve_after": "2026-11-09T20:30:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W3", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 1 mm in Mumbai on 9 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 19.08, "lon": 72.88, "date": "2026-11-09", "timezone": "Asia/Kolkata", "min_mm": 1 },
+      "resolve_after": "2026-11-09T20:30:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W4", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 2 mm in Bengaluru on 8 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 12.97, "lon": 77.59, "date": "2026-11-08", "timezone": "Asia/Kolkata", "min_mm": 2 },
+      "resolve_after": "2026-11-08T20:30:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W5", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 1 mm in New Delhi on 10 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 28.61, "lon": 77.21, "date": "2026-11-10", "timezone": "Asia/Kolkata", "min_mm": 1 },
+      "resolve_after": "2026-11-10T20:30:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W6", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 1 mm in Singapore on 8 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 1.35, "lon": 103.82, "date": "2026-11-08", "timezone": "Asia/Singapore", "min_mm": 1 },
+      "resolve_after": "2026-11-08T18:00:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W7", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 5 mm in Jakarta on 9 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": -6.21, "lon": 106.85, "date": "2026-11-09", "timezone": "Asia/Jakarta", "min_mm": 5 },
+      "resolve_after": "2026-11-09T19:00:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "W8", "category": "weather", "template": "weather_rain",
+      "text": "Did it rain at least 1 mm in London on 9 Nov 2026 (local day), per Open-Meteo daily precipitation_sum?",
+      "params": { "lat": 51.51, "lon": -0.13, "date": "2026-11-09", "timezone": "Europe/London", "min_mm": 1 },
+      "resolve_after": "2026-11-10T02:00:00Z",
+      "resolution_source": "Open-Meteo forecast API (past_days) daily precipitation_sum, fetched after resolve_after",
+      "expected": null
+    },
+    {
+      "key": "S1", "category": "sports", "template": "free_text",
+      "text": "Did {team_a} beat {team_b} in their {competition} football match on {date}? A draw, abandonment or postponement resolves NO.",
+      "params": {},
+      "fill": { "rule": "sports_fixture", "sport": "football" },
+      "resolve_after": "{kickoff + 4h}",
+      "resolution_source": "Official competition website, final result",
+      "expected": null
+    },
+    {
+      "key": "S2", "category": "sports", "template": "free_text",
+      "text": "Did the {team_a} beat the {team_b} in their {competition} basketball game on {date} (US date)? A postponement resolves NO.",
+      "params": {},
+      "fill": { "rule": "sports_fixture", "sport": "basketball" },
+      "resolve_after": "{tipoff + 4h}",
+      "resolution_source": "Official league website, final score",
+      "expected": null
+    },
+    {
+      "key": "S3", "category": "sports", "template": "free_text",
+      "text": "Did {team_a} beat {team_b} in their {competition} match on {date}? A tie, no result, abandonment or postponement resolves NO.",
+      "params": {},
+      "fill": { "rule": "sports_fixture", "sport": "cricket, or a second football match if no cricket fits the window" },
+      "resolve_after": "{scheduled end + 4h}",
+      "resolution_source": "Official board or competition website, final result",
+      "expected": null
+    },
+    {
+      "key": "N1", "category": "news", "template": "free_text",
+      "text": "{filled on 7 Nov by the news_event rule}",
+      "params": {},
+      "fill": { "rule": "news_event" },
+      "resolve_after": "{announced time + 4h}",
+      "resolution_source": "The official source named in the question",
+      "expected": null
+    },
+    {
+      "key": "A1", "category": "weather", "template": "free_text",
+      "text": "Was the weather nice in London on 9 Nov 2026?",
+      "params": {},
+      "resolve_after": "2026-11-10T02:00:00Z",
+      "resolution_source": "None: 'nice' has no objective definition",
+      "expected": "INVALID"
+    },
+    {
+      "key": "A2", "category": "crypto", "template": "free_text",
+      "text": "Did crypto go up on 9 Nov 2026?",
+      "params": {},
+      "resolve_after": "2026-11-10T02:00:00Z",
+      "resolution_source": "None: no asset, reference price or time window is given",
+      "expected": "INVALID"
+    }
+  ]
+}

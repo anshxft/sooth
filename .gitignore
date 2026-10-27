@@ -1,0 +1,15 @@
+# build output
+target/
+dist/
+node_modules/
+# secrets and keys: never commit
+.env
+.env.*
+!.env.example
+keys/
+*.key
+# brand fonts are downloaded from Google Fonts (OFL), not vendored
+brand/fonts/
+# local
+*.log
+.DS_Store

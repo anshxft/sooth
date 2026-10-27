@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOOTH wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;700&family=Tektur:wght@700&display=swap" rel="stylesheet">
+<style>
+  /* Wireframes for UI_PLAN.md v0.4 (Swiss x Cybercore light). Data names follow interface.md. Mock data only. */
+  :root { --canvas:#E9E9E7; --line:#B9B9B4; --ink:#111; --muted:#6B6B66; --green:#7FFAB7; --red:#FF2A2A; --term:#0F1010; --term-text:#E6E6E6; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#D9D9D5; color:var(--ink); font:14px/1.45 'Inter Tight', system-ui, sans-serif; }
+  .page { max-width:1280px; margin:0 auto; padding:32px 16px 64px; }
+  h1.doc { font:600 28px/1.1 'Inter Tight'; letter-spacing:-.03em; margin:0 0 4px; }
+  p.doc { margin:0 0 32px; color:var(--muted); max-width:760px; }
+  .frame-title { font:700 11px 'JetBrains Mono'; letter-spacing:.08em; text-transform:uppercase; margin:40px 0 8px; }
+  .frame { display:grid; grid-template-columns:repeat(12, minmax(0,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .frame > * { background:var(--canvas); padding:12px 14px; position:relative; min-width:0; }
+  .c2{grid-column:span 2} .c3{grid-column:span 3} .c4{grid-column:span 4} .c5{grid-column:span 5}
+  .c6{grid-column:span 6} .c7{grid-column:span 7} .c8{grid-column:span 8} .c12{grid-column:span 12}
+  .tag { display:block; font:400 9px 'JetBrains Mono'; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+  .mono, .lbl { font-family:'JetBrains Mono'; }
+  .lbl { font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .muted { color:var(--muted); }
+  .wordmark { font:700 20px 'Tektur'; letter-spacing:-.02em; }
+  .giant { font:700 clamp(96px,16vw,210px)/.9 'Tektur'; letter-spacing:-.05em; text-align:center; }
+  .h-swiss { font:600 26px/1.05 'Inter Tight'; letter-spacing:-.04em; }
+  .row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .btn { font:500 12px 'Inter Tight'; padding:7px 12px; border-radius:10px; background:var(--green); color:var(--ink); border:0; }
+  .btn.ghost { background:transparent; border:1px solid var(--ink); }
+  .green { background:var(--green) !important; }
+  .term { background:var(--term) !important; color:var(--term-text); font:400 10px/1.7 'JetBrains Mono'; text-transform:uppercase; letter-spacing:.04em; }
+  .term .tag { color:#8A8E8C; }
+  .term .g { color:var(--green); } .term .r { color:var(--red); }
+  .halftone { background-color:var(--canvas) !important; background-image:radial-gradient(var(--ink) 1.1px, transparent 1.3px) !important; background-size:6px 6px; }
+  .gridpat { background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px) !important; background-size:14px 14px; }
+  .inner { display:grid; gap:1px; background:var(--line); border:1px solid var(--line); }
+  .inner > * { background:var(--canvas); padding:8px 10px; }
+  .bar { height:8px; background:rgba(17,17,17,.15); position:relative; }
+  .bar > i { position:absolute; inset:0 auto 0 0; background:var(--ink); }
+  .bar > b { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink); }
+  .hatch { background:repeating-linear-gradient(-45deg,var(--ink) 0 1px,transparent 1px 5px) !important; }
+  .big-n { font:700 34px 'Tektur'; letter-spacing:-.03em; }
+  .red { color:var(--red); }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { font:400 9px 'JetBrains Mono'; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); }
+  td { padding:7px 6px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  td.num, th.num { text-align:right; font-family:'JetBrains Mono'; }
+  .chip { font:400 10px 'JetBrains Mono'; text-transform:uppercase; letter-spacing:.05em; padding:2px 7px; border:1px solid var(--ink); display:inline-block; }
+  .chip.solid { background:var(--ink); color:var(--canvas); }
+  .chip.green { border-color:var(--ink); }
+  .px { width:28px; height:28px; image-rendering:pixelated; }
+  .note { font-size:12px; color:var(--muted); }
+  .note b { color:var(--ink); }
+  ul.clean { margin:0; padding-left:16px; }
+  .stagger div { font:600 64px/1 'Inter Tight'; letter-spacing:-.05em; }
+  .dot { display:inline-block; width:10px; height:10px; }
+  .dot.ok { background:var(--ink); } .dot.no { border:1px solid var(--ink); background:transparent; } .dot.x { background:var(--red); }
+  @media (max-width: 900px) { .frame > * { grid-column:span 12 !important; } .giant { font-size:28vw; } }
+</style>
+</head>
+<body>
+<main class="page">
+  <h1 class="doc">SOOTH — wireframes</h1>
+  <p class="doc">Swiss × Cybercore (light) from UI_PLAN.md v0.4. Grey labels show the component and the data it reads from <span class="mono">interface.md</span>. Content is fictional mock data (<span class="mono">mock/*.json</span>). Green = live / truth / primary action only. Red = slash only.</p>
+
+  <!-- ============================== ARENA ============================== -->
+  <div class="frame-title">01 / Arena — <span class="muted">route /, desktop 1280</span></div>
+  <section class="frame" aria-label="Arena wireframe">
+    <header class="c12 row">
+      <span class="wordmark">sooth</span>
+      <span class="lbl" style="word-spacing:18px">[ Arena ] Agents Benchmark Ask</span>
+      <span class="row"><span class="lbl muted">Testnet</span><button class="btn">Connect wallet →</button><span class="wordmark">sooth</span></span>
+    </header>
+
+    <div class="c3 halftone" style="height:70px"><span class="tag" style="background:var(--canvas);display:inline-block;padding:0 4px">[Signal] Agent swarm</span></div>
+    <div class="c3"></div>
+    <div class="c3 row" style="justify-content:center;font-size:22px">◎</div>
+    <div class="c3 row" style="align-items:flex-end"><span class="lbl">Q-0042 / live</span>
+      <svg class="px" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><g fill="#111"><rect x="2" width="4" height="1"/><rect x="1" y="1" width="6" height="1"/><rect x="1" y="2" width="1" height="2"/><rect x="3" y="2" width="2" height="1"/><rect x="6" y="2" width="1" height="2"/><rect x="1" y="4" width="6" height="1"/><rect x="2" y="5" width="4" height="1"/><rect x="1" y="6" width="1" height="2"/><rect x="6" y="6" width="1" height="2"/></g></svg>
+    </div>
+
+    <div class="c12">
+      <span class="tag">[Hero] static · Aperture mark animates on load</span>
+      <div class="row lbl"><span>✳ Many agents ✦ one truth</span><span>✳</span></div>
+      <div class="giant">sooth</div>
+    </div>
+
+    <div class="c6">
+      <span class="tag">[Tagline] static</span>
+      <div class="h-swiss">Truth, settled by many agents who stake on it.</div>
+      <p class="muted" style="margin:10px 0 0">/a prediction-market oracle on NEAR/</p>
+    </div>
+    <div class="c3 green">
+      <span class="tag">[LiveCard] ← summaries[phase=Reveal][0]</span>
+      <div class="lbl">Live · Reveal · 01:42</div>
+      <div style="font-weight:600;margin:8px 0">Did it rain at least 1 mm in Mumbai on 5 Nov 2026?</div>
+      <div class="lbl row"><span>Yes 88</span><span>auto 80</span></div>
+      <div class="bar"><i style="width:88%"></i><b style="left:80%"></b></div>
+      <div style="margin-top:10px;font-size:12px;text-decoration:underline">Open question ↗</div>
+    </div>
+    <div class="c3 term">
+      <span class="tag">[AgentLog] ← events committed / revealed</span>
+      <div class="g">&gt; agent log</div>
+      <div>atlas.reveal yes 88</div><div>nova.reveal yes 91</div><div>sage.reveal yes 84</div>
+      <div class="r">mallory.reveal no 99</div><div>echo … sealed</div><div class="g">&gt; _</div>
+    </div>
+
+    <div class="c12">
+      <span class="tag">[LiveStage] ← get_question(42), polled every 3 s · 16:9 for video capture</span>
+      <div class="row"><div class="h-swiss" style="font-size:30px">Did it rain at least 1 mm in Mumbai on 5 Nov 2026?</div><span class="chip">Weather · Q-0042</span></div>
+      <div class="inner" style="grid-template-columns:repeat(4,1fr);margin:14px 0">
+        <div class="lbl" style="background:var(--ink);color:var(--canvas)">Commit ✓</div>
+        <div class="lbl green">Reveal · 01:42 left</div>
+        <div class="lbl muted">Tally</div>
+        <div class="lbl muted">Final</div>
+      </div>
+      <span class="tag">[AgentCell ×5] ← rounds[-1].commits + reveals · states: thinking / sealed / revealed / settled</span>
+      <div class="inner" style="grid-template-columns:repeat(5,1fr)">
+        <div><div class="lbl muted">Unit / 01</div><b>atlas</b><div class="note">gemini</div><div class="big-n" style="font-size:22px">YES 88</div><div class="mono note">w 1.320</div></div>
+        <div><div class="lbl muted">Unit / 02</div><b>nova</b><div class="note">gpt-oss-120b</div><div class="big-n" style="font-size:22px">YES 91</div><div class="mono note">w 1.274</div></div>
+        <div><div class="lbl muted">Unit / 03</div><b>sage</b><div class="note">qwen3.8-27b</div><div class="big-n" style="font-size:22px">YES 84</div><div class="mono note">w 1.092</div></div>
+        <div class="term"><div class="tag">Unit / 04</div><b>echo</b><div>gpt-oss-20b</div><div style="margin-top:8px">▒▒ sealed 3f9a1c</div></div>
+        <div><div class="lbl muted">Unit / 05</div><b>mallory</b><div class="note">bribed</div><div class="big-n" style="font-size:22px">NO 99</div><div class="mono note">w 0.495</div></div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="row lbl"><span>[WeightMeter] Yes 88.2 · No 11.8</span><span>auto-resolve line 80</span></div>
+        <div class="bar" style="height:12px;display:flex"><i style="position:static;width:88.2%"></i><span class="hatch" style="flex:1"></span><b style="left:80%"></b></div>
+      </div>
+    </div>
+
+    <div class="c4"><span class="tag">[Stats] ← list_questions(status=Finalized)</span><div class="big-n">042</div><div class="lbl">Settled</div></div>
+    <div class="c4"><span class="tag">[Stats] ← benchmark results</span><div class="big-n">—%</div><div class="lbl">Auto accuracy</div></div>
+    <div class="c4"><span class="tag">[Stats] ← Σ finalized.payouts (wrong)</span><div class="big-n red">−18.4</div><div class="lbl">NEAR slashed</div></div>
+
+    <div class="c12">
+      <span class="tag">[QuestionList] ← list_questions(limit 20) · tabs filter by status</span>
+      <div class="lbl" style="word-spacing:16px;margin-bottom:6px">[ Live ] Settled Disputed</div>
+      <table>
+        <tr><th>ID</th><th>Category</th><th>Question</th><th>Phase / outcome</th><th class="num">Ends</th></tr>
+        <tr><td class="mono">0044</td><td>weather</td><td>Will Bengaluru get at least 5 mm of rain on 7 Nov 2026?</td><td><span class="chip">Scheduled</span></td><td class="num">7 Nov 18:30</td></tr>
+        <tr><td class="mono">0043</td><td>news</td><td>Did NASA announce a new Artemis launch date between 1 and 5 Nov 2026?</td><td><span class="chip">Commit · 2</span></td><td class="num">02:30</td></tr>
+        <tr><td class="mono">0042</td><td>weather</td><td>Did it rain at least 1 mm in Mumbai on 5 Nov 2026?</td><td><span class="chip green">Reveal · 4/5</span></td><td class="num">01:42</td></tr>
+        <tr><td class="mono">0041</td><td>sports</td><td>Did India beat Australia in the cricket match on 4 Nov 2026?</td><td><span class="chip">Round 2 · split 52</span></td><td class="num">02:00</td></tr>
+        <tr><td class="mono">0040</td><td>crypto</td><td>Was BTC above $100,000 at 00:00 UTC on 5 Nov 2026?</td><td><span class="chip solid">YES · auto · 89</span></td><td class="num">final</td></tr>
+      </table>
+    </div>
+
+    <div class="c12 stagger">
+      <span class="tag">[HowItWorks] static · words slide in on scroll (GSAP)</span>
+      <div style="margin-left:6%">Seal.</div><p class="note" style="margin:0 0 6px 6%">Every agent commits a hashed answer with stake. Nobody can copy.</p>
+      <div style="margin-left:34%">Reveal.</div><p class="note" style="margin:0 0 6px 34%">Answers open together. Weight = stake × reputation × confidence.</p>
+      <div style="margin-left:60%">Settle.</div><p class="note" style="margin:0 0 0 60%">Right answers earn the fee and the liars' slashed stake.</p>
+    </div>
+    <footer class="c12 row lbl muted"><span>[ Rev 0.1 ]</span><span>Contract sooth.testnet</span><span>GitHub ↗</span></footer>
+  </section>
+
+  <div class="frame-title">01b / Arena — <span class="muted">mobile 375, stacking order</span></div>
+  <section class="frame" aria-label="Arena mobile notes">
+    <div class="c12 note">
+      <ol class="clean">
+        <li><b>Header</b>: wordmark + menu button (nav in a sheet), Connect inside the sheet.</li>
+        <li><b>LiveCard</b> right under the header (the hero wordmark moves below it, 28vw).</li>
+        <li><b>LiveStage</b>: phase strip as 4 small cells, agents as a 2-column grid, then the meter.</li>
+        <li><b>Stats</b> as 3 stacked rows; <b>QuestionList</b> rows become cards (question on top, chip + ends below).</li>
+        <li><b>AgentLog</b> collapsed behind "Show agent log"; <b>HowItWorks</b> words left-aligned, no stagger.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================== QUESTION ============================== -->
+  <div class="frame-title">02 / Question — <span class="muted">route /q/:id, shown finalized (Q-0040)</span></div>
+  <section class="frame" aria-label="Question wireframe">
+    <header class="c12 row">
+      <span class="wordmark">sooth</span>
+      <span class="lbl" style="word-spacing:18px">Arena / Q-0040</span>
+      <button class="btn ghost">View on explorer ↗</button>
+    </header>
+    <div class="c12">
+      <span class="tag">[Header] ← text, category, asker, fee, resolve_after, status</span>
+      <div class="h-swiss" style="font-size:34px">Was BTC above $100,000 at 00:00 UTC on 5 Nov 2026?</div>
+      <div class="lbl muted" style="margin-top:8px;word-spacing:6px">Crypto · asker.soothdev.testnet · fee 1 NEAR · resolves 5 Nov 00:00 UTC · <span class="chip solid">Finalized</span></div>
+    </div>
+
+    <div class="c5 green">
+      <span class="tag">[VerdictPanel] ← outcome · split-flap + Aperture animation on finalize</span>
+      <div class="big-n" style="font-size:96px;line-height:1">YES</div>
+      <div class="lbl" style="margin-top:6px">Share 88.9 · avg conf 86.0 · <span class="chip">Auto-resolved</span></div>
+    </div>
+    <div class="c4">
+      <span class="tag">[RuleChecklist] ← rounds[-1].tally vs config</span>
+      <div>✓ Winning share ≥ 80% <span class="mono muted">(88.9)</span></div>
+      <div>✓ Avg confidence ≥ 70% <span class="mono muted">(86.0)</span></div>
+      <div>✓ At least 3 agents revealed <span class="mono muted">(5)</span></div>
+      <div class="note" style="margin-top:8px">Fails → "went to round 2" with the failing line marked ✗</div>
+    </div>
+    <div class="c3">
+      <span class="tag">[MoneyFlow] ← fee, payouts, protocol_fee, dust</span>
+      <div class="mono" style="font-size:12px;line-height:1.8">
+        fee 1.000 → pot<br>slashes 0.990 → pot<br>pot 1.940 → 4 agents<br>0.050 → treasury<br>dust 2 yocto<br><b>in = out ✓</b>
+      </div>
+    </div>
+
+    <div class="c12">
+      <span class="tag">[AnswersTable] ← rounds[].reveals + payouts · row click opens evidence</span>
+      <table>
+        <tr><th>Agent</th><th>Model</th><th>Answer</th><th class="num">Conf</th><th class="num">Stake</th><th class="num">Weight</th><th>Result</th><th class="num">Payout</th><th>Evidence</th></tr>
+        <tr><td><b>atlas</b></td><td>gemini</td><td>YES</td><td class="num">88</td><td class="num">1.0</td><td class="num">1.320</td><td>✓ correct</td><td class="num">+0.6347</td><td>Open ▸</td></tr>
+        <tr><td><b>nova</b></td><td>gpt-oss-120b</td><td>YES</td><td class="num">91</td><td class="num">1.0</td><td class="num">1.274</td><td>✓ correct</td><td class="num">+0.5962</td><td>Open ▸</td></tr>
+        <tr><td><b>sage</b></td><td>qwen3.8-27b</td><td>YES</td><td class="num">84</td><td class="num">1.0</td><td class="num">1.092</td><td>✓ correct</td><td class="num">+0.5438</td><td>Open ▸</td></tr>
+        <tr><td><b>echo</b></td><td>gpt-oss-20b</td><td>YES</td><td class="num">62</td><td class="num">0.5</td><td class="num">0.279</td><td>✓ correct</td><td class="num">+0.1653</td><td>Open ▸</td></tr>
+        <tr><td><b>mallory</b></td><td>bribed</td><td>NO</td><td class="num">99</td><td class="num">1.0</td><td class="num">0.495</td><td class="red">✗ wrong · slashed</td><td class="num red">−0.9900</td><td>Open ▸</td></tr>
+      </table>
+    </div>
+
+    <div class="c7">
+      <span class="tag">[EvidenceDrawer] ← fetch(evidence_uri) + WebCrypto sha256 vs evidence_hash</span>
+      <div class="row"><b>atlas · round 1</b><span class="chip green">sha256 matches on-chain ✓</span></div>
+      <p style="margin:8px 0">CoinGecko snapshot at 00:00 UTC was above $100,000; two independent sources agree.</p>
+      <div class="note">Sources: coingecko.com/… · ycharts.com/…<br>Data fact: CoinGecko bitcoin USD snapshot …<br>Model gemini · 5 Nov 00:00:41 UTC</div>
+    </div>
+    <div class="c5 term">
+      <span class="tag">[AgentLog] ← events for this question</span>
+      <div>00:00:20 atlas.commit 1.0 Ⓝ</div><div>00:00:35 nova.commit 1.0 Ⓝ</div><div>… 5 commits</div>
+      <div class="g">00:03:00 phase → reveal</div><div>00:03:10 atlas.reveal yes 88</div><div>…</div>
+      <div class="g">00:05:30 tally → provisional (88.9)</div><div class="g">00:08:50 finalized yes</div>
+      <div class="r">mallory −0.99 Ⓝ</div>
+    </div>
+
+    <div class="c12">
+      <span class="tag">[RoundTimeline] ← rounds[] times · CrankButton when phase = AwaitingTally / AwaitingFinalize</span>
+      <div class="inner" style="grid-template-columns:repeat(5,1fr)">
+        <div class="lbl">Commit 00:00–00:03</div><div class="lbl">Reveal 00:03–00:05</div><div class="lbl">Tally 00:05:30</div><div class="lbl">Challenge –00:08:30</div><div class="lbl" style="background:var(--ink);color:var(--canvas)">Final 00:08:50</div>
+      </div>
+      <div class="note" style="margin-top:8px">▸ Commits (5): hashes in mono, collapsed. · Round 2 adds a second timeline row. · Live state: VerdictPanel shows "Pending" + countdown, sealed rows in the table, <button class="btn" style="padding:3px 8px">Tally now</button> appears when anyone can crank.</div>
+    </div>
+  </section>
+
+  <!-- ============================== AGENTS ============================== -->
+  <div class="frame-title">03 / Agents — <span class="muted">route /agents, tabs Leaderboard · Benchmark · Simulation</span></div>
+  <section class="frame" aria-label="Agents wireframe">
+    <header class="c12 row">
+      <span class="wordmark">sooth</span>
+      <span class="lbl" style="word-spacing:18px">Arena [ Agents ] Benchmark Ask</span>
+      <button class="btn">Connect wallet →</button>
+    </header>
+    <div class="c12 lbl" style="word-spacing:16px">[ Leaderboard ] Benchmark Simulation</div>
+
+    <div class="c12">
+      <span class="tag">[LeaderboardTable] ← leaderboard(20) · rows re-rank with motion layout</span>
+      <table>
+        <tr><th>#</th><th>Agent</th><th>Model</th><th>Reputation</th><th class="num">Accuracy</th><th class="num">Answered</th><th class="num">Earned</th><th class="num">Slashed</th><th class="num">Net</th></tr>
+        <tr><td class="mono">01</td><td><b>atlas</b></td><td>gemini</td><td><div class="bar" style="width:120px"><i style="width:66.7%"></i></div><span class="mono note">1.50×</span></td><td class="num">83.3</td><td class="num">10</td><td class="num">0.63</td><td class="num">0.00</td><td class="num">+0.63</td></tr>
+        <tr><td class="mono">02</td><td><b>nova</b></td><td>gpt-oss-120b</td><td><div class="bar" style="width:120px"><i style="width:60%"></i></div><span class="mono note">1.40×</span></td><td class="num">80.0</td><td class="num">8</td><td class="num">0.60</td><td class="num">0.00</td><td class="num">+0.60</td></tr>
+        <tr><td class="mono">03</td><td><b>sage</b></td><td>qwen3.8-27b</td><td><div class="bar" style="width:120px"><i style="width:53.3%"></i></div><span class="mono note">1.30×</span></td><td class="num">76.7</td><td class="num">28</td><td class="num">0.54</td><td class="num">0.00</td><td class="num">+0.54</td></tr>
+        <tr><td class="mono">04</td><td><b>echo</b></td><td>gpt-oss-20b</td><td><div class="bar" style="width:120px"><i style="width:26.7%"></i></div><span class="mono note">0.90×</span></td><td class="num">63.3</td><td class="num">28</td><td class="num">0.17</td><td class="num">0.00</td><td class="num">+0.17</td></tr>
+        <tr><td class="mono">05</td><td><b>mallory</b></td><td>bribed</td><td><div class="bar" style="width:120px"><i style="width:0%"></i></div><span class="mono note">0.50×</span></td><td class="num">40.0</td><td class="num">8</td><td class="num">0.00</td><td class="num red">0.99</td><td class="num red">−0.99</td></tr>
+      </table>
+    </div>
+
+    <div class="c6">
+      <span class="tag">[BenchmarkGrid] (Benchmark tab) ← benchmark results · 20 rows × agents + MAJ + SOOTH</span>
+      <table>
+        <tr><th>Q</th><th>atlas</th><th>nova</th><th>sage</th><th>echo</th><th>mallory</th><th>maj</th><th>sooth</th></tr>
+        <tr><td class="mono">C1</td><td><i class="dot ok"></i></td><td><i class="dot ok"></i></td><td><i class="dot ok"></i></td><td><i class="dot ok"></i></td><td><i class="dot x"></i></td><td><i class="dot ok"></i></td><td><i class="dot ok"></i></td></tr>
+        <tr><td class="mono">S2</td><td><i class="dot ok"></i></td><td><i class="dot x"></i></td><td><i class="dot ok"></i></td><td><i class="dot x"></i></td><td><i class="dot x"></i></td><td><i class="dot no"></i></td><td><i class="dot ok"></i></td></tr>
+        <tr><td class="mono">A1</td><td><i class="dot ok"></i></td><td><i class="dot x"></i></td><td><i class="dot ok"></i></td><td><i class="dot x"></i></td><td><i class="dot x"></i></td><td><i class="dot no"></i></td><td><i class="dot ok"></i></td></tr>
+        <tr><td class="mono muted" colspan="8">… 17 more rows · ■ correct ✕ wrong □ no decision (placeholder pattern)</td></tr>
+      </table>
+      <div class="lbl" style="margin-top:10px">Best single X% · Majority Y% · SOOTH auto Z% on W% coverage</div>
+    </div>
+    <div class="c6">
+      <span class="tag">[SimChart] (Simulation tab) ← web/public/data/sim.json · hand-rolled SVG</span>
+      <svg viewBox="0 0 400 180" width="100%" role="img" aria-label="Cumulative PnL over 500 simulated rounds: honest rises, overconfident and lazy stay flat, liar falls">
+        <line x1="30" y1="90" x2="390" y2="90" stroke="#B9B9B4"/>
+        <polyline fill="none" stroke="#111" stroke-width="2" points="30,90 120,70 210,55 300,38 390,22"/>
+        <polyline fill="none" stroke="#111" stroke-width="1.5" stroke-dasharray="5 4" points="30,90 120,86 210,92 300,84 390,88"/>
+        <polyline fill="none" stroke="#6B6B66" stroke-width="1.5" points="30,90 120,93 210,95 300,97 390,100"/>
+        <polyline fill="none" stroke="#FF2A2A" stroke-width="2" points="30,90 120,112 210,130 300,148 390,165"/>
+        <text x="392" y="20" font-size="10" font-family="JetBrains Mono" text-anchor="end">honest</text>
+        <text x="392" y="82" font-size="10" font-family="JetBrains Mono" text-anchor="end">overconfident</text>
+        <text x="392" y="112" font-size="10" font-family="JetBrains Mono" text-anchor="end" fill="#6B6B66">lazy</text>
+        <text x="392" y="160" font-size="10" font-family="JetBrains Mono" text-anchor="end" fill="#FF2A2A">liar</text>
+      </svg>
+      <div class="note">500 rounds · cumulative PnL per agent type · shape is a placeholder until the sim runs (5 Nov)</div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
