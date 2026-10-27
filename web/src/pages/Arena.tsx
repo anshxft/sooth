@@ -76,14 +76,14 @@ export function Arena() {
 
 function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
   if (!q) return <div className="col-span-12 bg-green! p-4 md:col-span-3"><span className="label">Loading live round…</span></div>
-  const yesShare = weightShare(q, 'YES')
+  const lead = leader(q)
   return (
     <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
       <span className="label">{q.phase} · {countdown(q.phase_ends_at, now) || `round ${q.round}`}</span>
       <span className="font-semibold leading-tight">{q.text}</span>
       <span>
-        <span className="label flex justify-between"><span>Yes {pct(yesShare)}</span><span>auto 80</span></span>
-        <Meter yesBps={yesShare} />
+        <span className="label flex justify-between"><span>{lead.answer} {pct(lead.bps)}</span><span>auto 80</span></span>
+        <Meter bps={lead.bps} />
       </span>
     </Link>
   )
@@ -112,7 +112,7 @@ function AgentLog({ q, names }: { q: QuestionView | null; names: Map<string, Age
 function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, AgentView>; now: number }) {
   const round = q.rounds.at(-1)!
   const step = STEP_OF[q.phase]
-  const yesShare = weightShare(q, 'YES')
+  const lead = leader(q)
   return (
     <div className="col-span-12 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -155,9 +155,9 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
         ))}
       </div>
       <div className="label mt-4 flex justify-between">
-        <span>Weight · yes {pct(yesShare)}</span><span>auto-resolve line 80</span>
+        <span>Weight · {lead.answer} {pct(lead.bps)}</span><span>auto-resolve line 80</span>
       </div>
-      <Meter yesBps={yesShare} tall />
+      <Meter bps={lead.bps} tall />
     </div>
   )
 }
@@ -193,21 +193,22 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
   )
 }
 
-function Meter({ yesBps, tall = false }: { yesBps: number; tall?: boolean }) {
+function Meter({ bps, tall = false }: { bps: number; tall?: boolean }) {
   return (
-    <div className={cn('relative mt-1 flex border border-ink bg-canvas', tall ? 'h-3' : 'h-2')} role="img" aria-label={`Yes weight ${pct(yesBps)} percent, auto-resolve at 80`}>
-      <i className="block bg-ink" style={{ width: `${yesBps / 100}%` }} />
+    <div className={cn('relative mt-1 flex border border-ink bg-canvas', tall ? 'h-3' : 'h-2')} role="img" aria-label={`Leading answer holds ${pct(bps)} percent of weight, auto-resolve at 80`}>
+      <i className="block bg-ink" style={{ width: `${bps / 100}%` }} />
       <span className="hatch flex-1" />
       <b className="absolute -bottom-1 -top-1 w-[2px] bg-ink" style={{ left: '80%' }} />
     </div>
   )
 }
 
-/** Share of the current round's revealed weight on `answer`, in basis points. */
-function weightShare(q: QuestionView, answer: Answer): number {
+/** Leading answer of the current round and its share of revealed weight, in basis points. */
+function leader(q: QuestionView): { answer: Answer; bps: number } {
   const reveals = q.rounds.at(-1)?.reveals ?? []
-  const total = reveals.reduce((sum, r) => sum + BigInt(r.weight), 0n)
-  if (total === 0n) return 0
-  const part = reveals.filter((r) => r.answer === answer).reduce((sum, r) => sum + BigInt(r.weight), 0n)
-  return Number((part * 10_000n) / total)
+  const totals = new Map<Answer, bigint>()
+  for (const r of reveals) totals.set(r.answer, (totals.get(r.answer) ?? 0n) + BigInt(r.weight))
+  const all = [...totals.values()].reduce((a, b) => a + b, 0n)
+  const [answer, weight] = [...totals].sort((a, b) => (b[1] > a[1] ? 1 : b[1] < a[1] ? -1 : 0))[0] ?? ['YES', 0n]
+  return { answer, bps: all === 0n ? 0 : Number((weight * 10_000n) / all) }
 }
