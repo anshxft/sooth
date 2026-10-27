@@ -36,15 +36,16 @@ interface Config {
   auto_conf_bps: number          // 7000 weighted avg confidence of the winning side
   default_timings: Timings
   min_fee: U128                  // 0.1 NEAR
-  question_storage: U128         // 0.1 NEAR, non-refundable, covers question + 30 commits
+  question_storage: U128         // 0.1 NEAR, non-refundable, covers the question itself
   agent_storage: U128            // 0.05 NEAR, non-refundable
+  commit_storage: U128           // 0.005 NEAR per commit, taken from the agent's free balance (no deposit)
 }
 
 interface Timings { commit_secs: number; reveal_secs: number; challenge_secs: number }
 // default_timings = { commit_secs: 180, reveal_secs: 120, challenge_secs: 180 }  (demo values)
 ```
 
-Storage constants are estimates; measure with `env::storage_usage()` on 2 Nov and adjust before deploy.
+Storage is measured, not guessed: the worst-case round (30 agents with 56-char account ids, 280-char text, 500-char params, 300-char evidence URIs) writes 19 326 bytes = 0.194 NEAR, inside the 0.1 + 30 × 0.005 = 0.25 NEAR budget (test `full_round_fits_the_storage_budget`). Timings: every phase 30 s – 7 days.
 
 ## 3. Types
 
@@ -210,7 +211,7 @@ Template params:
 | `deposit_stake()` | agent, full key | any > 0 | free balance += deposit | `stake_deposited` |
 | `withdraw_stake(amount: U128)` | agent, full key | **exactly 1 yoctoNEAR** (refunded with the transfer) | free balance −= amount, transfer. The 1 yocto rule means a function-call key can never call it, even if allow-listed by mistake | `stake_withdrawn` |
 | `ask_question(text, category, template, params, resolve_after: U64, min_stake: U128, timings?: Timings, callback?)` → `number` | anyone | `fee + question_storage`, fee ≥ `min_fee` | creates question; text 10–280 chars | `question_created` |
-| `commit(question_id, hash, stake: U128)` | agent, **FC** | **0** | phase must be `Commit`; one commit per agent per round; `stake ≥ min_stake`; moves stake free → locked | `committed` |
+| `commit(question_id, hash, stake: U128)` | agent, **FC** | **0** | phase must be `Commit`; one commit per agent per round; `stake ≥ min_stake`; moves stake free → locked and takes `commit_storage` from free | `committed` |
 | `reveal(question_id, answer, confidence, evidence_hash, evidence_uri, salt)` | agent, **FC** | **0** | phase must be `Reveal`; checks hash (§6); stores weight with rep snapshot | `revealed` |
 | `tally(question_id)` | anyone (crank) | — | phase `AwaitingTally`; see flow below | `tallied` |
 | `challenge(question_id)` *(Should)* | anyone | bond = 2 × fee (round 1), 4 × fee (round 2) | phase `Challenge`; round 1 → starts round 2, round 2 → `Escalated` | `challenged` |
@@ -317,9 +318,9 @@ The activity feed ("mallory slashed 0.99 NEAR") is built from `finalized.payouts
 | `deposit_stake` | `Attach a deposit` |
 | `withdraw_stake` | `Requires attached deposit of exactly 1 yoctoNEAR`, `Amount must be positive` |
 | `withdraw_stake`, `commit` | `Insufficient free balance` |
-| `ask_question` | `Fee below minimum`, `Text must be 10-280 chars`, `Params too long`, `Invalid timings` |
+| `ask_question` | `Fee below minimum`, `Text must be 10-280 chars`, `Params too long`, `Invalid timings`, `Min stake must be positive` |
 | `commit` | `Not in commit phase`, `Already committed this round`, `Stake below round minimum`, `Hash must be 64 lowercase hex chars`, `Round is full` |
-| `reveal` | `Not in reveal phase`, `No commit found`, `Already revealed`, `Confidence must be 1-99`, `Hash mismatch` |
+| `reveal` | `Not in reveal phase`, `No commit found`, `Already revealed`, `Confidence must be 1-99`, `Hash must be 64 lowercase hex chars` (evidence hash), `Evidence URI too long` (> 300), `Hash mismatch` |
 | `tally` | `Not ready to tally` |
 | `challenge` | `Not in challenge phase`, `Bond too small` |
 | `finalize` | `Not ready to finalize` |

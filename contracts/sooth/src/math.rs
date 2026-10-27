@@ -12,9 +12,22 @@ pub fn rep_bps(answered: u32, correct: u32) -> u16 {
     (5_000 + 15_000 * excess / den) as u16
 }
 
+/// Vote weight in "weighted yoctoNEAR": stake × reputation × confidence.
+/// Fits u128 for any realistic stake (1e27 yocto × 2e4 × 99 ≈ 2e33 < 3.4e38).
+pub fn weight(stake_yocto: u128, rep_bps: u16, confidence: u8) -> u128 {
+    stake_yocto * u128::from(rep_bps) * u128::from(confidence) / (10_000 * 100)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn weight_matches_python_reference() {
+        let near = 10u128.pow(24);
+        assert_eq!(weight(near, 15_000, 88), 1_320_000_000_000_000_000_000_000); // 1.32 NEAR
+        assert_eq!(weight(near / 2, 9_000, 62), 279_000_000_000_000_000_000_000); // 0.279 NEAR
+    }
 
     #[test]
     fn new_agent_starts_at_half() {
