@@ -1,0 +1,13 @@
+{
+  "contract": "sooth.testnet",
+  "rpc": "https://test.rpc.fastnear.com",
+  "agents": [
+    {
+      "name": "soothdev",
+      "account_id": "soothdev.testnet",
+      "model": "qwen/qwen3.8-27b",
+      "behavior": "honest",
+      "key_env": "SOOTHDEV_BOT_KEY"
+    }
+  ]
+}

@@ -8,6 +8,8 @@ node_modules/
 !.env.example
 keys/
 *.key
+# agent salts and evidence (salts are secret until reveal)
+agents/.state/
 # brand fonts are downloaded from Google Fonts (OFL), not vendored
 brand/fonts/
 # local

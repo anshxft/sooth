@@ -1,0 +1,17 @@
+{
+  "name": "sooth-agents",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "once": "node run.mts --once",
+    "start": "node run.mts"
+  },
+  "keywords": [],
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "near-api-js": "^7.4.0"
+  }
+}
