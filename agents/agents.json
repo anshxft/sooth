@@ -1,13 +1,11 @@
 {
   "contract": "sooth.testnet",
-  "rpc": "https://test.rpc.fastnear.com",
+  "rpc": "https://rpc.testnet.near.org",
   "agents": [
-    {
-      "name": "soothdev",
-      "account_id": "soothdev.testnet",
-      "model": "qwen/qwen3.8-27b",
-      "behavior": "honest",
-      "key_env": "SOOTHDEV_BOT_KEY"
-    }
+    { "name": "atlas", "account_id": "atlas-sooth.testnet", "model": "openai/gpt-oss-120b", "behavior": "honest", "key_env": "ATLAS_BOT_KEY" },
+    { "name": "nova", "account_id": "nova-sooth.testnet", "model": "openai/gpt-oss-120b", "behavior": "honest", "key_env": "NOVA_BOT_KEY" },
+    { "name": "sage", "account_id": "sage-sooth.testnet", "model": "qwen/qwen3.8-27b", "behavior": "honest", "key_env": "SAGE_BOT_KEY" },
+    { "name": "echo", "account_id": "echo-sooth.testnet", "model": "openai/gpt-oss-20b", "behavior": "honest", "key_env": "ECHO_BOT_KEY" },
+    { "name": "mallory", "account_id": "mallory-sooth.testnet", "model": "openai/gpt-oss-20b", "behavior": "liar", "key_env": "MALLORY_BOT_KEY" }
   ]
 }

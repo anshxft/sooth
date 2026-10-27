@@ -161,18 +161,31 @@ async function crank(agent: Agent, account: Account, id: number, methodName: 'ta
   }
 }
 
-async function tick(agent: Agent) {
+// One read per tick shared by every agent: the free RPC tier rate-limits per IP.
+type Shared = { open: { id: number; phase: string }[]; question: (id: number) => Promise<Question>; cranked: Set<number> }
+
+function sharedReads(open: Shared['open']): Shared {
+  const cache = new Map<number, Promise<Question>>()
+  const question = (id: number) => {
+    if (!cache.has(id)) cache.set(id, view<Question>('get_question', { question_id: id }))
+    return cache.get(id)!
+  }
+  return { open, question, cranked: new Set() }
+}
+
+async function tick(agent: Agent, { open, question, cranked }: Shared) {
   const key = process.env[agent.key_env]
   if (!key) return log(agent.name, `no ${agent.key_env} in agents/.env, skipping`)
   const account = new Account(agent.account_id, config.rpc, key as `ed25519:${string}`)
   const state = loadState(agent)
-  const open = await view<{ id: number; phase: string }[]>('list_questions', { limit: 20 })
   for (const s of open) {
     try {
-      if (s.phase === 'AwaitingTally') await crank(agent, account, s.id, 'tally')
-      else if (s.phase === 'AwaitingFinalize') await crank(agent, account, s.id, 'finalize')
-      else if (s.phase === 'Commit' || s.phase === 'Reveal') {
-        const q = await view<Question>('get_question', { question_id: s.id })
+      const method = s.phase === 'AwaitingTally' ? 'tally' : s.phase === 'AwaitingFinalize' ? 'finalize' : null
+      if (method && !cranked.has(s.id)) {
+        cranked.add(s.id) // one crank per question per tick
+        await crank(agent, account, s.id, method)
+      } else if (s.phase === 'Commit' || s.phase === 'Reveal') {
+        const q = await question(s.id)
         if (s.phase === 'Commit') await commit(agent, account, q, state)
         else await reveal(agent, account, q, state)
       }
@@ -194,7 +207,12 @@ if (process.argv[2] === '--new-key') {
   newKey(process.argv[3])
 } else {
   do {
-    for (const agent of config.agents) await tick(agent).catch((e) => log(agent.name, `tick failed: ${(e as Error).message}`))
+    try {
+      const shared = sharedReads(await view<Shared['open']>('list_questions', { limit: 20 }))
+      for (const agent of config.agents) await tick(agent, shared).catch((e) => log(agent.name, `tick failed: ${(e as Error).message}`))
+    } catch (e) {
+      log('runtime', `list_questions failed: ${(e as Error).message.slice(0, 200)}`)
+    }
     if (process.argv.includes('--once')) break
     await new Promise((r) => setTimeout(r, POLL_MS))
   } while (true)

@@ -29,7 +29,8 @@ export function Arena() {
     `q${live?.id}`,
   )
   const names = new Map((agents.data ?? []).map((a) => [a.account_id, a]))
-  const q = question.data
+  // get_question has no phase_ends_at; the list summary does.
+  const q = question.data && live ? { ...question.data, phase_ends_at: live.phase_ends_at } : question.data
 
   return (
     <main className="mx-auto max-w-[1280px] p-4">
@@ -132,7 +133,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
           const payout = q.payouts.find((p) => p.account_id === c.account_id && p.round === round.round)
           const slashed = payout?.delta.startsWith('-')
           return (
-            <div key={c.account_id} className={cn('p-3', !reveal && 'bg-term! text-term-text')}>
+            <div key={c.account_id} className={cn('p-3 odd:last:col-span-2 md:odd:last:col-span-1', !reveal && 'bg-term! text-term-text')}>
               <div className="label opacity-70">Unit / {String(i + 1).padStart(2, '0')}</div>
               <div className="font-semibold">{agent?.name ?? c.account_id}</div>
               <div className="text-sm opacity-70">{agent?.model ?? '—'}</div>
@@ -150,7 +151,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
           )
         })}
         {Array.from({ length: Math.max(0, SLOTS - round.commits.length) }, (_, i) => (
-          <div key={`empty${i}`} className="hatch min-h-28 opacity-40" aria-hidden="true" />
+          <div key={`empty${i}`} className="hatch min-h-28 opacity-40 odd:last:col-span-2 md:odd:last:col-span-1" aria-hidden="true" />
         ))}
       </div>
       <div className="label mt-4 flex justify-between">
