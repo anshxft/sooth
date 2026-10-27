@@ -1,7 +1,7 @@
 import { Link } from 'wouter'
 import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
-  countdown, pct, qid, toNear, useAgents, useNow, usePoll, view,
+  countdown, isSwarmAgent, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn } from '../lib/utils'
 
@@ -22,8 +22,8 @@ export function Arena() {
     () => (live ? view<QuestionView>('get_question', { question_id: live.id }) : Promise.resolve(null)),
     `q${live?.id}`,
   )
-  // get_question has no phase_ends_at; the list summary does.
-  const q = question.data && live ? { ...question.data, phase_ends_at: live.phase_ends_at } : question.data
+  // get_question has no phase_ends_at; the list summary does. Smoke-test accounts are left out of the stage.
+  const q = question.data && live ? swarmOnly({ ...question.data, phase_ends_at: live.phase_ends_at }) : question.data
 
   return (
     <main className="mx-auto max-w-[1280px] p-4">
@@ -194,6 +194,14 @@ function Meter({ bps, tall = false }: { bps: number; tall?: boolean }) {
       <b className="absolute -bottom-1 -top-1 w-[2px] bg-ink" style={{ left: '80%' }} />
     </div>
   )
+}
+
+function swarmOnly(q: QuestionView): QuestionView {
+  return {
+    ...q,
+    rounds: q.rounds.map((r) => ({ ...r, commits: r.commits.filter((c) => isSwarmAgent(c.account_id)), reveals: r.reveals.filter((x) => isSwarmAgent(x.account_id)) })),
+    payouts: q.payouts.filter((p) => isSwarmAgent(p.account_id)),
+  }
 }
 
 /** Leading answer of the current round and its share of revealed weight, in basis points. */

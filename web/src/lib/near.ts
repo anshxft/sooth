@@ -4,6 +4,9 @@ import { NearConnector } from '@hot-labs/near-connect'
 import { JsonRpcProvider } from 'near-api-js'
 
 export const CONTRACT = 'sooth.testnet'
+// Registered during the CLI smoke test, not part of the swarm. Kept on-chain, hidden in the UI.
+const HIDDEN_AGENTS = new Set(['soothdev.testnet'])
+export const isSwarmAgent = (accountId: string) => !HIDDEN_AGENTS.has(accountId)
 const POLL_MS = 3_000
 const provider = new JsonRpcProvider({ url: 'https://test.rpc.fastnear.com' })
 export const connector = new NearConnector({ network: 'testnet' })

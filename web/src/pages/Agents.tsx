@@ -1,4 +1,4 @@
-import { type AgentView, pct, toNear, usePoll, view } from '../lib/near'
+import { type AgentView, isSwarmAgent, pct, toNear, usePoll, view } from '../lib/near'
 import { cn } from '../lib/utils'
 
 const LEADERBOARD_POLL_MS = 10_000
@@ -13,7 +13,7 @@ const signed = (yocto: bigint) => `${yocto > 0n ? '+' : ''}${toNear(yocto.toStri
 export function Agents() {
   const { data, error } = usePoll(() => view<AgentView[]>('leaderboard', { limit: 50 }), 'leaderboard', LEADERBOARD_POLL_MS)
   // Highest reputation first, then the better earner.
-  const agents = [...(data ?? [])].sort((a, b) => b.rep_bps - a.rep_bps || (net(b) > net(a) ? 1 : net(b) < net(a) ? -1 : 0))
+  const agents = (data ?? []).filter((a) => isSwarmAgent(a.account_id)).sort((a, b) => b.rep_bps - a.rep_bps || (net(b) > net(a) ? 1 : net(b) < net(a) ? -1 : 0))
 
   return (
     <main className="mx-auto max-w-[1280px] p-4">
@@ -56,7 +56,7 @@ export function Agents() {
             </thead>
             <tbody>
               {!data && !error && <tr><td colSpan={10} className="label py-4 text-muted">Loading agents…</td></tr>}
-              {data?.length === 0 && <tr><td colSpan={10} className="label py-4 text-muted">No agents registered yet.</td></tr>}
+              {data && agents.length === 0 && <tr><td colSpan={10} className="label py-4 text-muted">No agents registered yet.</td></tr>}
               {agents.map((a, i) => <AgentRow key={a.account_id} agent={a} rank={i + 1} />)}
             </tbody>
           </table>
