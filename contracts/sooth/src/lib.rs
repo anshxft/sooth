@@ -1,6 +1,7 @@
 //! SOOTH: an oracle where AI agents stake on the truth.
 //! Types, methods, events, error strings and math are frozen in docs/interface.md.
 mod math;
+mod payout;
 #[cfg(test)]
 mod tests;
 mod types;
@@ -251,6 +252,52 @@ impl Contract {
         );
     }
 
+    // -------------------------------------------------------------------- tally (F4)
+
+    /// Anyone can crank this once the reveal window has closed (docs/interface.md §4, tally flow).
+    pub fn tally(&mut self, question_id: u64) {
+        let now = env::block_timestamp();
+        let rules = payout::Thresholds {
+            auto_share_bps: self.config.auto_share_bps,
+            auto_conf_bps: self.config.auto_conf_bps,
+            min_agents: self.config.min_agents,
+        };
+        let question = self.questions.get_mut(&question_id).unwrap_or_else(|| env::panic_str("Question not found"));
+        require!(question.phase(now) == Phase::AwaitingTally, "Not ready to tally");
+
+        let round_no = question.current_round().round;
+        let tally = payout::tally(question.current_round(), &rules, now);
+        let result = if round_no == 1 && tally.revealed == 0 {
+            TallyResult::Refunded
+        } else if tally.confident {
+            TallyResult::Provisional
+        } else if round_no == 1 {
+            TallyResult::RoundStarted
+        } else {
+            TallyResult::Escalated
+        };
+        emit(
+            "tallied",
+            json!({ "question_id": question_id, "round": round_no, "result": result.as_str(), "winner": tally.winner,
+                    "share_bps": tally.share_bps, "avg_conf_bps": tally.avg_conf_bps }),
+        );
+        let min_stake = question.current_round().min_stake;
+        question.current_round_mut().tally = Some(tally);
+
+        match result {
+            TallyResult::Provisional => {
+                question.status = Status::Provisional;
+                question.challenge_end = Some(now + u64::from(question.timings.challenge_secs) * NS_PER_SEC);
+            }
+            TallyResult::RoundStarted => {
+                let timings = question.timings;
+                question.rounds.push(new_round(2, min_stake.saturating_mul(2), now, &timings));
+            }
+            TallyResult::Escalated => question.status = Status::Escalated,
+            TallyResult::Refunded => self.refund(question_id, now),
+        }
+    }
+
     // -------------------------------------------------------------------- views
 
     pub fn get_config(&self) -> Config {
@@ -313,9 +360,79 @@ impl Contract {
     }
 }
 
+#[derive(Clone, Copy)]
+enum TallyResult {
+    Provisional,
+    RoundStarted,
+    Escalated,
+    Refunded,
+}
+
+impl TallyResult {
+    fn as_str(self) -> &'static str {
+        match self {
+            TallyResult::Provisional => "provisional",
+            TallyResult::RoundStarted => "round_started",
+            TallyResult::Escalated => "escalated",
+            TallyResult::Refunded => "refunded",
+        }
+    }
+}
+
 impl Contract {
     fn agent_mut(&mut self, account_id: &AccountId) -> &mut Agent {
         self.agents.get_mut(account_id).unwrap_or_else(|| env::panic_str("Agent not registered"))
+    }
+
+    /// Nobody revealed in round 1: the fee goes back to the asker and every silent commit is slashed.
+    fn refund(&mut self, question_id: u64, now: u64) {
+        let fee_bps = self.config.protocol_fee_bps;
+        let treasury = self.config.treasury.clone();
+        let question = self.questions.get_mut(&question_id).unwrap_or_else(|| env::panic_str("Question not found"));
+        // With zero reveals no agent can be right, so any final answer gives the refund settlement.
+        let settlement = payout::settle(question.fee.as_yoctonear(), fee_bps, &question.rounds, Answer::Invalid);
+        require!(payout::conserved(question.fee.as_yoctonear(), &settlement), "Settlement does not balance");
+        question.status = Status::Refunded;
+        question.payouts = settlement.payouts.clone();
+        question.protocol_fee = Some(ZERO);
+        question.dust = Some(ZERO);
+        question.finalized_at = Some(now);
+        let asker = question.asker.clone();
+
+        self.apply_payouts(&settlement.payouts);
+        Promise::new(asker).transfer(NearToken::from_yoctonear(settlement.refund_to_asker)).detach();
+        if settlement.slashed_to_treasury > 0 {
+            Promise::new(treasury).transfer(NearToken::from_yoctonear(settlement.slashed_to_treasury)).detach();
+        }
+    }
+
+    /// Unlock each settled stake and move it (plus reward, minus slash) back to free balance.
+    fn apply_payouts(&mut self, payouts: &[Payout]) {
+        for p in payouts {
+            let Some(agent) = self.agents.get_mut(&p.account_id) else { continue };
+            let delta = p.delta.0;
+            agent.locked_balance = agent.locked_balance.saturating_sub(p.stake);
+            let returned = (p.stake.as_yoctonear() as i128 + delta).max(0) as u128;
+            agent.free_balance = agent.free_balance.saturating_add(NearToken::from_yoctonear(returned));
+            let stats = &mut agent.stats;
+            match p.reason {
+                PayoutReason::Correct => {
+                    stats.answered += 1;
+                    stats.correct += 1;
+                    stats.earned = stats.earned.saturating_add(NearToken::from_yoctonear(delta as u128));
+                }
+                PayoutReason::Wrong => {
+                    stats.answered += 1;
+                    stats.wrong += 1;
+                    stats.slashed = stats.slashed.saturating_add(NearToken::from_yoctonear(delta.unsigned_abs()));
+                }
+                PayoutReason::NoReveal => {
+                    stats.no_reveal += 1;
+                    stats.slashed = stats.slashed.saturating_add(p.stake);
+                }
+                PayoutReason::ChallengeWon | PayoutReason::ChallengeLost => {}
+            }
+        }
     }
 }
 

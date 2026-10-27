@@ -396,6 +396,116 @@ fn confidence_100_fails() {
     reveal_as(&mut c, &account("atlas"), qid, Answer::Yes, 100, "salt");
 }
 
+// --------------------------------------------------------------------- F4: tally
+
+/// Reveal window of round 1 closes at T0 + 300 s.
+const TALLY_AT: u64 = T0 + 301 * NS_PER_SEC;
+
+fn vote(c: &mut Contract, qid: u64, round: u8, opens_at: u64, votes: &[(&str, Answer, u8)]) {
+    for (name, answer, conf) in votes {
+        let id = account(name);
+        call_at(&id, ZERO, opens_at + 10 * NS_PER_SEC);
+        let hash = hex_sha256(&commit_preimage(qid, round, &id, *answer, *conf, &evidence(), "salt"));
+        c.commit(qid, hash, MIN_STAKE.saturating_mul(u128::from(round)));
+    }
+    for (name, answer, conf) in votes {
+        call_at(&account(name), ZERO, opens_at + 200 * NS_PER_SEC);
+        c.reveal(qid, *answer, *conf, evidence(), "https://example.com/e.json".into(), "salt".into());
+    }
+}
+
+fn tally_at(c: &mut Contract, qid: u64, now: u64) -> QuestionView {
+    call_at(&account("cranker"), ZERO, now);
+    c.tally(qid);
+    c.get_question(qid).unwrap()
+}
+
+fn agents(c: &mut Contract, names: &[&str]) {
+    for name in names {
+        add_agent(c, name, NearToken::from_near(5));
+    }
+}
+
+#[test]
+fn agreement_becomes_provisional_with_a_challenge_window() {
+    let mut c = new_contract();
+    agents(&mut c, &["atlas", "nova", "sage"]);
+    let qid = ask(&mut c, T0);
+    vote(&mut c, qid, 1, T0, &[("atlas", Answer::Yes, 88), ("nova", Answer::Yes, 91), ("sage", Answer::Yes, 84)]);
+    let q = tally_at(&mut c, qid, TALLY_AT);
+    assert!(last_event("tallied"));
+    assert_eq!(q.status, Status::Provisional);
+    assert_eq!(q.phase, Phase::Challenge);
+    assert_eq!(q.challenge_end, Some(U64(TALLY_AT + 180 * NS_PER_SEC)));
+    let t = q.rounds[0].tally.clone().unwrap();
+    assert!(t.confident && t.winner == Some(Answer::Yes) && t.share_bps == 10_000);
+}
+
+#[test]
+fn split_vote_opens_round_two_with_double_stake() {
+    let mut c = new_contract();
+    agents(&mut c, &["atlas", "nova", "sage"]);
+    let qid = ask(&mut c, T0);
+    vote(&mut c, qid, 1, T0, &[("atlas", Answer::Yes, 80), ("nova", Answer::No, 80), ("sage", Answer::Yes, 60)]);
+    let q = tally_at(&mut c, qid, TALLY_AT);
+    assert_eq!(q.status, Status::Open);
+    assert_eq!(q.round, 2);
+    assert_eq!(q.phase, Phase::Commit);
+    assert_eq!(q.rounds[1].min_stake, MIN_STAKE.saturating_mul(2));
+    assert_eq!(q.rounds[1].commit_start, U64(TALLY_AT));
+    assert!(!q.rounds[0].tally.clone().unwrap().confident);
+}
+
+#[test]
+fn two_agreeing_agents_are_not_enough() {
+    let mut c = new_contract();
+    agents(&mut c, &["atlas", "nova"]);
+    let qid = ask(&mut c, T0);
+    vote(&mut c, qid, 1, T0, &[("atlas", Answer::Yes, 95), ("nova", Answer::Yes, 95)]);
+    assert_eq!(tally_at(&mut c, qid, TALLY_AT).round, 2);
+}
+
+#[test]
+fn split_round_two_escalates_to_the_dao() {
+    let mut c = new_contract();
+    agents(&mut c, &["atlas", "nova", "sage"]);
+    let qid = ask(&mut c, T0);
+    let split = [("atlas", Answer::Yes, 80), ("nova", Answer::No, 80), ("sage", Answer::Yes, 60)];
+    vote(&mut c, qid, 1, T0, &split);
+    tally_at(&mut c, qid, TALLY_AT);
+    vote(&mut c, qid, 2, TALLY_AT, &split);
+    let q = tally_at(&mut c, qid, TALLY_AT + 301 * NS_PER_SEC);
+    assert_eq!(q.status, Status::Escalated);
+    assert_eq!(q.phase, Phase::Dao);
+}
+
+#[test]
+fn nobody_revealing_refunds_the_asker_and_slashes_silent_agents() {
+    let mut c = new_contract();
+    agents(&mut c, &["atlas"]);
+    let qid = ask(&mut c, T0);
+    commit_as(&mut c, &account("atlas"), qid, Answer::Yes, 88, MIN_STAKE);
+    let q = tally_at(&mut c, qid, TALLY_AT);
+    assert_eq!(q.status, Status::Refunded);
+    assert_eq!(q.payouts.len(), 1);
+    assert_eq!(q.payouts[0].reason, PayoutReason::NoReveal);
+    assert_eq!(q.payouts[0].delta.0, -(MIN_STAKE.as_yoctonear() as i128));
+    let atlas = c.get_agent(account("atlas")).unwrap();
+    assert_eq!(atlas.locked_balance, ZERO);
+    assert_eq!(atlas.stats.no_reveal, 1);
+    assert_eq!(atlas.stats.slashed, MIN_STAKE);
+    // 5 NEAR − 0.5 stake (slashed) − 0.005 commit storage
+    assert_eq!(atlas.free_balance, NearToken::from_millinear(4_495));
+}
+
+#[test]
+#[should_panic(expected = "Not ready to tally")]
+fn tally_before_reveal_closes_fails() {
+    let mut c = new_contract();
+    let qid = ask(&mut c, T0);
+    tally_at(&mut c, qid, REVEAL_AT);
+}
+
 #[test]
 fn hex_sha256_is_standard_sha256() {
     assert_eq!(hex_sha256("abc"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");

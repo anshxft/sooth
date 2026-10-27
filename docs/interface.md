@@ -260,7 +260,7 @@ dust         = pot - Σ reward_i                                                
 if Σ score == 0: fee back to asker, Σ slash → treasury
 ```
 
-All divisions floor. Invariant (checked in tests and in `make_mock.py`): **`fee + Σslash = protocol_fee + Σreward + dust`** (plus refund in the no-winner case). Test vector: question 40 in `mock/questions.json`.
+All divisions floor. `pot × score` overflows u128 (≈ 10⁶⁰), so `reward_i` uses an exact 256-bit `mul_div` (`payout.rs`); any other implementation must also be exact or it will not match the test vector. Invariant (checked in tests, in `make_mock.py`, and in the contract before money moves): **`fee + Σslash = protocol_fee + Σreward + dust`** (plus refund in the no-winner case). Test vector: question 40 in `mock/questions.json`.
 
 ## 6. Commit hash and evidence
 
