@@ -1,6 +1,6 @@
 //! SOOTH Swarm: a contractor agent spends a budget on sealed-bid jobs, and the SOOTH jury rules
 //! on disputed work. Design: SOOTH_SPEC.md §14.
-mod award;
+pub mod award;
 #[cfg(test)]
 mod tests;
 mod types;

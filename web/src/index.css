@@ -96,6 +96,11 @@ body {
 .blueprint > :nth-child(13) { --stagger: 12; }
 .blueprint > :nth-child(14) { --stagger: 13; }
 
+/* Mono labels type themselves in, in step with their cell. Declared before the state classes
+   below, so a label that is also sealed / stamped / unsealing keeps that animation. */
+@keyframes type { from { clip-path: inset(0 100% 0 0); } }
+.label { animation: type 520ms steps(28, end) both; animation-delay: calc(var(--stagger, 13) * 30ms + 80ms); }
+
 /* A sealed value opening, a deliverable arriving. */
 .unseal { animation: unseal 260ms var(--ease-out) both; }
 /* A verdict or receipt landing. */
@@ -137,4 +142,60 @@ body {
   .live-dot::before,
   .wipe { animation: none; }
   .fill { transition: none; }
+}
+
+/* ---------------------------------------------------------------- ambient
+   Cursor ring, drifting dot grid, cursor spotlight and film grain. Fine pointers only for the
+   ring (Cursor renders nothing on touch); everything stills for reduced motion. */
+body { background: transparent; } /* lets the fixed dot grid show through the page gutters */
+
+.cursor-ring { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; mix-blend-mode: difference; }
+.cursor-ring > span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+  transition: transform 200ms var(--ease-out), background-color 200ms ease;
+}
+.cursor-ring--hot > span { transform: scale(1.8); background-color: #fff; }
+
+@keyframes drift { to { transform: translate3d(24px, 24px, 0); } }
+.backdrop-grid {
+  position: fixed;
+  inset: -24px;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(rgb(17 17 17 / 0.18) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+  animation: drift 24s linear infinite;
+}
+.backdrop-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: radial-gradient(360px circle at var(--mx, -400px) var(--my, -400px), rgb(127 250 183 / 0.22), transparent 70%);
+  mix-blend-mode: multiply;
+}
+@keyframes grain {
+  25% { transform: translate3d(-3%, 2%, 0); }
+  50% { transform: translate3d(2%, -4%, 0); }
+  75% { transform: translate3d(-1%, 3%, 0); }
+}
+.backdrop-grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 41;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.9s steps(4) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label,
+  .backdrop-grid,
+  .backdrop-grain { animation: none; }
 }

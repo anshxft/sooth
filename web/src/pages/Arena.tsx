@@ -5,6 +5,7 @@ import {
   countdown, isSwarmAgent, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn } from '../lib/utils'
+import { Scramble } from '../lib/motion'
 
 const LIVE_PHASES: Phase[] = ['Commit', 'Reveal', 'AwaitingTally', 'Challenge', 'AwaitingFinalize']
 const STEPS = ['Commit', 'Reveal', 'Tally', 'Final'] as const
@@ -76,7 +77,7 @@ function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
   return (
     <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
       <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{q.phase} · {countdown(q.phase_ends_at, now) || `round ${q.round}`}</span>
-      <span className="font-semibold leading-tight">{q.text}</span>
+      <Scramble text={q.text} className="font-semibold leading-tight" />
       <span>
         <span className="label flex justify-between"><span>{lead.answer} {pct(lead.bps)}</span><span>auto 80</span></span>
         <Meter bps={lead.bps} />
@@ -112,7 +113,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
   return (
     <div className="col-span-12 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-[clamp(1.4rem,2.8vw,2.2rem)] font-semibold leading-tight tracking-[-0.03em]">{q.text}</h2>
+        <h2 className="text-[clamp(1.4rem,2.8vw,2.2rem)] font-semibold leading-tight tracking-[-0.03em]"><Scramble text={q.text} /></h2>
         <span className="label border border-ink px-2 py-1">{q.category} · {qid(q.id)}</span>
       </div>
       <ol className="blueprint mt-4 grid-cols-4 rounded-none!">

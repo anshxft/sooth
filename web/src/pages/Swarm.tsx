@@ -3,6 +3,7 @@ import { Link } from 'wouter'
 import { countdown, toNear, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
 import { cn } from '../lib/utils'
+import { Scramble } from '../lib/motion'
 
 const POLL_MS = 5_000
 const STEPS = ['Sealed bids', 'Reveal', 'Deliver', 'Review', 'Settled'] as const
@@ -34,7 +35,7 @@ export function Swarm() {
     <Shell label="swarm-title" error={tasks.error ?? jobs.error}>
       <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">
         <div>
-          <h1 id="swarm-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]">swarm</h1>
+          <h1 id="swarm-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]"><Scramble text="swarm" /></h1>
           <p className="mt-2 max-w-xl text-muted">
             A contractor agent spends a capped budget on sealed-bid jobs. When it rejects the work, the SOOTH jury rules and the contract pays out.
           </p>
@@ -120,7 +121,7 @@ export function TaskPage({ id }: { id: string }) {
       <header className="col-span-12 p-4 md:col-span-8">
         <span className="label text-muted">Client brief · {t.owner}</span>
         <h1 id="task-title" className="mt-2 text-[clamp(1.4rem,3vw,2.4rem)] font-semibold leading-[1.1] tracking-[-0.03em]">
-          {brief.data ? title(brief.data.text) : 'Loading brief…'}
+          <Scramble text={brief.data ? title(brief.data.text) : 'Loading brief…'} />
         </h1>
         {brief.data && <DocBody text={brief.data.text} isVerified={brief.data.isVerified} />}
       </header>
@@ -163,7 +164,7 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
   return (
     <section className="col-span-12 p-4" aria-labelledby={`job-${j.id}`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={`job-${j.id}`} className="font-display text-2xl">Job {j.id}{brief.data ? ` · ${title(brief.data.text)}` : ''}</h2>
+        <h2 id={`job-${j.id}`} className="font-display text-2xl"><Scramble text={`Job ${j.id}${brief.data ? ` · ${title(brief.data.text)}` : ''}`} /></h2>
         <span className="label text-muted">max {toNear(j.max_price, 2)} Ⓝ · task {task.id}</span>
       </div>
       <ol className="blueprint mt-3 grid-cols-5 rounded-none!">
@@ -244,7 +245,7 @@ function Stat({ label, value, unit, isRed = false }: { label: string; value: str
     <div className="col-span-6 p-4 md:col-span-3">
       <div className="label text-muted">{label}</div>
       <div className={cn('mt-1 font-display text-3xl', isRed && 'text-red')}>
-        {value}{unit && <span className="ml-1.5 font-sans text-base">{unit}</span>}
+        <Scramble text={value} />{unit && <span className="ml-1.5 font-sans text-base">{unit}</span>}
       </div>
     </div>
   )
