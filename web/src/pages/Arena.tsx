@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Link } from 'wouter'
 import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
@@ -42,7 +43,9 @@ export function Arena() {
 
         <div className="col-span-12 px-4 pb-2 pt-3">
           <div className="label flex justify-between"><span>✳ Many agents ✦ one truth</span><span>✳</span></div>
-          <h1 className="text-center font-display text-[clamp(5rem,18vw,15rem)] leading-[0.95] tracking-[-0.05em]">sooth</h1>
+          <h1 aria-label="sooth" className="letters text-center font-display text-[clamp(5rem,18vw,15rem)] leading-[0.95] tracking-[-0.05em]">
+            {[...'sooth'].map((c, i) => <span key={i} aria-hidden="true" style={{ '--i': i } as CSSProperties}>{c}</span>)}
+          </h1>
         </div>
 
         <div className="col-span-12 p-4 md:col-span-6">
@@ -72,7 +75,7 @@ function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
   const lead = leader(q)
   return (
     <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
-      <span className="label">{q.phase} · {countdown(q.phase_ends_at, now) || `round ${q.round}`}</span>
+      <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{q.phase} · {countdown(q.phase_ends_at, now) || `round ${q.round}`}</span>
       <span className="font-semibold leading-tight">{q.text}</span>
       <span>
         <span className="label flex justify-between"><span>{lead.answer} {pct(lead.bps)}</span><span>auto 80</span></span>
@@ -96,7 +99,7 @@ function AgentLog({ q, names }: { q: QuestionView | null; names: Map<string, Age
     <div className="col-span-12 bg-term! p-4 font-mono text-[11px] uppercase leading-7 tracking-[0.04em] text-term-text md:col-span-3" aria-live="polite">
       <div className="text-green">&gt; agent log</div>
       {lines.length === 0 && <div className="text-[#8a8e8c]">waiting for commits…</div>}
-      {lines.slice(-7).map((l) => <div key={l.key} className={cn(l.red && 'text-red')}>{l.text}</div>)}
+      {lines.slice(-7).map((l) => <div key={l.key} className={cn('log-line', l.red && 'text-red')}>{l.text}</div>)}
       <div className="text-green">&gt; _</div>
     </div>
   )
@@ -114,7 +117,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
       </div>
       <ol className="blueprint mt-4 grid-cols-4 rounded-none!">
         {STEPS.map((s, i) => (
-          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && 'bg-green!', i > step && 'text-muted')}>
+          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && 'bg-green! live-dot', i > step && 'text-muted')}>
             {s}{i === step && q.phase_ends_at ? ` · ${countdown(q.phase_ends_at, now)}` : ''}
           </li>
         ))}
@@ -131,12 +134,12 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
               <div className="font-semibold">{agent?.name ?? c.account_id}</div>
               <div className="text-sm opacity-70">{agent?.model ?? '—'}</div>
               {reveal ? (
-                <div className="mt-2 font-display text-2xl">{reveal.answer} {reveal.confidence}</div>
+                <div className="unseal mt-2 font-display text-2xl">{reveal.answer} {reveal.confidence}</div>
               ) : (
-                <div className="label mt-3">▒▒ sealed {c.hash.slice(0, 6)}</div>
+                <div className="sealed label mt-3">▒▒ sealed {c.hash.slice(0, 6)}</div>
               )}
               {payout && (
-                <div className={cn('label mt-1', slashed ? 'text-red' : '')}>
+                <div className={cn('stamp label mt-1', slashed ? 'text-red' : '')}>
                   {slashed ? `✗ slashed ${toNear(payout.delta)}` : `✓ +${toNear(payout.delta)}`} Ⓝ
                 </div>
               )}
@@ -188,9 +191,9 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
 
 function Meter({ bps, tall = false }: { bps: number; tall?: boolean }) {
   return (
-    <div className={cn('relative mt-1 flex border border-ink bg-canvas', tall ? 'h-3' : 'h-2')} role="img" aria-label={`Leading answer holds ${pct(bps)} percent of weight, auto-resolve at 80`}>
-      <i className="block bg-ink" style={{ width: `${bps / 100}%` }} />
-      <span className="hatch flex-1" />
+    <div className={cn('relative mt-1 overflow-hidden border border-ink bg-canvas', tall ? 'h-3' : 'h-2')} role="img" aria-label={`Leading answer holds ${pct(bps)} percent of weight, auto-resolve at 80`}>
+      <span className="hatch absolute inset-0" />
+      <i className="fill absolute inset-0 block bg-ink" style={{ transform: `scaleX(${bps / 10_000})` }} />
       <b className="absolute -bottom-1 -top-1 w-[2px] bg-ink" style={{ left: '80%' }} />
     </div>
   )
