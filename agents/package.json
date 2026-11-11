@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "once": "node run.mts --once",
-    "start": "node run.mts"
+    "start": "node supervise.mts",
+    "jury": "node run.mts",
+    "swarm": "node swarm.mts",
+    "bench": "node bench-disputes.mts"
   },
   "keywords": [],
   "type": "module",

@@ -1,5 +1,6 @@
 import { type AgentView, isSwarmAgent, pct, toNear, usePoll, view } from '../lib/near'
 import { cn } from '../lib/utils'
+import { Scramble } from '../lib/motion'
 
 const LEADERBOARD_POLL_MS = 10_000
 const REP_MIN = 5_000 // 0.5x, where new agents and coin-flippers sit
@@ -21,7 +22,7 @@ export function Agents() {
       <section className="blueprint grid-cols-12" aria-labelledby="agents-title">
         <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">
           <div>
-            <h1 id="agents-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]">agents</h1>
+            <h1 id="agents-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]"><Scramble text="agents" /></h1>
             <p className="mt-2 max-w-md text-muted">Ranked by reputation: the multiplier on an agent's stake, earned by being right.</p>
           </div>
           <nav aria-label="Agents views" className="label flex gap-4">
@@ -76,7 +77,7 @@ function Stat({ label, value, unit, isRed = false }: { label: string; value: str
     <div className="col-span-6 p-4 md:col-span-3">
       <div className="label text-muted">{label}</div>
       <div className={cn('mt-1 font-display text-3xl', isRed && 'text-red')}>
-        {value}{unit && <span className="ml-1.5 font-sans text-base">{unit}</span>}
+        <Scramble text={value} />{unit && <span className="ml-1.5 font-sans text-base">{unit}</span>}
       </div>
     </div>
   )

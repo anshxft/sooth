@@ -15,6 +15,7 @@ type Bid = { account_id: string; price: string | null }
 type Job = {
   id: number; task_id: number; brief_uri: string; brief_hash: string; max_price: string; phase: string; bids: Bid[]
   winner: string | null; deliverable_uri: string | null; deliverable_hash: string | null; result: string | null
+  question_id: number | null; dispute_deadline: string | null
 }
 type Part = { title: string; brief_uri: string; brief_hash: string; max_price: string; job_ids: number[]; done: boolean }
 type Bidding = { price: string; salt: string; committed: boolean; revealed: boolean; delivered: boolean }
@@ -60,6 +61,14 @@ const call = (bot: Bot, methodName: string, args: object) =>
 const near = (yocto: string) => Number(BigInt(yocto) / 10n ** 21n) / 1000
 
 // --------------------------------------------------------------- contractor
+
+/** True once SOOTH has a final result for the dispute, or the contract's dispute deadline has passed. */
+async function isRuledOrExpired(job: Job): Promise<boolean> {
+  if (job.dispute_deadline && BigInt(job.dispute_deadline) <= BigInt(Date.now()) * 1_000_000n) return true
+  if (job.question_id === null) return false
+  const result = await provider.callFunction({ contractId: config.contract, method: 'get_result', args: { question_id: job.question_id } })
+  return result !== null
+}
 
 async function plan(task: Task): Promise<Part[]> {
   const brief = await getDoc(task.brief_uri, task.brief_hash)
@@ -112,6 +121,11 @@ async function contractorTick(tasks: Task[], jobs: Map<number, Job>) {
       for (const job of [...jobs.values()].filter((j) => j.task_id === task.id)) {
         if (job.phase === 'AwaitingAward') await call(S.contractor, 'award', { job_id: job.id })
         else if (job.phase === 'DeliveryMissed') await call(S.contractor, 'cancel_job', { job_id: job.id })
+        else if (job.phase === 'Disputed' && (await isRuledOrExpired(job))) {
+          // SOOTH's callback normally settles the job; this covers a callback that ran out of gas.
+          await call(S.contractor, 'settle', { job_id: job.id })
+          log('contractor', `job ${job.id}: settled from the jury result`)
+        }
         else if (job.phase === 'Review' && !reviewed[job.id]) {
           const decision = await review(job)
           await call(S.contractor, decision, { job_id: job.id })

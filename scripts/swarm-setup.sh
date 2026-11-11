@@ -12,8 +12,8 @@ export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$HOME/.cache/sooth-target}"
 C=sooth-swarm.testnet
 SOOTH=sooth.testnet
 NET=(network-config testnet sign-with-legacy-keychain send)
-CONTRACTOR_METHODS='open_job, accept, dispute, award, cancel_job'
-WORKER_METHODS='commit_bid, reveal_bid, submit, claim, award'
+CONTRACTOR_METHODS='open_job, accept, dispute, award, cancel_job, settle'
+WORKER_METHODS='commit_bid, reveal_bid, submit, claim, award, settle'
 
 exists() { near account view-account-summary "$1" network-config testnet now >/dev/null 2>&1; }
 call() { near contract call-function as-transaction "$C" "$2" json-args "$3" prepaid-gas '30.0 Tgas' attached-deposit "$4" sign-as "$1" "${NET[@]}"; }

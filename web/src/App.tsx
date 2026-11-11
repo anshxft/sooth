@@ -1,4 +1,5 @@
 import { Link, Route, Switch } from 'wouter'
+import { Backdrop, Cursor } from './lib/motion'
 import { useAccount } from './lib/near'
 import { Agents } from './pages/Agents'
 import { Arena } from './pages/Arena'
@@ -17,6 +18,8 @@ export default function App() {
   const { accountId, signIn, signOut } = useAccount()
   return (
     <>
+      <Backdrop />
+      <Cursor />
       <header className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 pt-4">
         <Link href="/" className="font-display text-xl tracking-[-0.04em]">sooth</Link>
         <nav aria-label="Main" className="label hidden gap-6 md:flex">

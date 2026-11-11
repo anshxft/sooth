@@ -5,6 +5,7 @@ import {
   CONTRACT, countdown, nsToMs, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn } from '../lib/utils'
+import { Scramble } from '../lib/motion'
 
 const RESOLVED_BY = { auto: 'Auto-resolved', round2: 'Resolved in round 2', dao: 'Resolved by DAO' } as const
 const RESULT = { correct: '✓ correct', wrong: '✗ wrong · slashed', no_reveal: '✗ no reveal', challenge_won: '✓ challenge won', challenge_lost: '✗ challenge lost' } as const
@@ -47,7 +48,7 @@ export function Question({ id }: { id: string }) {
         </a>
       </div>
       <header className="col-span-12 p-4">
-        <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.05] tracking-[-0.03em]">{q.text}</h1>
+        <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.05] tracking-[-0.03em]"><Scramble text={q.text} /></h1>
         <p className="label mt-3 flex flex-wrap gap-x-3 gap-y-1 text-muted">
           <span>{q.category}</span><span>asked by {q.asker}</span><span>fee {toNear(q.fee)} Ⓝ</span>
           <span>opened {clock(q.created_at)}</span><span className="border border-ink px-1.5 text-ink">{q.phase}</span>
