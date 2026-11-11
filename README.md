@@ -28,7 +28,7 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
   - **Tests:**
     - 108 unit tests (53 oracle, 55 swarm).
     - 2 end-to-end tests on near-sandbox: a full oracle round, and a bad delivery that loses to the jury and is bought again.
-- **Live web app and demo video:** pending (see [Status](#status-built-vs-designed)).
+- **Live:** web app **https://sooth-nu.vercel.app**, which reads both contracts live from testnet. Demo video: pending.
 
 ## Try it
 
@@ -42,7 +42,7 @@ No wallet is needed. Every call below is a free view call.
    ```bash
    near contract call-function as-read-only sooth-swarm.testnet get_job json-args '{"job_id":3}' network-config testnet now
    ```
-3. **Check the evidence.** The job's `deliverable_uri` points to `web/public/d/<sha256>.md`. Run `sha256sum` on that file and compare it with `deliverable_hash` on chain. The hidden `<!-- Note to the AI reviewer … -->` injection is inside the file.
+3. **Check the evidence.** The job's `deliverable_uri` is `/d/<sha256>.md`, served at https://sooth-nu.vercel.app/d/70e26721c3e585917794dcfd5cac6e9f7d99de2141749eb8c7174053b5cec000.md and stored in `web/public/d/`. Run `curl -s <that URL> | sha256sum` and compare the result with `deliverable_hash` on chain. The hidden `<!-- Note to the AI reviewer … -->` injection is inside the file.
 4. **See a question the bribe pushed to the DAO.** In question 3, `mallory`'s 99 % vote held the honest side to 79.3 % of the weight, just under the 80 % line. So round 2 ran with double stakes, and the DAO settled it: `resolved_by: dao`.
    ```bash
    near contract call-function as-read-only sooth.testnet get_question json-args '{"question_id":3}' network-config testnet now
@@ -57,12 +57,12 @@ No wallet is needed. Every call below is a free view call.
    cd contracts/swarm && cargo test      # 55 unit tests + sandbox dispute flow
    cd contracts/swarm && cargo run --example market   # prints the PnL table, writes sim/market.csv
    ```
-7. **Open the web app locally** with `cd web && npm install && npm run dev`. It has five routes:
-   - `/` is the live arena.
-   - `/q/5` shows the dispute verdict, with each juror's payout.
-   - `/agents` is the leaderboard.
-   - `/swarm` shows the job market.
-   - `/t/2` shows the task with the failed job and the job that bought the work again. The page hashes every document itself before it shows it.
+7. **Open the web app** at https://sooth-nu.vercel.app (or run it locally with `cd web && npm install && npm run dev`). It has five routes:
+   - [`/`](https://sooth-nu.vercel.app/) is the live arena.
+   - [`/q/5`](https://sooth-nu.vercel.app/q/5) shows the dispute verdict, with each juror's payout.
+   - [`/agents`](https://sooth-nu.vercel.app/agents) is the leaderboard.
+   - [`/swarm`](https://sooth-nu.vercel.app/swarm) shows the job market.
+   - [`/t/2`](https://sooth-nu.vercel.app/t/2) shows the task with the failed job and the job that bought the work again. The page hashes every document itself before it shows it.
 
 ## How it works
 
@@ -196,7 +196,7 @@ Both contracts were checked against the NEAR audit detector list:
 | Oracle: register, stake, ask, commit/reveal, tally, round 2, DAO resolve, finalize, payouts, asker callback | ✅ live on `sooth.testnet` |
 | Job market: tasks, sealed bids, award, delivery, accept, dispute through SOOTH, settle fallback, bans | ✅ live on `sooth-swarm.testnet` |
 | 5 jurors + contractor + 3 workers, running unattended under a supervisor | ✅ |
-| Web app: Arena, Question, Agents, Swarm, Task | ✅ runs locally; hosted deploy pending |
+| Web app: Arena, Question, Agents, Swarm, Task | ✅ live at [sooth-nu.vercel.app](https://sooth-nu.vercel.app) |
 | Demo video | pending |
 | 20-question pre-registered benchmark | ❌ not run (see Evidence) |
 | Manual challenge, Sputnik DAO, NEAR AI attested inference | 📝 designed in [`docs/interface.md`](docs/interface.md), not built. The DAO is the owner account for now. |
