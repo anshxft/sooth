@@ -29,9 +29,9 @@ const HTTP_TIMEOUT_MS = 30_000
 const MAX_DOC_CHARS = 40_000
 const DOCS = new URL('../web/public/d/', HERE)
 
-for (const file of [new URL('.env', HERE), process.env.ENV_FILE ?? '\\\\wsl.localhost\\Ubuntu\\home\\you\\practice\\.env']) {
-  if (existsSync(file)) process.loadEnvFile(file)
-}
+// agents/.env first; it may set ENV_FILE to a second file kept outside the repo.
+if (existsSync(new URL('.env', HERE))) process.loadEnvFile(new URL('.env', HERE))
+if (process.env.ENV_FILE && existsSync(process.env.ENV_FILE)) process.loadEnvFile(process.env.ENV_FILE)
 export const config = JSON.parse(readFileSync(new URL('agents.json', HERE), 'utf8')) as Config
 mkdirSync(new URL('.state/', HERE), { recursive: true })
 
