@@ -73,7 +73,7 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
   const box = 'col-span-12 flex min-h-56 flex-col justify-between gap-4 p-4 md:col-span-4'
   if (o) {
     return (
-      <div className={cn(box, 'bg-green!')}>
+      <div className={cn(box, 'stamp bg-green!')}>
         <span className="label">Verdict · {RESOLVED_BY[o.resolved_by]}</span>
         <span className="font-display text-[clamp(4rem,10vw,7rem)] leading-none">{o.answer}</span>
         <span className="label">Share {pct(o.share_bps)} · avg conf {pct(o.avg_conf_bps)}</span>
@@ -92,7 +92,7 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
   const left = countdown(phaseEnd(q), now)
   return (
     <div className={cn(box, 'bg-term! text-term-text')} aria-live="polite">
-      <span className="label text-green">Pending · round {q.round}</span>
+      <span className="live-dot label text-green">Pending · round {q.round}</span>
       <span className="font-display text-[clamp(3rem,7vw,5rem)] leading-none">{left || (q.phase === 'Dao' ? 'DAO' : q.phase)}</span>
       <span className="label">{q.phase === 'Dao' ? 'Agents could not agree. Waiting for the DAO.' : `${q.phase} phase`}</span>
     </div>
@@ -191,7 +191,7 @@ function RoundBlock({ q, r, config, names }: { q: QuestionView; r: Round; config
                 <tr key={c.account_id} className="border-t border-line">
                   <td className="py-2 font-semibold">{agent?.name ?? c.account_id}</td>
                   <td className="text-muted">{agent?.model ?? '—'}</td>
-                  <td className="font-display text-lg">{rv ? rv.answer : <span className="label text-muted">▒▒ sealed</span>}</td>
+                  <td className="font-display text-lg">{rv ? <span className="unseal inline-block">{rv.answer}</span> : <span className="sealed label text-muted">▒▒ sealed</span>}</td>
                   <td className="text-right font-mono">{rv?.confidence ?? '—'}</td>
                   <td className="text-right font-mono">{toNear(c.stake, 2)}</td>
                   <td className="text-right font-mono">{rv ? toNear(rv.weight) : '—'}</td>

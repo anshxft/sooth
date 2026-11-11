@@ -94,7 +94,7 @@ function TaskRow({ task, jobs }: { task: Task; jobs: Job[] }) {
       <p className="label mt-1 flex flex-wrap gap-x-3 text-muted">
         <span>budget {toNear(task.budget, 2)} Ⓝ</span><span>paid {toNear(task.paid, 2)} Ⓝ</span>
         <span>{jobs.length} job{jobs.length === 1 ? '' : 's'}</span>
-        <span className={cn('border border-ink px-1.5 text-ink', live && 'bg-green')}>{live ? live.phase : task.status}</span>
+        <span className={cn('border border-ink px-1.5 text-ink', live && 'live-dot bg-green')}>{live ? live.phase : task.status}</span>
       </p>
     </li>
   )
@@ -143,7 +143,7 @@ function Budget({ task: t }: { task: Task }) {
     <div className="col-span-12 p-4 md:col-span-4">
       <span className="label text-muted">Budget · spent only by {short(t.contractor)}'s limited key</span>
       <div className="font-display mt-1 text-4xl">{toNear(t.budget, 2)} <span className="font-sans text-base">Ⓝ</span></div>
-      <div className="mt-3 flex h-3 border border-ink" role="img" aria-label="Budget split">
+      <div className="wipe mt-3 flex h-3 border border-ink" role="img" aria-label="Budget split">
         {parts.map(([label, v, cls]) => budget > 0n && <i key={label} className={cn('block h-full', cls)} style={{ width: `${Number((BigInt(v) * 10_000n) / budget) / 100}%` }} />)}
       </div>
       <dl className="mt-3 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 font-mono text-sm">
@@ -168,7 +168,7 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
       </div>
       <ol className="blueprint mt-3 grid-cols-5 rounded-none!">
         {STEPS.map((s, i) => (
-          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && (j.phase === 'Disputed' ? 'bg-term! text-green' : 'bg-green!'), i > step && 'text-muted')}>
+          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && (j.phase === 'Disputed' ? 'bg-term! text-green' : 'bg-green!'), i === step && j.phase !== 'Closed' && 'live-dot', i > step && 'text-muted')}>
             {i === 3 && j.phase === 'Disputed' ? 'Jury' : s}{i === step && left ? ` · ${left}` : ''}
           </li>
         ))}
@@ -182,8 +182,8 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
             {j.bids.map((b) => (
               <li key={b.account_id} className={cn('flex justify-between border-t border-line py-1.5', b.account_id === j.winner && 'font-semibold')}>
                 <span>{b.account_id === j.winner ? '★ ' : ''}{short(b.account_id)}</span>
-                {b.price && <span className="font-mono">{toNear(b.price, 2)} Ⓝ</span>}
-                {!b.price && step < 2 && <span className="font-mono">▒▒ {b.hash.slice(0, 6)}</span>}
+                {b.price && <span key={b.price} className="unseal font-mono">{toNear(b.price, 2)} Ⓝ</span>}
+                {!b.price && step < 2 && <span className="sealed font-mono">▒▒ {b.hash.slice(0, 6)}</span>}
                 {!b.price && step >= 2 && <span className="label text-red">✗ no reveal · bond slashed</span>}
               </li>
             ))}
@@ -202,7 +202,7 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
         </p>
       )}
       {result && (
-        <div className={cn('mt-3 flex flex-wrap justify-between gap-2 border border-ink p-3', result.isBad ? 'bg-red/10' : 'bg-green/40')}>
+        <div className={cn('stamp mt-3 flex flex-wrap justify-between gap-2 border border-ink p-3', result.isBad ? 'bg-red/10' : 'bg-green/40')}>
           <span className="font-semibold">Receipt · {result.text}</span>
           <span className="font-mono text-sm">paid {toNear(paidOut(j).toString())} Ⓝ{j.price ? ` of ${toNear(j.price, 2)} Ⓝ` : ''}</span>
         </div>
@@ -222,7 +222,7 @@ function Deliverable({ uri, hash }: { uri: string; hash: string }) {
 function DocBody({ text, isVerified }: { text: string; isVerified: boolean }) {
   return (
     <>
-      <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap border border-line bg-canvas p-3 font-mono text-xs leading-5">{text}</pre>
+      <pre className="unseal mt-2 max-h-72 overflow-auto whitespace-pre-wrap border border-line bg-canvas p-3 font-mono text-xs leading-5">{text}</pre>
       <p className={cn('label mt-1', isVerified ? 'text-muted' : 'text-red')}>
         {isVerified ? 'sha256 matches the hash on chain ✓' : 'Does not match the hash on chain ✗'}
       </p>

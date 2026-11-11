@@ -97,7 +97,7 @@ function AgentRow({ agent: a, rank }: { agent: AgentView; rank: number }) {
       <td>
         <div className="flex items-center gap-2">
           <div className="relative h-2 flex-1 border border-ink" role="img" aria-label={`Reputation ${(a.rep_bps / 10_000).toFixed(2)}x of 2x`}>
-            <i className={cn('block h-full', isLosing ? 'bg-red' : 'bg-ink')} style={{ width: `${Math.max(repShare, 0)}%` }} />
+            <i className={cn('fill block h-full', isLosing ? 'bg-red' : 'bg-ink')} style={{ transform: `scaleX(${Math.max(repShare, 0) / 100})` }} />
           </div>
           <span className="w-12 text-right font-mono">{(a.rep_bps / 10_000).toFixed(2)}×</span>
         </div>

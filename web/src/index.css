@@ -61,11 +61,80 @@ body {
   box-shadow: 0 0 0 4px var(--color-green);
 }
 
+/* ---------------------------------------------------------------- motion
+   Every animation explains a change: a page assembling, a sealed value opening, a live phase,
+   a verdict landing. transform / opacity / clip-path only. */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes unseal { from { opacity: 0; filter: blur(4px); transform: translateY(4px); } }
+@keyframes stamp { from { opacity: 0; transform: scale(0.96); } }
+@keyframes breathe { 50% { opacity: 0.4; } }
+@keyframes log-in { from { opacity: 0; transform: translateX(-6px); } }
+@keyframes wipe { from { clip-path: inset(0 100% 0 0); } }
+@keyframes letter { from { opacity: 0; transform: translateY(35%); } }
+
+/* Page entry: blueprint cells assemble 30 ms apart instead of popping in at once. The cell
+   background stays put (so the grid lines never flash); only what is inside it rises. */
+.blueprint > * > * { animation: rise 360ms var(--ease-out) both; animation-delay: calc(var(--stagger, 13) * 30ms); }
+.blueprint > :nth-child(1) { --stagger: 0; }
+.blueprint > :nth-child(2) { --stagger: 1; }
+.blueprint > :nth-child(3) { --stagger: 2; }
+.blueprint > :nth-child(4) { --stagger: 3; }
+.blueprint > :nth-child(5) { --stagger: 4; }
+.blueprint > :nth-child(6) { --stagger: 5; }
+.blueprint > :nth-child(7) { --stagger: 6; }
+.blueprint > :nth-child(8) { --stagger: 7; }
+.blueprint > :nth-child(9) { --stagger: 8; }
+.blueprint > :nth-child(10) { --stagger: 9; }
+.blueprint > :nth-child(11) { --stagger: 10; }
+.blueprint > :nth-child(12) { --stagger: 11; }
+.blueprint > :nth-child(13) { --stagger: 12; }
+.blueprint > :nth-child(14) { --stagger: 13; }
+
+/* A sealed value opening, a deliverable arriving. */
+.unseal { animation: unseal 260ms var(--ease-out) both; }
+/* A verdict or receipt landing. */
+.stamp { animation: stamp 280ms var(--ease-out) both; }
+/* Still sealed / still waiting. */
+.sealed { animation: breathe 1.6s ease-in-out infinite; }
+/* The phase that is running right now. */
+.live-dot::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+  animation: breathe 1.2s ease-in-out infinite;
+}
+.log-line { animation: log-in 220ms var(--ease-out) both; }
+/* Bars that fill: the value lives in a scaleX transform, never in width. */
+.fill { transform-origin: left; transition: transform 300ms var(--ease-out); }
+.wipe { animation: wipe 600ms var(--ease-out) both; }
+/* The hero wordmark, letter by letter (wrap letters in spans with --i). */
+.letters > span { display: inline-block; animation: letter 520ms var(--ease-out) both; animation-delay: calc(var(--i) * 45ms + 120ms); }
+
+@media (hover: hover) and (pointer: fine) {
+  tbody tr { transition: background-color 150ms ease; }
+  tbody tr:hover { background-color: rgb(17 17 17 / 0.04); }
+}
+
+/* Fewer, gentler: keep the fades that explain a change, drop movement and loops. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
-  }
+  .blueprint > * > *,
+  .unseal,
+  .stamp,
+  .log-line,
+  .letters > span { animation-name: fade; }
+  .sealed,
+  .live-dot::before,
+  .wipe { animation: none; }
+  .fill { transition: none; }
 }
