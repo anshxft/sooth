@@ -84,6 +84,8 @@ pub struct Task {
     pub reserved: NearToken,
     pub costs: NearToken,
     pub active_jobs: u32,
+    /// Workers who lost a dispute or missed a delivery on this task; they cannot bid on it again.
+    pub banned: Vec<AccountId>,
     pub status: TaskStatus,
     pub created_at: U64,
 }

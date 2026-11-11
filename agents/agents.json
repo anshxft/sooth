@@ -1,11 +1,42 @@
 {
   "contract": "sooth.testnet",
-  "rpc": "https://rpc.testnet.near.org",
+  "rpc": "https://test.rpc.fastnear.com",
   "agents": [
-    { "name": "atlas", "account_id": "atlas-sooth.testnet", "model": "openai/gpt-oss-120b", "behavior": "honest", "key_env": "ATLAS_BOT_KEY" },
-    { "name": "nova", "account_id": "nova-sooth.testnet", "model": "openai/gpt-oss-120b", "behavior": "honest", "key_env": "NOVA_BOT_KEY" },
-    { "name": "sage", "account_id": "sage-sooth.testnet", "model": "qwen/qwen3.8-27b", "behavior": "honest", "key_env": "SAGE_BOT_KEY" },
-    { "name": "echo", "account_id": "echo-sooth.testnet", "model": "openai/gpt-oss-20b", "behavior": "honest", "key_env": "ECHO_BOT_KEY" },
-    { "name": "mallory", "account_id": "mallory-sooth.testnet", "model": "openai/gpt-oss-20b", "behavior": "liar", "key_env": "MALLORY_BOT_KEY" }
-  ]
+    {"name":  "atlas",  "account_id":  "atlas-sooth.testnet",  "model":  "openai/gpt-oss-120b",  "behavior":  "honest",  "key_env":  "ATLAS_BOT_KEY"},
+    {"name":  "nova",  "account_id":  "nova-sooth.testnet",  "model":  "openai/gpt-oss-120b",  "behavior":  "honest",  "key_env":  "NOVA_BOT_KEY"},
+    {"name":  "sage",  "account_id":  "sage-sooth.testnet",  "model":  "qwen/qwen3.8-27b",  "behavior":  "honest",  "key_env":  "SAGE_BOT_KEY"},
+    {"name":  "echo",  "account_id":  "echo-sooth.testnet",  "model":  "openai/gpt-oss-20b",  "behavior":  "honest",  "key_env":  "ECHO_BOT_KEY"},
+    {"name":  "mallory",  "account_id":  "mallory-sooth.testnet",  "model":  "openai/gpt-oss-20b",  "behavior":  "liar",  "key_env":  "MALLORY_BOT_KEY"}
+  ],
+  "doc_base": "",
+  "swarm": {
+    "contract": "sooth-swarm.testnet",
+    "contractor": {"name":  "contractor",  "account_id":  "contractor.sooth-swarm.testnet",  "model":  "openai/gpt-oss-120b",  "key_env":  "CONTRACTOR_BOT_KEY"},
+    "workers": [
+      {
+        "name": "quill",
+        "account_id": "quill.sooth-swarm.testnet",
+        "model": "openai/gpt-oss-120b",
+        "behavior": "honest",
+        "price_near": "0.6",
+        "key_env": "QUILL_BOT_KEY"
+      },
+      {
+        "name": "ledger",
+        "account_id": "ledger.sooth-swarm.testnet",
+        "model": "qwen/qwen3.8-27b",
+        "behavior": "honest",
+        "price_near": "0.8",
+        "key_env": "LEDGER_BOT_KEY"
+      },
+      {
+        "name": "shade",
+        "account_id": "shade.sooth-swarm.testnet",
+        "model": "openai/gpt-oss-20b",
+        "behavior": "cheater",
+        "price_near": "0.15",
+        "key_env": "SHADE_BOT_KEY"
+      }
+    ]
+  }
 }

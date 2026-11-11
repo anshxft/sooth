@@ -138,6 +138,7 @@ impl Contract {
                 reserved: ZERO,
                 costs: ZERO,
                 active_jobs: 0,
+                banned: vec![],
                 status: TaskStatus::Open,
                 created_at: U64(env::block_timestamp()),
             },
@@ -227,6 +228,7 @@ impl Contract {
         require!(job.bids.len() < max_bids, "Job has too many bids");
         let task = self.tasks.get(&job.task_id).unwrap_or_else(|| env::panic_str("Task not found"));
         require!(account_id != task.owner && account_id != task.contractor, "Cannot bid on your own job");
+        require!(!task.banned.contains(&account_id), "Banned from this task after a failed job");
 
         let worker = self.worker_mut(&account_id);
         let cost = bond.saturating_add(bid_storage);
@@ -474,6 +476,17 @@ impl Contract {
         self.tasks.get(&task_id).map(|t| TaskView { task: t.clone(), available: t.available() })
     }
 
+    /// Newest first.
+    pub fn list_tasks(&self, limit: u32, before_id: Option<u64>) -> Vec<TaskView> {
+        let below = before_id.unwrap_or(self.next_task_id).min(self.next_task_id);
+        (1..below)
+            .rev()
+            .take(limit.min(MAX_PAGE) as usize)
+            .filter_map(|id| self.tasks.get(&id))
+            .map(|t| TaskView { task: t.clone(), available: t.available() })
+            .collect()
+    }
+
     pub fn get_job(&self, job_id: u64) -> Option<JobView> {
         let now = env::block_timestamp();
         self.jobs.get(&job_id).map(|j| JobView { job: j.clone(), phase: j.phase(now) })
@@ -590,6 +603,9 @@ impl Contract {
         task.active_jobs -= 1;
         if bond_slashed {
             task.budget = task.budget.saturating_add(bond);
+            if !task.banned.contains(&winner) {
+                task.banned.push(winner.clone());
+            }
         }
         // The receipt the web app and the contractor's report read.
         emit(
