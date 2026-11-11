@@ -729,6 +729,34 @@ fn a_lost_dispute_keeps_reputation_at_the_floor() {
 }
 
 #[test]
+#[should_panic(expected = "Banned from this task after a failed job")]
+fn a_worker_who_lost_a_dispute_cannot_bid_on_the_task_again() {
+    let mut c = new_contract();
+    add_worker(&mut c, "cheater");
+    let task = add_task(&mut c);
+    let job = delivered(&mut c, task, "cheater", milli(200));
+    disputed(&mut c, job);
+    rule(&mut c, Answer::No);
+    let retry = open(&mut c, task, near(2));
+    commit(&mut c, retry, "cheater", milli(200));
+}
+
+#[test]
+fn a_banned_worker_can_still_bid_on_other_tasks() {
+    let mut c = new_contract();
+    add_worker(&mut c, "cheater");
+    let task = add_task(&mut c);
+    let job = delivered(&mut c, task, "cheater", milli(200));
+    disputed(&mut c, job);
+    rule(&mut c, Answer::No);
+    let other = add_task(&mut c);
+    let job = open(&mut c, other, near(2));
+    commit(&mut c, job, "cheater", milli(200));
+    assert_eq!(job_of(&c, job).bids.len(), 1);
+    assert_eq!(c.list_tasks(10, None).iter().map(|t| t.task.id).collect::<Vec<_>>(), vec![other, task]);
+}
+
+#[test]
 #[should_panic(expected = "Only the owner can do this")]
 fn only_the_owner_sets_jury_timings() {
     let mut c = new_contract();

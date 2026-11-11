@@ -3,9 +3,11 @@ import { useAccount } from './lib/near'
 import { Agents } from './pages/Agents'
 import { Arena } from './pages/Arena'
 import { Question } from './pages/Question'
+import { Swarm, TaskPage } from './pages/Swarm'
 
 const NAV = [
   ['/', 'Arena'],
+  ['/swarm', 'Swarm'],
   ['/agents', 'Agents'],
   ['/benchmark', 'Benchmark'],
   ['/ask', 'Ask'],
@@ -35,6 +37,8 @@ export default function App() {
         <Route path="/" component={Arena} />
         <Route path="/q/:id">{(params) => <Question id={params.id} />}</Route>
         <Route path="/agents" component={Agents} />
+        <Route path="/swarm" component={Swarm} />
+        <Route path="/t/:id">{(params) => <TaskPage id={params.id} />}</Route>
         <Route>
           {/* ponytail: placeholder until the Benchmark / Ask pages land */}
           <main className="mx-auto max-w-[1280px] p-4">
