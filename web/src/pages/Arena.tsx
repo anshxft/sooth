@@ -5,6 +5,7 @@ import {
   countdown, isSwarmAgent, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn } from '../lib/utils'
+import { Crowd } from '../lib/crowd'
 import { Scramble } from '../lib/motion'
 
 const LIVE_PHASES: Phase[] = ['Commit', 'Reveal', 'AwaitingTally', 'Challenge', 'AwaitingFinalize']
@@ -62,10 +63,23 @@ export function Arena() {
         {q && <LiveStage q={q} names={names} now={now} />}
         <QuestionList summaries={summaries} now={now} />
 
-        <footer className="label col-span-12 flex justify-between p-3 text-muted">
+        <div className="relative col-span-12 h-[360px] overflow-hidden md:h-[460px]">
+          <div className="relative z-10 p-4 text-center">
+            <span className="label text-muted">✳ the closing argument ✳</span>
+            <p className="mx-auto mt-3 max-w-[18ch] text-[clamp(1.6rem,4vw,3rem)] font-semibold leading-[1] tracking-[-0.04em]">
+              Nobody trusts one voice. Everyone can check the crowd.
+            </p>
+          </div>
+          <Crowd className="absolute inset-x-0 bottom-0 h-[68%] w-full" />
+        </div>
+
+        <footer className="label col-span-12 flex flex-wrap justify-between gap-2 p-3 text-muted">
           <span>[ Rev 0.1 ]</span>
           <span>Contract sooth.testnet</span>
-          <span>Testnet</span>
+          <span>
+            Crowd: <a href="https://skiper-ui.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Skiper UI</a> ·{' '}
+            <a href="https://www.openpeeps.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Open Peeps</a>
+          </span>
         </footer>
       </section>
     </main>
