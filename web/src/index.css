@@ -120,6 +120,9 @@ body {
   animation: breathe 1.2s ease-in-out infinite;
 }
 .log-line { animation: log-in 220ms var(--ease-out) both; }
+/* A running timer's clock turns slowly, so a live deadline reads as live. */
+@keyframes turn { to { transform: rotate(360deg); } }
+.timer-hand { animation: turn 4s linear infinite; }
 /* Bars that fill: the value lives in a scaleX transform, never in width. */
 .fill { transform-origin: left; transition: transform 300ms var(--ease-out); }
 .wipe { animation: wipe 600ms var(--ease-out) both; }
@@ -144,6 +147,7 @@ body {
   .log-line,
   .letters > span { animation-name: fade; }
   .sealed,
+  .timer-hand,
   .live-dot::before,
   .wipe { animation: none; }
   .fill,
