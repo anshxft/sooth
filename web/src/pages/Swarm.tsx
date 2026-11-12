@@ -4,6 +4,7 @@ import { countdown, toNear, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
+import { Timer, elapsed } from '../lib/timer'
 
 const POLL_MS = 5_000
 const STEPS = ['Sealed bids', 'Reveal', 'Deliver', 'Review', 'Settled'] as const
@@ -267,7 +268,10 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
       {result && (
         <div className={cn('stamp mt-3 flex flex-wrap justify-between gap-2 border border-ink p-3', result.isBad ? 'bg-red/10' : 'bg-green/40')}>
           <span className="font-semibold">Receipt · {result.text}</span>
-          <span className="font-mono text-sm">paid {toNear(paidOut(j).toString())} Ⓝ{j.price ? ` of ${toNear(j.price, 2)} Ⓝ` : ''}</span>
+          <span className="flex items-center gap-3 font-mono text-sm">
+            paid {toNear(paidOut(j).toString())} Ⓝ{j.price ? ` of ${toNear(j.price, 2)} Ⓝ` : ''}
+            {j.closed_at && <Timer time={elapsed(j.created_at, j.closed_at)} label="Opened to settled" caption="settled in" className="bg-canvas" />}
+          </span>
         </div>
       )}
     </section>

@@ -6,6 +6,7 @@ import {
 } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
+import { Timer, elapsed } from '../lib/timer'
 
 const RESOLVED_BY = { auto: 'Auto-resolved', round2: 'Resolved in round 2', dao: 'Resolved by DAO' } as const
 const RESULT = { correct: '✓ correct', wrong: '✗ wrong · slashed', no_reveal: '✗ no reveal', challenge_won: '✓ challenge won', challenge_lost: '✗ challenge lost' } as const
@@ -77,7 +78,10 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
       <div className={cn(box, 'stamp bg-green!')}>
         <span className="label">Verdict · {RESOLVED_BY[o.resolved_by]}</span>
         <span className="font-display text-[clamp(4rem,10vw,7rem)] leading-none">{o.answer}</span>
-        <span className="label">Share {pct(o.share_bps)} · avg conf {pct(o.avg_conf_bps)}</span>
+        <span className="flex flex-wrap items-center justify-between gap-2">
+          <span className="label">Share {pct(o.share_bps)} · avg conf {pct(o.avg_conf_bps)}</span>
+          {q.finalized_at && <Timer time={elapsed(q.created_at, q.finalized_at)} label="Asked to settled" caption="settled in" className="bg-canvas" />}
+        </span>
       </div>
     )
   }

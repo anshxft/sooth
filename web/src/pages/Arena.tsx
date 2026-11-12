@@ -6,6 +6,7 @@ import {
 } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Crowd } from '../lib/crowd'
+import { Countdown } from '../lib/timer'
 import { Scramble } from '../lib/motion'
 
 const LIVE_PHASES: Phase[] = ['Commit', 'Reveal', 'AwaitingTally', 'Challenge', 'AwaitingFinalize']
@@ -91,7 +92,10 @@ function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
   const lead = leader(q)
   return (
     <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
-      <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{q.phase} · {countdown(q.phase_ends_at, now) || `round ${q.round}`}</span>
+      <span className="flex items-center justify-between gap-2">
+        <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{q.phase} · round {q.round}</span>
+        <Countdown endsAt={q.phase_ends_at} now={now} className="bg-canvas" />
+      </span>
       <Scramble text={q.text} className="font-semibold leading-tight" />
       <span>
         <span className="label flex justify-between"><span>{lead.answer} {pct(lead.bps)}</span><span>auto 80</span></span>
@@ -196,7 +200,7 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
                   {s.outcome ? `${s.outcome.answer} · ${s.outcome.resolved_by} · ${pct(s.outcome.share_bps)}` : `${s.phase} · r${s.round}`}
                 </span>
               </td>
-              <td className="text-right font-mono">{countdown(s.phase_ends_at, now) || '—'}</td>
+              <td className="text-right font-mono">{countdown(s.phase_ends_at, now) ? <Countdown endsAt={s.phase_ends_at} now={now} /> : '—'}</td>
             </tr>
           ))}
         </tbody>
