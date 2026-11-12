@@ -1,9 +1,9 @@
 // Bottom navigation dock: icons swell as the pointer nears them (springs), the current page wears a dot.
 // Magnification after Cult UI's Dock (MIT, cult-ui.com/docs/components/dock); rebuilt as links for this app.
 import { type MotionValue, motion, useMotionValue, useSpring, useTransform } from 'motion/react'
-import { type ReactNode, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { type Theme, currentTheme, switchTheme } from './theme'
+import { type Theme, currentTheme, prepareInk, switchTheme } from './theme'
 import { cn } from './utils'
 
 const SIZE = 44 // resting icon size, px
@@ -38,7 +38,6 @@ const PAGES = [
 export function Dock() {
   const mouseX = useMotionValue(Infinity)
   const [location] = useLocation()
-  const [theme, setTheme] = useState<Theme>(currentTheme)
   const isActive = (href: string) => (href === '/' ? location === '/' || location.startsWith('/q/') : location.startsWith(href) || (href === '/swarm' && location.startsWith('/t/')))
 
   return (
@@ -60,25 +59,30 @@ export function Dock() {
         <Item mouseX={mouseX} label="Contract on explorer" className="hidden sm:flex">
           {(cls) => <a href={EXPLORER} target="_blank" rel="noopener noreferrer" aria-label="Contract on explorer" className={cls}>{ICONS.explorer}</a>}
         </Item>
-        <Item mouseX={mouseX} label={theme === 'dark' ? 'Light theme' : 'Dark theme'}>
-          {(cls) => (
-            <button
-              type="button"
-              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-              className={cls}
-              onClick={(e) => {
-                const next = theme === 'dark' ? 'light' : 'dark'
-                // detail 0 = keyboard click: spread from the screen centre instead of the pointer.
-                void switchTheme(next, e.detail === 0 ? undefined : { x: e.clientX, y: e.clientY })
-                setTheme(next)
-              }}
-            >
-              {theme === 'dark' ? ICONS.sun : ICONS.moon}
-            </button>
-          )}
-        </Item>
       </motion.div>
     </nav>
+  )
+}
+
+/** Light / dark switch, top right as in the reference: the ink wash starts from this button. */
+export function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(currentTheme)
+  const button = useRef<HTMLButtonElement>(null)
+  useEffect(() => prepareInk(button.current), [])
+  return (
+    <button
+      ref={button}
+      type="button"
+      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors duration-150 hover:border-ink"
+      onClick={() => {
+        const next = theme === 'dark' ? 'light' : 'dark'
+        switchTheme(next, button.current)
+        setTheme(next)
+      }}
+    >
+      <span className="flex size-8 items-center justify-center">{theme === 'dark' ? ICONS.sun : ICONS.moon}</span>
+    </button>
   )
 }
 
