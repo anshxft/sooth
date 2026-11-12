@@ -3,6 +3,7 @@ import { Dock, ThemeToggle } from './lib/dock'
 import { Backdrop } from './lib/motion'
 import { useAccount } from './lib/near'
 import { Agents } from './pages/Agents'
+import { Ask } from './pages/Ask'
 import { Arena } from './pages/Arena'
 import { Benchmark } from './pages/Benchmark'
 import { Question } from './pages/Question'
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/agents" component={Agents} />
           <Route path="/swarm" component={Swarm} />
           <Route path="/t/:id">{(params) => <TaskPage id={params.id} />}</Route>
+          <Route path="/ask" component={Ask} />
           <Route path="/benchmark" component={Benchmark} />
           <Route>
             <main className="mx-auto max-w-[1440px] p-4">
