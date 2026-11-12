@@ -16,6 +16,7 @@ const REVIEW_FALSE_ALARM: f64 = 0.03; // contractor disputes good work by mistak
 const JURY_CORRECT: f64 = 0.92;
 const FLAKY_MISS: f64 = 0.3;
 const YOCTO: f64 = 1e24;
+const CHART_EVERY: usize = 10; // jobs between points in web/src/data/market.json
 
 #[derive(Clone, Copy, PartialEq)]
 enum Strategy {
@@ -74,6 +75,7 @@ fn main() {
     let mut rng = Rng(0x5007_4b1d);
     let (mut delivered, mut spent) = (0u32, 0.0f64);
     let mut csv = String::from("job,seller,pnl_near,rep_bps\n");
+    let mut points: Vec<String> = Vec::new();
 
     for job in 0..JOBS {
         let buyer = job % BUYERS;
@@ -106,10 +108,21 @@ fn main() {
         for s in &sellers {
             writeln!(csv, "{job},{},{:.3},{}", s.name, s.pnl, rep_bps(s.jobs, s.successful)).unwrap();
         }
+        if (job + 1) % CHART_EVERY == 0 || job == 0 {
+            let pnl: Vec<String> = sellers.iter().map(|s| format!("{:.2}", s.pnl)).collect();
+            points.push(format!("{{\"job\":{},\"pnl\":[{}]}}", job + 1, pnl.join(",")));
+        }
     }
 
     std::fs::create_dir_all("../../sim").unwrap();
     std::fs::write("../../sim/market.csv", csv).unwrap();
+    // Sampled copy for the web app's /benchmark chart.
+    let rows: Vec<String> = sellers
+        .iter()
+        .map(|s| format!("{{\"name\":\"{}\",\"price\":{},\"jobs\":{},\"rep\":{},\"pnl\":{:.2}}}", s.name, s.price, s.jobs, f64::from(rep_bps(s.jobs, s.successful)) / 1e4, s.pnl))
+        .collect();
+    let json = format!("{{\"jobs\":{JOBS},\"buyers\":{BUYERS},\"sellers\":[{}],\"points\":[{}]}}", rows.join(","), points.join(","));
+    std::fs::write("../../web/src/data/market.json", json).unwrap();
     println!("{JOBS} jobs, {BUYERS} buyers. Real work delivered on {delivered} jobs; buyers spent {spent:.2} NEAR.\n");
     println!("{:<16} {:>6} {:>5} {:>6} {:>10}", "seller", "price", "jobs", "rep", "pnl NEAR");
     for s in &sellers {

@@ -21,7 +21,13 @@ const RESULT: Record<NonNullable<Job['result']>, { text: string; isBad: boolean 
 }
 
 const short = (id: string) => id.split('.')[0]
-const title = (markdown: string) => markdown.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '').slice(0, 120) ?? ''
+const TITLE_MAX = 90
+/** First line of a document, cut to its first sentence and to a word boundary. */
+function title(markdown: string): string {
+  const line = markdown.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '') ?? ''
+  const sentence = line.split(/(?<=[.!?])\s/)[0]
+  return sentence.length <= TITLE_MAX ? sentence : `${sentence.slice(0, TITLE_MAX).replace(/\s+\S*$/, '')}…`
+}
 
 export function Swarm() {
   const tasks = usePoll(() => swarmView<Task[]>('list_tasks', { limit: 20 }), 'tasks', POLL_MS)
@@ -45,9 +51,9 @@ export function Swarm() {
         </a>
       </div>
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
-      <Stat label="Jobs" value={String(all.length)} />
-      <Stat label="Paid to workers" value={toNear(paid.toString())} unit="Ⓝ" />
-      <Stat label="Bonds slashed" value={toNear(slashed.toString())} unit="Ⓝ" isRed={slashed > 0n} />
+      <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
+      <Stat label="Paid to workers" value={jobs.data ? toNear(paid.toString()) : '—'} unit="Ⓝ" />
+      <Stat label="Bonds slashed" value={workers.data ? toNear(slashed.toString()) : '—'} unit="Ⓝ" isRed={slashed > 0n} />
 
       <div className="col-span-12 p-4 md:col-span-7">
         <span className="label text-muted">Tasks</span>

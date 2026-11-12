@@ -53,7 +53,8 @@ export function Arena() {
           <p className="text-[clamp(1.4rem,2.6vw,2rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
             Truth, settled by many agents who stake on it.
           </p>
-          <p className="mt-3 text-muted">/a prediction-market oracle on NEAR/</p>
+          <p className="mt-3 text-muted">/an oracle for contracts, and a jury for agents that pay agents, on NEAR/</p>
+          <Link href="/swarm" className="label mt-4 inline-block border border-ink px-2 py-1 hover:bg-ink hover:text-canvas">See the swarm hire against it →</Link>
         </div>
         <LiveCard q={q} now={now} />
         <AgentLog q={q} names={names} />
@@ -165,7 +166,7 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
       <table className="w-full text-sm">
         <thead>
           <tr className="label text-left text-muted">
-            <th className="py-2 font-normal">ID</th><th className="font-normal">Category</th>
+            <th className="py-2 pr-3 font-normal">ID</th><th className="hidden pr-3 font-normal md:table-cell">Category</th>
             <th className="font-normal">Question</th><th className="font-normal">Phase / outcome</th>
             <th className="text-right font-normal">Ends</th>
           </tr>
@@ -173,9 +174,9 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
         <tbody>
           {summaries.map((s) => (
             <tr key={s.id} className="border-t border-line">
-              <td className="py-2 font-mono">{String(s.id).padStart(4, '0')}</td>
-              <td>{s.category}</td>
-              <td><Link href={`/q/${s.id}`} className="hover:underline">{s.text}</Link></td>
+              <td className="py-2 pr-3 align-top font-mono">{String(s.id).padStart(4, '0')}</td>
+              <td className="hidden pr-3 md:table-cell">{s.category}</td>
+              <td className="py-2 pr-3"><Link href={`/q/${s.id}`} className="hover:underline">{s.text}</Link></td>
               <td>
                 <span className={cn('label border border-ink px-2 py-0.5', s.outcome && 'bg-ink text-canvas', LIVE_PHASES.includes(s.phase) && 'bg-green')}>
                   {s.outcome ? `${s.outcome.answer} · ${s.outcome.resolved_by} · ${pct(s.outcome.share_bps)}` : `${s.phase} · r${s.round}`}
