@@ -1,7 +1,7 @@
 // Light / dark theme on <html data-theme>. index.html sets it before first paint from the same key.
 //
 // The switch: an ink drop lands on the theme button, swells into a torn blot and floods the page,
-// wisps running ahead of its edge, the last of the old theme breaking into streaks (~0.85 s).
+// its edge marbled into curling streaks like ink spreading in liquid, wisps running ahead (~1 s).
 // To keep it smooth, every frame of the ink mask is drawn ahead of time (idle time after load and
 // after each switch) into one sprite; the switch only steps the view-transition mask through it,
 // which costs the browser almost nothing per frame.
@@ -9,16 +9,18 @@ export type Theme = 'light' | 'dark'
 
 const KEY = 'sooth-theme'
 const W = 480 // mask resolution; stretched to the viewport (ink edges are soft anyway)
-const FRAMES = 30
-const COLS = 6 // frames sit in a 6 x 5 grid: a tall single strip would pass the GPU's texture limit on phones
+const FRAMES = 45 // ~45 fps over the wash
+const COLS = 9 // frames sit in a 9 x 5 grid: a tall single strip would pass the GPU's texture limit on phones
 const ROWS = Math.ceil(FRAMES / COLS)
-const DURATION_MS = 950
+const DURATION_MS = 1000
 const WARP_PX = 150 // how far the big swirl bends the blot into irregular lobes
 const TEAR = 0.09 // fine raggedness of the edge
 const VEIN = 0.14 // how far wisps reach ahead of the main front (share of the page diagonal)
 const EDGE = 90 // edge sharpness: alpha ramps over 1/EDGE of the diagonal
 const WISP_EDGE = 30 // wisp edges, a little softer than the body
 const WISP_ALPHA = 0.75 // and a little translucent, like ink thinning in water
+const MARBLE = 0.32 // width of the marbled band where ink and page streak into each other
+const MARBLE_WARP_PX = 70 // how hard the flow drags those streaks (domain warping)
 
 export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
 
@@ -37,7 +39,7 @@ const smooth = (t: number) => t * t * (3 - 2 * t)
 function ease(t: number): number {
   if (t < 0.12) return 0.06 * (t / 0.12) ** 1.5
   if (t < 0.7) return 0.06 + 0.84 * smooth((t - 0.12) / 0.58)
-  return 0.9 + 0.32 * (1 - (1 - (t - 0.7) / 0.3) ** 2)
+  return 0.9 + 0.45 * (1 - (1 - (t - 0.7) / 0.3) ** 2)
 }
 
 /** RGB noise drawn by the browser's SVG turbulence into a canvas; alpha forced to 1. */
@@ -65,6 +67,8 @@ async function build(ox: number, oy: number): Promise<Wash> {
   const swirl = await noise(W, h, 'fractalNoise', '0.007', 5, seed) // lobes at every scale
   const veins = await noise(W, h, 'turbulence', '0.02', 3, seed + 7) // ridges, read in polar space below
   const tear = await noise(W, h, 'fractalNoise', '0.05', 4, seed + 13) // ragged edge
+  const flow = await noise(W, h, 'fractalNoise', '0.009', 3, seed + 21) // where the liquid pushes
+  const streak = await noise(W, h, 'turbulence', '0.022 0.012', 4, seed + 29) // thin ridges it drags
   const reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, h - cy))
 
   // Two arrival maps (0 = at once, ~1 = last). body: distance from the drop through swirled
@@ -83,8 +87,13 @@ async function build(ox: number, oy: number): Promise<Wash> {
       const across = Math.floor(((Math.atan2(wy - cy, wx - cx) / (2 * Math.PI) + 1) % 1) * W * 2) % W
       const along = Math.min(h - 1, Math.floor(d * h * 0.12))
       const ridge = (1 - veins[(along * W + across) * 4] / 255) ** 6 // turbulence dips to 0 along thin ridges
-      body[i] = d + TEAR * (tear[p] / 255 - 0.5)
-      wisp[i] = d - VEIN * ridge
+      // Marbling: read the ridges at a point pushed along the flow, so they stretch into the long
+      // curling streaks of ink spreading in liquid. Off near the drop, which starts clean.
+      const mx = Math.min(W - 1, Math.max(0, Math.round(x + (flow[p] / 255 - 0.5) * 2 * MARBLE_WARP_PX)))
+      const my = Math.min(h - 1, Math.max(0, Math.round(y + (flow[p + 1] / 255 - 0.5) * 2 * MARBLE_WARP_PX)))
+      const marble = Math.min(1, (streak[(my * W + mx) * 4] / 255) * 1.8) - 0.5
+      body[i] = d + TEAR * (tear[p] / 255 - 0.5) + MARBLE * marble * near
+      wisp[i] = body[i] - VEIN * ridge // same marbled edge, only the thin ridges reach ahead
     }
   }
 
