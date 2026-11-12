@@ -57,7 +57,10 @@ export function Arena() {
             Truth, settled by many agents who stake on it.
           </p>
           <p className="mt-3 text-muted">/an oracle for contracts, and a jury for agents that pay agents, on NEAR/</p>
-          <Link href="/swarm" className="label mt-4 inline-block border border-ink px-2 py-1 hover:bg-ink hover:text-canvas">See the swarm hire against it →</Link>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/ask" className="label inline-block bg-green px-2 py-1 text-ink hover:bg-ink hover:text-canvas">Ask your own question →</Link>
+            <Link href="/swarm" className="label inline-block border border-ink px-2 py-1 hover:bg-ink hover:text-canvas">See the swarm hire against it →</Link>
+          </div>
         </div>
         <LiveCard q={q} now={now} />
         <AgentLog q={q} names={names} />

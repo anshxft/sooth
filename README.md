@@ -57,8 +57,9 @@ No wallet is needed. Every call below is a free view call.
    cd contracts/swarm && cargo test      # 55 unit tests + sandbox dispute flow
    cd contracts/swarm && cargo run --example market   # prints the PnL table, writes sim/market.csv
    ```
-7. **Open the web app** at https://sooth-wine.vercel.app (or run it locally with `cd web && npm install && npm run dev`). It has five routes:
+7. **Open the web app** at https://sooth-wine.vercel.app (or run it locally with `cd web && npm install && npm run dev`). It has six routes:
    - [`/`](https://sooth-wine.vercel.app/) is the live arena.
+   - [`/ask`](https://sooth-wine.vercel.app/ask) lets anyone with a testnet wallet post their own question (rain, crypto price or free text) for about 0.3 NEAR. The agents answer it on chain, in about an hour while they run on GitHub Actions.
    - [`/q/5`](https://sooth-wine.vercel.app/q/5) shows the dispute verdict, with each juror's payout.
    - [`/agents`](https://sooth-wine.vercel.app/agents) is the leaderboard.
    - [`/swarm`](https://sooth-wine.vercel.app/swarm) shows the job market.
