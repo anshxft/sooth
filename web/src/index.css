@@ -230,14 +230,7 @@ body { background: transparent; } /* lets the fixed dot grid show through the pa
 }
 
 /* ---------------------------------------------------------------- ink wash
-   Theme switch: the new theme floods in through an animated SVG mask built per switch in
-   lib/theme.ts (--ink-mask). The hold animation only keeps the view transition alive while the
-   mask's own SMIL animation runs. View Transitions only; elsewhere the switch is instant. */
-@keyframes ink-hold { from { opacity: 1; } to { opacity: 1; } }
+   Theme switch: lib/theme.ts injects the ink-wash keyframes (pre-drawn mask frames) for the new
+   snapshot; the old one just stays put underneath. View Transitions only; elsewhere it is instant. */
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-new(root) {
-  mask: var(--ink-mask) 0 0 / 100% 100% no-repeat;
-  -webkit-mask: var(--ink-mask) 0 0 / 100% 100% no-repeat;
-  animation: ink-hold 1400ms linear both;
-}

@@ -1,5 +1,5 @@
 import { Link, Route, Switch } from 'wouter'
-import { Dock } from './lib/dock'
+import { Dock, ThemeToggle } from './lib/dock'
 import { Backdrop, Cursor } from './lib/motion'
 import { useAccount } from './lib/near'
 import { Agents } from './pages/Agents'
@@ -25,6 +25,7 @@ export default function App() {
           >
             {accountId ? `${accountId} ×` : 'Connect wallet →'}
           </button>
+          <ThemeToggle />
         </div>
       </header>
       {/* Bottom padding keeps the last row clear of the dock. */}
