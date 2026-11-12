@@ -126,6 +126,11 @@ body {
 /* The hero wordmark, letter by letter (wrap letters in spans with --i). */
 .letters > span { display: inline-block; animation: letter 520ms var(--ease-out) both; animation-delay: calc(var(--i) * 45ms + 120ms); }
 
+/* A card that opens in place: the row track grows from 0fr to 1fr, so height animates without
+   measuring it (the accordion case, where no transform can stand in for height). */
+.expand { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 260ms var(--ease-out), opacity 200ms ease; }
+.expand[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+
 @media (hover: hover) and (pointer: fine) {
   tbody tr { transition: background-color 150ms ease; }
   tbody tr:hover { background-color: rgb(17 17 17 / 0.04); }
@@ -141,7 +146,8 @@ body {
   .sealed,
   .live-dot::before,
   .wipe { animation: none; }
-  .fill { transition: none; }
+  .fill,
+  .expand { transition: none; }
 }
 
 /* ---------------------------------------------------------------- ambient

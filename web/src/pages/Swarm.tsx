@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactNode, useState } from 'react'
 import { Link } from 'wouter'
 import { countdown, toNear, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
@@ -36,6 +36,7 @@ export function Swarm() {
   const all = jobs.data ?? []
   const paid = all.reduce((s, j) => s + paidOut(j), 0n)
   const slashed = (workers.data ?? []).reduce((s, w) => s + BigInt(w.stats.slashed), 0n)
+  const [open, setOpen] = useState<string | null>(null)
 
   return (
     <Shell label="swarm-title" error={tasks.error ?? jobs.error}>
@@ -64,28 +65,83 @@ export function Swarm() {
         </ul>
       </div>
       <div className="col-span-12 p-4 md:col-span-5">
-        <span className="label text-muted">Workers</span>
-        <table className="mt-2 w-full text-sm">
-          <thead>
-            <tr className="label text-left text-muted">
-              <th className="py-2 font-normal">Worker</th><th className="text-right font-normal">Rep</th>
-              <th className="text-right font-normal">Jobs</th><th className="text-right font-normal">Earned</th><th className="text-right font-normal">Slashed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {workers.data?.map((w) => (
-              <tr key={w.account_id} className="border-t border-line">
-                <td className="py-2 font-semibold">{w.name}</td>
-                <td className="text-right font-mono">{(w.rep_bps / 10_000).toFixed(2)}×</td>
-                <td className="text-right font-mono">{w.stats.successful}✓ {w.stats.failed}✗</td>
-                <td className="text-right font-mono">{toNear(w.stats.earned)}</td>
-                <td className={cn('text-right font-mono', w.stats.slashed !== '0' && 'text-red')}>{toNear(w.stats.slashed)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <span className="label text-muted">Workers · open one to see its jobs</span>
+        {!workers.data && <p className="label mt-3 text-muted">Loading workers…</p>}
+        <ul className="mt-2 grid gap-2">
+          {workers.data?.map((w) => (
+            <WorkerCard
+              key={w.account_id} worker={w} jobs={all} tasks={tasks.data ?? []}
+              isOpen={open === w.account_id} onToggle={() => setOpen((o) => (o === w.account_id ? null : w.account_id))}
+            />
+          ))}
+        </ul>
       </div>
     </Shell>
+  )
+}
+
+type WorkerCardProps = { worker: Worker; jobs: Job[]; tasks: Task[]; isOpen: boolean; onToggle: () => void }
+
+function WorkerCard({ worker: w, jobs, tasks, isOpen, onToggle }: WorkerCardProps) {
+  const net = BigInt(w.stats.earned) - BigInt(w.stats.slashed)
+  const bids = jobs.filter((j) => j.bids.some((b) => b.account_id === w.account_id)).sort((a, b) => b.id - a.id)
+  const bannedFrom = tasks.filter((t) => t.banned.includes(w.account_id))
+  const panelId = `worker-${w.name}`
+  return (
+    <li className={cn('border border-ink transition-colors duration-200', isOpen ? 'bg-canvas' : 'bg-canvas hover:bg-ink/5', net < 0n && 'border-red')}>
+      <button type="button" onClick={onToggle} aria-expanded={isOpen} aria-controls={panelId} className="flex w-full items-center gap-3 p-3 text-left">
+        <span className="font-display text-xl">{w.name}</span>
+        <span className="label text-muted">{(w.rep_bps / 10_000).toFixed(2)}× rep</span>
+        <span className={cn('ml-auto font-mono text-sm font-semibold', net < 0n && 'text-red')}>{net > 0n ? '+' : ''}{toNear(net.toString())} Ⓝ</span>
+        <span aria-hidden="true" className={cn('font-mono transition-transform duration-200', isOpen && 'rotate-45')}>+</span>
+      </button>
+      <div id={panelId} className="expand" data-open={isOpen} inert={!isOpen}>
+        <div className="overflow-hidden">
+          <div className="border-t border-line p-3">
+            <p className="label text-muted">{w.account_id}</p>
+            <dl className="mt-2 grid grid-cols-3 gap-2 font-mono text-sm">
+              <Fact label="Locked" value={toNear(w.locked_balance, 2)} />
+              <Fact label="Won" value={`${w.stats.successful}✓ ${w.stats.failed}✗`} />
+              <Fact label="No reveal" value={String(w.stats.no_reveal)} />
+              <Fact label="Earned" value={toNear(w.stats.earned)} />
+              <Fact label="Slashed" value={toNear(w.stats.slashed)} isRed={w.stats.slashed !== '0'} />
+              <Fact label="Free" value={toNear(w.free_balance, 2)} />
+            </dl>
+            {bannedFrom.length > 0 && <p className="label mt-3 text-red">Banned from {bannedFrom.map((t) => `T-${String(t.id).padStart(3, '0')}`).join(', ')} after a failed job</p>}
+            <span className="label mt-3 block text-muted">Bids</span>
+            {bids.length === 0 && <p className="mt-1 text-sm text-muted">No bids yet.</p>}
+            <ul className="mt-1 text-sm">
+              {bids.map((j) => <BidLine key={j.id} job={j} account={w.account_id} />)}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </li>
+  )
+}
+
+function BidLine({ job: j, account }: { job: Job; account: string }) {
+  const bid = j.bids.find((b) => b.account_id === account)
+  const isWinner = j.winner === account
+  const status = j.result ? RESULT[j.result].text : j.phase
+  const outcome = !isWinner && j.winner ? `lost to ${short(j.winner)}` : status
+  const isBad = isWinner && j.result !== null && RESULT[j.result].isBad
+  return (
+    <li className="flex flex-wrap justify-between gap-x-3 border-t border-line py-1.5">
+      <Link href={`/t/${j.task_id}`} className="hover:underline">{isWinner ? '★ ' : ''}Job {j.id}</Link>
+      {bid?.price && <span className="font-mono">{toNear(bid.price, 2)} Ⓝ</span>}
+      {!bid?.price && (STEP_OF[j.phase] < 2 ? <span className="sealed font-mono">sealed</span> : <span className="label text-red">✗ no reveal · bond slashed</span>)}
+      <span className={cn('label w-full', isBad ? 'text-red' : 'text-muted')}>{outcome}</span>
+    </li>
+  )
+}
+
+function Fact({ label, value, isRed = false }: { label: string; value: string; isRed?: boolean }) {
+  return (
+    <div>
+      <dt className="label text-muted">{label}</dt>
+      <dd className={cn(isRed && 'text-red')}>{value}</dd>
+    </div>
   )
 }
 
