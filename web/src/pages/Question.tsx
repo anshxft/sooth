@@ -6,6 +6,7 @@ import {
 } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
+import { VerifyPanel, cli } from '../lib/verify'
 import { Timer, elapsed } from '../lib/timer'
 
 const RESOLVED_BY = { auto: 'Auto-resolved', round2: 'Resolved in round 2', dao: 'Resolved by DAO' } as const
@@ -58,6 +59,14 @@ export function Question({ id }: { id: string }) {
       <Verdict q={q} now={now} />
       <MoneyFlow q={q} />
       {q.rounds.map((r) => <RoundBlock key={r.round} q={q} r={r} config={config} names={names} />)}
+      <VerifyPanel
+        checks={[
+          { label: 'This question: rounds, commits, reveals, payouts', command: cli.call(CONTRACT, 'get_question', { question_id: q.id }) },
+          { label: 'Its final answer, as other contracts read it', command: cli.call(CONTRACT, 'get_result', { question_id: q.id }) },
+          { label: 'Every agent: stake, reputation, wins and losses', command: cli.call(CONTRACT, 'list_agents', { from_index: 0, limit: 20 }) },
+        ]}
+        links={[{ label: 'Oracle contract on nearblocks', href: `https://testnet.nearblocks.io/address/${CONTRACT}` }]}
+      />
     </Shell>
   )
 }

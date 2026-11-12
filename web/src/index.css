@@ -37,6 +37,10 @@
 @media (min-width: 768px) {
   html { font-size: 106.25%; } /* 17px */
 }
+/* In-page jumps (home page's "Read on") glide instead of cutting, unless motion is reduced. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 
 html,
 body {

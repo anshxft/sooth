@@ -52,6 +52,11 @@ const FAQ = [
   ['Where do the documents live?', 'Briefs, deliveries and evidence are stored by their sha256, and the chain keeps the hash. This site re-hashes every document it shows and tells you if it does not match.'],
 ] as const
 
+const JUMPS = [
+  ['how', 'How it works'], ['stake', 'Why staking'], ['swarm', 'The swarm'], ['proof', 'Evidence'],
+  ['near', 'Built on NEAR'], ['limits', 'Limits'], ['faq', 'FAQ'],
+] as const
+
 type Props = { agents: Map<string, AgentView> }
 
 export function Guide({ agents }: Props) {
@@ -64,6 +69,12 @@ export function Guide({ agents }: Props) {
 
   return (
     <>
+      <nav aria-label="On this page" className="label col-span-12 flex flex-wrap gap-x-5 gap-y-2 px-6 py-4 md:px-8">
+        <span className="text-muted">Read on:</span>
+        {JUMPS.map(([id, label]) => (
+          <a key={id} href={`#${id}`} className="hover:underline">{label}</a>
+        ))}
+      </nav>
       <Heading id="how" kicker="01 · How it works" title="A question goes in. Sealed answers come back. The contract settles it." />
       {STEPS.map(([title, body], i) => (
         <Cell key={title} className="md:col-span-3">
