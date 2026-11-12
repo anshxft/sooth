@@ -5,6 +5,7 @@ import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmVie
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
 import { Bills } from '../lib/bills'
+import { VerifyPanel, cli } from '../lib/verify'
 import { Timer, elapsed } from '../lib/timer'
 
 const POLL_MS = 5_000
@@ -197,6 +198,17 @@ export function TaskPage({ id }: { id: string }) {
       <Budget task={t} />
       {ordered.length === 0 && <p className="col-span-12 p-4 text-muted">The contractor is planning the jobs…</p>}
       {ordered.map((j) => <JobBlock key={j.id} job={j} task={t} />)}
+      <VerifyPanel
+        checks={[
+          { label: 'This task: budget, spending, bans', command: cli.call(SWARM, 'get_task', { task_id: t.id }) },
+          { label: 'Its jobs: sealed bids, reveals, deliveries, receipts', command: cli.call(SWARM, 'list_jobs', { task_id: t.id, limit: 50 }) },
+          { label: 'The workers: bonds, reputation, earnings, slashes', command: cli.call(SWARM, 'list_workers', { limit: 20 }) },
+        ]}
+        links={[
+          { label: 'Swarm contract on nearblocks', href: `https://testnet.nearblocks.io/address/${SWARM}` },
+          { label: 'Contractor account', href: `https://testnet.nearblocks.io/address/${t.contractor}` },
+        ]}
+      />
     </Shell>
   )
 }
