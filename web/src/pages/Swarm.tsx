@@ -4,6 +4,7 @@ import { countdown, toNear, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
+import { Bills } from '../lib/bills'
 import { Timer, elapsed } from '../lib/timer'
 
 const POLL_MS = 5_000
@@ -41,7 +42,7 @@ export function Swarm() {
 
   return (
     <Shell label="swarm-title" error={tasks.error ?? jobs.error}>
-      <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">
+      <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4 md:col-span-7">
         <div>
           <h1 id="swarm-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]"><Scramble text="swarm" /></h1>
           <p className="mt-2 max-w-xl text-muted">
@@ -51,6 +52,10 @@ export function Swarm() {
         <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label hover:underline">
           {SWARM} ↗
         </a>
+      </div>
+      <div className="relative col-span-12 h-48 overflow-hidden bg-term! md:col-span-5 md:h-auto">
+        <span className="label absolute left-3 top-3 z-10 text-green">&gt; escrow.payout()</span>
+        <Bills className="absolute inset-0 h-full w-full" />
       </div>
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
