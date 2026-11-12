@@ -24,7 +24,7 @@ export function Benchmark() {
   const tricks = disputes.filter((d) => MANIPULATION.has(d.kind))
   const cheater = market.sellers.find((s) => s.name === 'cheater')
   return (
-    <main className="mx-auto max-w-[1280px] p-4">
+    <main className="mx-auto max-w-[1440px] p-4">
       <section className="blueprint grid-cols-12" aria-labelledby="bench-title">
         <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">
           <div>

@@ -305,7 +305,7 @@ function DocBody({ text, isVerified }: { text: string; isVerified: boolean }) {
 
 function Shell({ children, label, error }: { children: ReactNode; label: string; error?: string | null }) {
   return (
-    <main className="mx-auto max-w-[1280px] p-4">
+    <main className="mx-auto max-w-[1440px] p-4">
       {error && <p role="alert" className="label mb-3 text-red">Can't reach NEAR testnet. Retrying…</p>}
       <section className="blueprint grid-cols-12" aria-labelledby={label}>{children}</section>
     </main>
