@@ -21,9 +21,9 @@ export default function App() {
           <button
             type="button"
             onClick={accountId ? signOut : signIn}
-            className="label rounded-full bg-green px-4 py-2 text-ink transition-transform active:scale-[0.97]"
+            className="wallet label rounded-full bg-green px-4 py-2 text-ink transition-transform duration-150 active:scale-[0.96]"
           >
-            {accountId ? `${accountId} ×` : 'Connect wallet →'}
+            {accountId ? `${accountId} ×` : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
           </button>
           <ThemeToggle />
         </div>

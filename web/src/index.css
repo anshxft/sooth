@@ -152,7 +152,31 @@ body {
 .expand { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 260ms var(--ease-out), opacity 200ms ease; }
 .expand[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
 
+/* Theme toggle: the outgoing icon turns away and shrinks, the incoming one turns in. */
+.theme-icon { transition: transform 450ms var(--ease-out), opacity 250ms ease; }
+.theme-icon[data-on="false"] { opacity: 0; }
+.theme-icon--sun[data-on="false"] { transform: rotate(-120deg) scale(0.4); }
+.theme-icon--moon[data-on="false"] { transform: rotate(120deg) scale(0.4); }
+
+/* Connect wallet: a darker fill sweeps in from the left, the arrow leans forward. */
+.wallet { position: relative; isolation: isolate; overflow: hidden; }
+.wallet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, #111111 14%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms var(--ease-out);
+}
+.wallet-arrow { display: inline-block; transition: transform 220ms var(--ease-out); }
+
 @media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover .theme-icon--sun[data-on="true"] { transform: rotate(45deg); }
+  .theme-toggle:hover .theme-icon--moon[data-on="true"] { transform: rotate(-18deg); }
+  .wallet:hover::before { transform: scaleX(1); }
+  .wallet:hover .wallet-arrow { transform: translateX(3px); }
   tbody tr { transition: background-color 150ms ease; }
   tbody tr:hover { background-color: color-mix(in srgb, var(--color-ink) 4%, transparent); }
 }
@@ -169,7 +193,10 @@ body {
   .live-dot::before,
   .wipe { animation: none; }
   .fill,
-  .expand { transition: none; }
+  .expand,
+  .theme-icon,
+  .wallet::before,
+  .wallet-arrow { transition: none; }
 }
 
 /* ---------------------------------------------------------------- ambient
