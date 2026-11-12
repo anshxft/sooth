@@ -3,13 +3,15 @@
 // The switch: an ink drop lands on the theme button, swells into a torn blot and floods the page,
 // wisps running ahead of its edge, the last of the old theme breaking into streaks (~0.85 s).
 // To keep it smooth, every frame of the ink mask is drawn ahead of time (idle time after load and
-// after each switch) into small PNGs; the switch itself only steps a view-transition mask through
-// them, which costs the browser almost nothing per frame.
+// after each switch) into one sprite; the switch only steps the view-transition mask through it,
+// which costs the browser almost nothing per frame.
 export type Theme = 'light' | 'dark'
 
 const KEY = 'sooth-theme'
 const W = 480 // mask resolution; stretched to the viewport (ink edges are soft anyway)
 const FRAMES = 30
+const COLS = 6 // frames sit in a 6 x 5 grid: a tall single strip would pass the GPU's texture limit on phones
+const ROWS = Math.ceil(FRAMES / COLS)
 const DURATION_MS = 950
 const WARP_PX = 150 // how far the big swirl bends the blot into irregular lobes
 const TEAR = 0.09 // fine raggedness of the edge
@@ -50,7 +52,7 @@ async function noise(w: number, h: number, type: 'fractalNoise' | 'turbulence', 
   return ctx.getImageData(0, 0, w, h).data
 }
 
-type Wash = { urls: string[]; css: string; size: string }
+type Wash = { url: string; css: string; size: string }
 let ready: Wash | null = null
 let preparing = false
 
@@ -86,11 +88,12 @@ async function build(ox: number, oy: number): Promise<Wash> {
     }
   }
 
-  const canvas = new OffscreenCanvas(W, h)
-  const ctx = canvas.getContext('2d')
+  // All frames in one sprite grid: one image to load, and the animation only moves it.
+  // (Swapping a separate image per frame left the mask empty while each one loaded.)
+  const sprite = new OffscreenCanvas(W * COLS, h * ROWS)
+  const ctx = sprite.getContext('2d')
   if (!ctx) throw new Error('no 2d context')
   const frame = ctx.createImageData(W, h)
-  const urls: string[] = []
   for (let k = 0; k < FRAMES; k++) {
     const front = ease(k / (FRAMES - 1))
     for (let i = 0; i < body.length; i++) {
@@ -98,17 +101,45 @@ async function build(ox: number, oy: number): Promise<Wash> {
       const faint = Math.max(0, Math.min(1, (front - wisp[i]) * WISP_EDGE)) * WISP_ALPHA
       frame.data[i * 4 + 3] = Math.max(solid, faint) * 255
     }
-    ctx.putImageData(frame, 0, 0)
-    const url = URL.createObjectURL(await canvas.convertToBlob({ type: 'image/png' }))
-    const decoded = new Image()
-    decoded.src = url
-    await decoded.decode() // decoded now, not mid-animation
-    urls.push(url)
+    ctx.putImageData(frame, (k % COLS) * W, Math.floor(k / COLS) * h)
   }
-  const steps = urls.map((u, k) => `${((k / FRAMES) * 100).toFixed(2)}% { mask-image: url("${u}"); -webkit-mask-image: url("${u}"); }`).join('\n')
-  const css = `@keyframes ink-wash {\n${steps}\n100% { mask-image: none; -webkit-mask-image: none; }\n}
-::view-transition-new(root) { mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; animation: ink-wash ${DURATION_MS}ms linear both; }`
-  return { urls, css, size: `${innerWidth}x${innerHeight}` }
+  // A data URL, not a blob URL: the view-transition mask never painted a blob: image in time.
+  const url = await toDataUrl(await sprite.convertToBlob({ type: 'image/png' }))
+  // Keep the sprite loaded as a CSS image, so the mask is there on the transition's first frame.
+  keepLoaded(url)
+  const img = new Image()
+  img.src = url
+  await img.decode()
+  const at = (k: number) => {
+    const pos = `${((k % COLS) / (COLS - 1)) * 100}% ${(Math.floor(k / COLS) / (ROWS - 1)) * 100}%`
+    return `mask-position: ${pos}; -webkit-mask-position: ${pos};`
+  }
+  // One keyframe per frame; steps(1) makes each jump straight to its cell instead of sliding.
+  const steps = Array.from({ length: FRAMES }, (_, k) => `${((k / (FRAMES - 1)) * 100).toFixed(3)}% { ${at(k)} animation-timing-function: steps(1, end); }`).join('\n')
+  const css = `@keyframes ink-wash {\n${steps}\n}
+::view-transition-new(root) { mask-image: url("${url}"); -webkit-mask-image: url("${url}"); mask-size: ${COLS * 100}% ${ROWS * 100}%; -webkit-mask-size: ${COLS * 100}% ${ROWS * 100}%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; ${at(0)} animation: ink-wash ${DURATION_MS}ms linear both; }`
+  return { url, css, size: `${innerWidth}x${innerHeight}` }
+}
+
+const toDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+
+/** A hidden element that holds the sprite as a mask, so the browser keeps it decoded. */
+function keepLoaded(url: string) {
+  let holder = document.getElementById('ink-preload')
+  if (!holder) {
+    holder = document.createElement('div')
+    holder.id = 'ink-preload'
+    holder.setAttribute('aria-hidden', 'true')
+    holder.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.01;pointer-events:none;background:#000'
+    document.body.append(holder)
+  }
+  holder.style.maskImage = holder.style.webkitMaskImage = `url("${url}")`
 }
 
 /** Get the next wash ready in idle time, starting from the theme button. */
@@ -136,7 +167,6 @@ export function switchTheme(next: Theme, button: HTMLElement | null) {
   ready = null
   if (wash.size !== `${innerWidth}x${innerHeight}`) {
     // The window changed shape since the frames were drawn: switch now, draw for the new size.
-    for (const u of wash.urls) URL.revokeObjectURL(u)
     apply(next)
     prepareInk(button)
     return
@@ -147,7 +177,6 @@ export function switchTheme(next: Theme, button: HTMLElement | null) {
   const transition = document.startViewTransition(() => apply(next))
   transition.finished.finally(() => {
     style.remove()
-    for (const u of wash.urls) URL.revokeObjectURL(u)
     prepareInk(button) // fresh noise for the next switch
   })
 }
