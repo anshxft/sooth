@@ -229,20 +229,15 @@ body { background: transparent; } /* lets the fixed dot grid show through the pa
   .backdrop-grain { animation: none; }
 }
 
-/* ---------------------------------------------------------------- ink bleed
-   Theme switch: the new theme spreads out of the click point through an ink-blot mask
-   (public/ink.svg, feTurbulence-edged). View Transitions only; elsewhere the switch is instant. */
-@property --ink-r { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@keyframes ink-spread { to { --ink-r: 230vmax; } }
+/* ---------------------------------------------------------------- ink wash
+   Theme switch: the new theme floods in through an animated SVG mask built per switch in
+   lib/theme.ts (--ink-mask). The hold animation only keeps the view transition alive while the
+   mask's own SMIL animation runs. View Transitions only; elsewhere the switch is instant. */
+@keyframes ink-hold { from { opacity: 1; } to { opacity: 1; } }
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 ::view-transition-new(root) {
-  --ink-r: 0px;
-  mask: url("/ink.svg") no-repeat;
-  -webkit-mask: url("/ink.svg") no-repeat;
-  mask-size: calc(var(--ink-r) * 2) calc(var(--ink-r) * 2);
-  -webkit-mask-size: calc(var(--ink-r) * 2) calc(var(--ink-r) * 2);
-  mask-position: calc(var(--ink-x, 50vw) - var(--ink-r)) calc(var(--ink-y, 50vh) - var(--ink-r));
-  -webkit-mask-position: calc(var(--ink-x, 50vw) - var(--ink-r)) calc(var(--ink-y, 50vh) - var(--ink-r));
-  animation: ink-spread 1100ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  mask: var(--ink-mask) 0 0 / 100% 100% no-repeat;
+  -webkit-mask: var(--ink-mask) 0 0 / 100% 100% no-repeat;
+  animation: ink-hold 1400ms linear both;
 }
