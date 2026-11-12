@@ -74,14 +74,18 @@ export function ThemeToggle() {
       ref={button}
       type="button"
       aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-      className="flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors duration-150 hover:border-ink"
+      className="theme-toggle flex size-9 items-center justify-center rounded-full border border-line text-ink transition-[border-color,transform] duration-150 hover:border-ink active:scale-[0.92]"
       onClick={() => {
         const next = theme === 'dark' ? 'light' : 'dark'
         switchTheme(next, button.current)
         setTheme(next)
       }}
     >
-      <span className="flex size-8 items-center justify-center">{theme === 'dark' ? ICONS.sun : ICONS.moon}</span>
+      {/* Both icons stay mounted so the swap can turn one out and the other in. */}
+      <span className="grid size-8 place-items-center">
+        <span className="theme-icon theme-icon--sun col-start-1 row-start-1 flex size-8 items-center justify-center" data-on={theme === 'dark'}>{ICONS.sun}</span>
+        <span className="theme-icon theme-icon--moon col-start-1 row-start-1 flex size-8 items-center justify-center" data-on={theme === 'light'}>{ICONS.moon}</span>
+      </span>
     </button>
   )
 }
