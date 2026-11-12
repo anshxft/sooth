@@ -3,6 +3,7 @@
 // codepen.io/zadvorsky/pen/xxwbBQV. Illustrations: Open Peeps (CC0), one sprite sheet of 15 x 7 figures.
 import { gsap } from 'gsap'
 import { useEffect, useRef } from 'react'
+import { isWashing } from './theme'
 
 const SRC = '/peeps/all-peeps.png'
 const COLS = 15
@@ -35,6 +36,7 @@ export function Crowd({ className }: { className?: string }) {
     const crowd: Peep[] = []
 
     const render = () => {
+      if (isWashing()) return // hold the frame while the theme's ink wash runs over the page
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.save()
       ctx.scale(devicePixelRatio, devicePixelRatio)

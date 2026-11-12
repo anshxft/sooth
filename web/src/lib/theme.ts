@@ -8,19 +8,23 @@
 export type Theme = 'light' | 'dark'
 
 const KEY = 'sooth-theme'
-const W = 480 // mask resolution; stretched to the viewport (ink edges are soft anyway)
-const FRAMES = 45 // ~45 fps over the wash
-const COLS = 9 // frames sit in a 9 x 5 grid: a tall single strip would pass the GPU's texture limit on phones
+// Mask resolution, stretched to the viewport. Kept small on purpose: the whole sprite is decoded
+// and painted under the page for the length of the wash, and at 480 px x 45 frames that cost a
+// ~300 ms hitch at the start and dropped frames after. Ink edges are soft, so it barely shows.
+const W = 288
+const PX = W / 480 // the look below was tuned at 480 px; pixel sizes and noise scales follow W
+const FRAMES = 36 // ~36 fps over the wash
+const COLS = 6 // frames sit in a 6 x 6 grid: a tall single strip would pass the GPU's texture limit on phones
 const ROWS = Math.ceil(FRAMES / COLS)
 const DURATION_MS = 1000
-const WARP_PX = 150 // how far the big swirl bends the blot into irregular lobes
+const WARP_PX = 150 * PX // how far the big swirl bends the blot into irregular lobes
 const TEAR = 0.09 // fine raggedness of the edge
 const VEIN = 0.14 // how far wisps reach ahead of the main front (share of the page diagonal)
 const EDGE = 90 // edge sharpness: alpha ramps over 1/EDGE of the diagonal
 const WISP_EDGE = 30 // wisp edges, a little softer than the body
 const WISP_ALPHA = 0.75 // and a little translucent, like ink thinning in water
 const MARBLE = 0.32 // width of the marbled band where ink and page streak into each other
-const MARBLE_WARP_PX = 70 // how hard the flow drags those streaks (domain warping)
+const MARBLE_WARP_PX = 70 * PX // how hard the flow drags those streaks (domain warping)
 
 export const currentTheme = (): Theme => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light')
 
@@ -64,11 +68,11 @@ async function build(ox: number, oy: number): Promise<Wash> {
   const s = W / innerWidth
   const [cx, cy] = [ox * s, oy * s]
   const seed = Math.floor(Math.random() * 1000)
-  const swirl = await noise(W, h, 'fractalNoise', '0.007', 5, seed) // lobes at every scale
-  const veins = await noise(W, h, 'turbulence', '0.02', 3, seed + 7) // ridges, read in polar space below
-  const tear = await noise(W, h, 'fractalNoise', '0.05', 4, seed + 13) // ragged edge
-  const flow = await noise(W, h, 'fractalNoise', '0.009', 3, seed + 21) // where the liquid pushes
-  const streak = await noise(W, h, 'turbulence', '0.022 0.012', 4, seed + 29) // thin ridges it drags
+  const swirl = await noise(W, h, 'fractalNoise', `${0.007 / PX}`, 5, seed) // lobes at every scale
+  const veins = await noise(W, h, 'turbulence', `${0.02 / PX}`, 3, seed + 7) // ridges, read in polar space below
+  const tear = await noise(W, h, 'fractalNoise', `${0.05 / PX}`, 4, seed + 13) // ragged edge
+  const flow = await noise(W, h, 'fractalNoise', `${0.009 / PX}`, 3, seed + 21) // where the liquid pushes
+  const streak = await noise(W, h, 'turbulence', `${0.022 / PX} ${0.012 / PX}`, 4, seed + 29) // thin ridges it drags
   const reach = Math.hypot(Math.max(cx, W - cx), Math.max(cy, h - cy))
 
   // Two arrival maps (0 = at once, ~1 = last). body: distance from the drop through swirled
@@ -159,7 +163,18 @@ export function prepareInk(button: HTMLElement | null, isFresh = false) {
   const box = button.getBoundingClientRect()
   const run = () =>
     build(box.left + box.width / 2, box.top + box.height / 2)
-      .then((wash) => (ready = wash))
+      .then((wash) => {
+        ready = wash
+        // Swap the wash's CSS in now, in idle time: parsing a stylesheet that carries the whole
+        // sprite as a data URL took a few hundred ms, and doing it on click was the lag.
+        let style = document.getElementById('ink-wash-css')
+        if (!style) {
+          style = document.createElement('style')
+          style.id = 'ink-wash-css'
+          document.head.append(style)
+        }
+        style.textContent = wash.css
+      })
       .catch(() => undefined) // keep whatever wash we had; without one the switch is simply instant
       .finally(() => (preparing = false))
   if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 2000 })
@@ -167,6 +182,9 @@ export function prepareInk(button: HTMLElement | null, isFresh = false) {
 }
 
 let isRunning = false
+
+/** True while the ink wash is on screen (animations elsewhere can pause for it). */
+export const isWashing = () => isRunning
 
 /** Switch theme; the ink wash runs if one is drawn, otherwise the switch is instant. */
 export function switchTheme(next: Theme, button: HTMLElement | null) {
@@ -184,12 +202,9 @@ export function switchTheme(next: Theme, button: HTMLElement | null) {
     return
   }
   isRunning = true
-  const style = document.createElement('style')
-  style.textContent = wash.css
-  document.head.append(style)
+  // The wash CSS is already in the page (prepareInk); it only applies while a view transition runs.
   const transition = document.startViewTransition(() => apply(next))
   transition.finished.finally(() => {
-    style.remove()
     isRunning = false
     prepareInk(button, true) // fresh noise for later; this wash serves any click until then
   })
