@@ -4,6 +4,7 @@
 // buffer, and characters are picked by pattern part and lighting. Written for this app after an
 // ASCII "falling bills" clip; no code from it.
 import { useEffect, useRef } from 'react'
+import { isWashing } from './theme'
 
 const CHAR_H = 12 // px per character row; the cell width is measured from the font
 const FPS = 30
@@ -130,11 +131,7 @@ export function Bills({ count = 12, scale = 1, className }: { count?: number; sc
         }
       }
       ctx.clearRect(0, 0, w, h)
-      // Green on the dark theme, ink on the light one; read each frame so a theme switch follows.
-      const root = getComputedStyle(document.documentElement)
-      const isDark = document.documentElement.dataset.theme === 'dark'
-      const color = (isDark ? root.getPropertyValue('--color-green') : root.getPropertyValue('--color-ink')).trim() || '#7ffab7'
-      const strength = isDark ? 0.75 : 0.35 // faint enough to read the page through
+      const { color, strength } = palette
       // One string per row per brightness bucket: a few hundred fillText calls instead of thousands.
       for (let bucket = 1; bucket <= 4; bucket++) {
         ctx.fillStyle = color
@@ -154,6 +151,19 @@ export function Bills({ count = 12, scale = 1, className }: { count?: number; sc
       ctx.globalAlpha = 1
     }
 
+    // Green on the dark theme, ink on the light one. Read when the theme changes, not every frame:
+    // getComputedStyle per frame forced a style recalculation of the whole page.
+    let palette = { color: '#111111', strength: 0.35 }
+    const readPalette = () => {
+      const isDark = document.documentElement.dataset.theme === 'dark'
+      const root = getComputedStyle(document.documentElement)
+      const color = root.getPropertyValue(isDark ? '--color-green' : '--color-ink').trim()
+      palette = { color: color || '#7ffab7', strength: isDark ? 0.75 : 0.35 } // faint enough to read the page through
+    }
+    readPalette()
+    const themeWatch = new MutationObserver(readPalette)
+    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
     resize()
     let frame = 0
     let last = 0
@@ -161,7 +171,9 @@ export function Bills({ count = 12, scale = 1, className }: { count?: number; sc
     const start = performance.now()
     const loop = (now: number) => {
       frame = requestAnimationFrame(loop)
-      if (!isOnScreen || now - last < 1000 / FPS) return
+      // Hold still during the theme's ink wash: every new frame here would repaint the live new-theme
+      // layer the wash is masking, which is what made the switch stutter on this page.
+      if (!isOnScreen || isWashing() || now - last < 1000 / FPS) return
       last = now
       draw((now - start) / 1000)
     }
@@ -181,6 +193,7 @@ export function Bills({ count = 12, scale = 1, className }: { count?: number; sc
     return () => {
       cancelAnimationFrame(frame)
       visibility.disconnect()
+      themeWatch.disconnect()
       window.removeEventListener('resize', onResize)
     }
   }, [count, scale])
