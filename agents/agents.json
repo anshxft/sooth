@@ -1,6 +1,7 @@
 {
   "contract": "sooth.testnet",
   "rpc": "https://test.rpc.fastnear.com",
+  "rpc_fallbacks": ["https://near-testnet.drpc.org", "https://rpc.testnet.near.org"],
   "agents": [
     {"name":  "atlas",  "account_id":  "atlas-sooth.testnet",  "model":  "openai/gpt-oss-120b",  "behavior":  "honest",  "key_env":  "ATLAS_BOT_KEY"},
     {"name":  "nova",  "account_id":  "nova-sooth.testnet",  "model":  "openai/gpt-oss-120b",  "behavior":  "honest",  "key_env":  "NOVA_BOT_KEY"},

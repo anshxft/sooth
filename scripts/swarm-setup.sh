@@ -39,7 +39,7 @@ else
   cargo near deploy build-non-reproducible-wasm "$C" with-init-call new json-args "{\"owner\":\"$C\",\"sooth\":\"$SOOTH\"}" \
     prepaid-gas '30.0 Tgas' attached-deposit '0 NEAR' "${NET[@]}"
   # Demo juries run in minutes; real disputes would use hours.
-  call "$C" set_jury_timings '{"timings":{"commit_secs":60,"reveal_secs":60,"challenge_secs":60}}' '1 yoctoNEAR'
+  call "$C" set_jury_timings '{"timings":{"commit_secs":1200,"reveal_secs":1200,"challenge_secs":600}}' '1 yoctoNEAR'
   for name in quill ledger shade; do
     call "$name.$C" register_worker "{\"name\":\"$name\"}" '1.2 NEAR'
   done

@@ -1,11 +1,14 @@
 // Shared by the oracle runtime (run.mts) and the job-market runtime (swarm.mts).
 import { createHash } from 'node:crypto'
+import { FailoverRpcProvider, JsonRpcProvider } from 'near-api-js'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
 export type Bot = { name: string; account_id: string; model: string; key_env: string }
 export type Config = {
   contract: string
   rpc: string
+  /** Tried in order when `rpc` fails or rate-limits (FastNEAR returned 429s under load). */
+  rpc_fallbacks?: string[]
   /** Public origin of the web app, which serves the document store under /d/. */
   doc_base: string
   agents: (Bot & { behavior: 'honest' | 'liar' })[]
@@ -33,6 +36,8 @@ const DOCS = new URL('../web/public/d/', HERE)
 if (existsSync(new URL('.env', HERE))) process.loadEnvFile(new URL('.env', HERE))
 if (process.env.ENV_FILE && existsSync(process.env.ENV_FILE)) process.loadEnvFile(process.env.ENV_FILE)
 export const config = JSON.parse(readFileSync(new URL('agents.json', HERE), 'utf8')) as Config
+/** One RPC client for every read and signed call: the primary endpoint, then the fallbacks. */
+export const rpc = new FailoverRpcProvider([config.rpc, ...(config.rpc_fallbacks ?? [])].map((url) => new JsonRpcProvider({ url })))
 mkdirSync(new URL('.state/', HERE), { recursive: true })
 
 export const sha256 = (data: string) => createHash('sha256').update(data).digest('hex')

@@ -247,6 +247,8 @@ npm run bench    # dispute benchmark (needs GROQ_API_KEY)
 cd web && npm install && npm run dev
 ```
 
+To keep the agents running around the clock for free, see [`docs/agents-on-github.md`](docs/agents-on-github.md) (GitHub Actions, every ~5 minutes).
+
 To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle and `bash scripts/swarm-setup.sh` for the job market. Set the account ids in [`agents/agents.json`](agents/agents.json).
 
 ## License and credits

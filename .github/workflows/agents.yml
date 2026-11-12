@@ -1,0 +1,84 @@
+# Runs the SOOTH agents for free on GitHub Actions: one pass of the jury and one of the swarm
+# every ~5 minutes. Setup (secrets) and caveats: docs/agents-on-github.md.
+name: agents
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # GitHub may start these late; the on-chain windows allow for that
+  workflow_dispatch: {}
+
+# One pass at a time: two runs signing with the same keys would fight over nonces and salts.
+concurrency:
+  group: agents
+  cancel-in-progress: false
+
+permissions:
+  contents: write # to publish the evidence and deliverables the agents write
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+      ATLAS_BOT_KEY: ${{ secrets.ATLAS_BOT_KEY }}
+      NOVA_BOT_KEY: ${{ secrets.NOVA_BOT_KEY }}
+      SAGE_BOT_KEY: ${{ secrets.SAGE_BOT_KEY }}
+      ECHO_BOT_KEY: ${{ secrets.ECHO_BOT_KEY }}
+      MALLORY_BOT_KEY: ${{ secrets.MALLORY_BOT_KEY }}
+      CONTRACTOR_BOT_KEY: ${{ secrets.CONTRACTOR_BOT_KEY }}
+      QUILL_BOT_KEY: ${{ secrets.QUILL_BOT_KEY }}
+      LEDGER_BOT_KEY: ${{ secrets.LEDGER_BOT_KEY }}
+      SHADE_BOT_KEY: ${{ secrets.SHADE_BOT_KEY }}
+      SOOTHDEV_BOT_KEY: ${{ secrets.SOOTHDEV_BOT_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Salts of sealed answers and bids live in agents/.state between passes. Losing them means an
+      # agent cannot reveal what it committed, and its stake is slashed, so the state is carried over.
+      - name: Restore agent state
+        uses: actions/cache/restore@v4
+        with:
+          path: agents/.state
+          key: agent-state-${{ github.run_id }}
+          restore-keys: agent-state-
+
+      - name: Install
+        run: npm ci
+        working-directory: agents
+
+      # Until the secrets are added (docs/agents-on-github.md) the passes are skipped, not failed.
+      - name: Jury pass
+        if: ${{ env.ATLAS_BOT_KEY != '' }}
+        run: node run.mts --once
+        working-directory: agents
+
+      - name: Swarm pass
+        if: ${{ always() && env.CONTRACTOR_BOT_KEY != '' }}
+        run: node swarm.mts --once
+        working-directory: agents
+
+      - name: Save agent state
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: agents/.state
+          key: agent-state-${{ github.run_id }}
+
+      # New evidence, briefs and deliverables are stored by hash under web/public/d; pushing them
+      # makes Vercel redeploy so the links on chain resolve.
+      - name: Publish new documents
+        if: always()
+        run: |
+          git add web/public/d
+          if git diff --cached --quiet; then echo "no new documents"; exit 0; fi
+          git config user.name "sooth-agents"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(agents): publish evidence and deliverables"
+          git pull --rebase --quiet
+          git push
