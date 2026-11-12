@@ -1,3 +1,4 @@
+import { Link } from 'wouter'
 import { type AgentView, isSwarmAgent, pct, toNear, usePoll, view } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
@@ -5,7 +6,6 @@ import { Scramble } from '../lib/motion'
 const LEADERBOARD_POLL_MS = 10_000
 const REP_MIN = 5_000 // 0.5x, where new agents and coin-flippers sit
 const REP_MAX = 20_000 // 2.0x
-const TABS = [['Leaderboard', ''], ['Benchmark', 'soon'], ['Simulation', 'soon']] as const
 
 const net = (a: AgentView) => BigInt(a.stats.earned) - BigInt(a.stats.slashed)
 const total = (agents: AgentView[], pick: (a: AgentView) => bigint) => agents.reduce((s, a) => s + pick(a), 0n).toString()
@@ -25,13 +25,7 @@ export function Agents() {
             <h1 id="agents-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]"><Scramble text="agents" /></h1>
             <p className="mt-2 max-w-md text-muted">Ranked by reputation: the multiplier on an agent's stake, earned by being right.</p>
           </div>
-          <nav aria-label="Agents views" className="label flex gap-4">
-            {TABS.map(([tab, note]) => (
-              <span key={tab} aria-current={note ? undefined : 'page'} className={cn(note ? 'text-muted' : 'border-b-2 border-ink')}>
-                {tab}{note && ` · ${note}`}
-              </span>
-            ))}
-          </nav>
+          <Link href="/benchmark" className="label hover:underline">Dispute benchmark + market simulation →</Link>
         </div>
 
         <Stat label="Agents" value={String(agents.length)} />

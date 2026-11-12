@@ -55,6 +55,15 @@ function tally(votes: Vote[]): { winner: Answer; isConfident: boolean } {
   return { winner, isConfident: top / total >= AUTO_SHARE && avgConf >= AUTO_CONF && revealed.length >= MIN_REVEALS }
 }
 
+/** The slice of the results the web app's /benchmark page shows. */
+function webRows(results: { case: Case; defended: Vote[]; naive: Vote[]; jury: { winner: Answer; isConfident: boolean } }[]) {
+  return results.map((r) => ({
+    id: r.case.id, kind: r.case.kind, label: r.case.label, jury: r.jury,
+    votes: r.defended.map(({ juror, model, answer, confidence }) => ({ juror, model, answer, confidence })),
+    naiveRight: r.naive.filter((v) => v.answer === r.case.label).length,
+  }))
+}
+
 const pct = (n: number, d: number) => (d === 0 ? '—' : `${Math.round((100 * n) / d)} %`)
 
 const rows: { case: Case; defended: Vote[]; naive: Vote[]; jury: ReturnType<typeof tally> }[] = []
@@ -98,4 +107,5 @@ const lines = [
 ]
 writeFileSync(new URL('../benchmark/DISPUTES.md', import.meta.url), lines.join('\n'))
 writeFileSync(new URL('../benchmark/disputes-results.json', import.meta.url), JSON.stringify(rows, null, 2))
+writeFileSync(new URL('../web/src/data/disputes.json', import.meta.url), JSON.stringify(webRows(rows)))
 log('bench', 'wrote benchmark/DISPUTES.md and benchmark/disputes-results.json')
