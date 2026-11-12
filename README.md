@@ -253,5 +253,6 @@ To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle a
 
 - **License:** [MIT](LICENSE).
 - **Fonts:** Tektur, Inter Tight and JetBrains Mono, under the SIL OFL.
+- **Crowd animation** on the Arena page: adapted from [Skiper UI](https://skiper-ui.com) "Canvas crowd" (free tier, credit required), with [Open Peeps](https://www.openpeeps.com) illustrations (CC0).
 - **Research basis:** arXiv 2605.30802 (multi-agent AI oracles for prediction-market resolution).
 - **Built with AI:** Claude Code wrote most of the code with the author. The agents use open-weight models through Groq.
