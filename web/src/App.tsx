@@ -1,6 +1,6 @@
 import { Link, Route, Switch } from 'wouter'
 import { Dock, ThemeToggle } from './lib/dock'
-import { Backdrop, Cursor } from './lib/motion'
+import { Backdrop } from './lib/motion'
 import { useAccount } from './lib/near'
 import { Agents } from './pages/Agents'
 import { Arena } from './pages/Arena'
@@ -13,7 +13,6 @@ export default function App() {
   return (
     <>
       <Backdrop />
-      <Cursor />
       <header className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 pt-4">
         <Link href="/" className="font-display text-xl tracking-[-0.04em]">sooth</Link>
         <div className="flex items-center gap-3">

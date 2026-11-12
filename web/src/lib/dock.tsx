@@ -45,7 +45,7 @@ export function Dock() {
       <motion.div
         onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(Infinity)}
-        className="flex h-[60px] items-end gap-1.5 rounded-2xl border border-line bg-canvas/85 px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)] backdrop-blur-md"
+        className="flex h-[60px] items-end gap-1.5 rounded-2xl border border-line bg-canvas px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)]"
       >
         {PAGES.map(([href, label, glyph]) => (
           <Item key={href} mouseX={mouseX} label={label} isActive={isActive(href)}>
