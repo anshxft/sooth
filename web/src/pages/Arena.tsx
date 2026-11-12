@@ -6,6 +6,7 @@ import {
 } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Crowd } from '../lib/crowd'
+import { Guide } from './Guide'
 import { Countdown } from '../lib/timer'
 import { Scramble } from '../lib/motion'
 
@@ -30,7 +31,7 @@ export function Arena() {
   const q = question.data && live ? swarmOnly({ ...question.data, phase_ends_at: live.phase_ends_at }) : question.data
 
   return (
-    <main className="mx-auto max-w-[1280px] p-4">
+    <main className="mx-auto max-w-[1440px] p-4">
       {list.error && (
         <p role="alert" className="label mb-3 text-red">
           Can't reach NEAR testnet. Retrying…
@@ -63,6 +64,7 @@ export function Arena() {
 
         {q && <LiveStage q={q} names={names} now={now} />}
         <QuestionList summaries={summaries} now={now} />
+        <Guide agents={names} />
 
         <div className="relative col-span-12 h-[360px] overflow-hidden md:h-[460px]">
           <div className="relative z-10 p-4 text-center">

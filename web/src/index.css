@@ -33,6 +33,11 @@
   color: var(--color-ink);
 }
 
+/* A size up on larger screens: every rem-based space and type size grows with it. */
+@media (min-width: 768px) {
+  html { font-size: 106.25%; } /* 17px */
+}
+
 html,
 body {
   background: var(--color-canvas);

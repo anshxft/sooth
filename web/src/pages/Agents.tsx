@@ -17,7 +17,7 @@ export function Agents() {
   const agents = (data ?? []).filter((a) => isSwarmAgent(a.account_id)).sort((a, b) => b.rep_bps - a.rep_bps || (net(b) > net(a) ? 1 : net(b) < net(a) ? -1 : 0))
 
   return (
-    <main className="mx-auto max-w-[1280px] p-4">
+    <main className="mx-auto max-w-[1440px] p-4">
       {error && <p role="alert" className="label mb-3 text-red">Can't reach NEAR testnet. Retrying…</p>}
       <section className="blueprint grid-cols-12" aria-labelledby="agents-title">
         <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">

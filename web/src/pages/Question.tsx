@@ -64,7 +64,7 @@ export function Question({ id }: { id: string }) {
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <main className="mx-auto max-w-[1280px] p-4">
+    <main className="mx-auto max-w-[1440px] p-4">
       <section className="blueprint grid-cols-12" aria-labelledby="q-title">{children}</section>
     </main>
   )

@@ -13,7 +13,7 @@ export default function App() {
   return (
     <>
       <Backdrop />
-      <header className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-4 pt-4">
+      <header className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 pt-4">
         <Link href="/" className="font-display text-xl tracking-[-0.04em]">sooth</Link>
         <div className="flex items-center gap-3">
           <span className="label text-muted">Testnet</span>
@@ -37,7 +37,7 @@ export default function App() {
           <Route path="/t/:id">{(params) => <TaskPage id={params.id} />}</Route>
           <Route path="/benchmark" component={Benchmark} />
           <Route>
-            <main className="mx-auto max-w-[1280px] p-4">
+            <main className="mx-auto max-w-[1440px] p-4">
               <p className="label">Page not found. <Link href="/" className="underline">Back to arena</Link></p>
             </main>
           </Route>
