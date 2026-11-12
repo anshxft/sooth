@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@import "lenis/dist/lenis.css";
 
 /* Swiss x Cybercore tokens (UI_PLAN v0.4). Green = truth / live / primary only; red = slash only. */
 @theme {
@@ -200,60 +199,29 @@ body {
 }
 
 /* ---------------------------------------------------------------- ambient
-   Cursor ring, drifting dot grid, cursor spotlight and film grain. Fine pointers only for the
-   ring (Cursor renders nothing on touch); everything stills for reduced motion. */
+   A still dot grid and film grain. Both stay still on purpose: endlessly moving full-screen
+   layers (and the old cursor ring and spotlight) kept the browser repainting on every frame. */
 body { background: transparent; } /* lets the fixed dot grid show through the page gutters */
 
-.cursor-ring { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; mix-blend-mode: difference; }
-.cursor-ring > span {
-  display: block;
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  border: 1.5px solid #fff;
-  border-radius: 50%;
-  transition: transform 200ms var(--ease-out), background-color 200ms ease;
-}
-.cursor-ring--hot > span { transform: scale(1.8); background-color: #fff; }
-
-@keyframes drift { to { transform: translate3d(24px, 24px, 0); } }
 .backdrop-grid {
   position: fixed;
-  inset: -24px;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
   background-image: radial-gradient(color-mix(in srgb, var(--color-ink) 18%, transparent) 1px, transparent 1.2px);
   background-size: 24px 24px;
-  animation: drift 24s linear infinite;
-}
-.backdrop-spotlight {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  background: radial-gradient(360px circle at var(--mx, -400px) var(--my, -400px), rgb(127 250 183 / 0.22), transparent 70%);
-  mix-blend-mode: multiply;
-}
-:root[data-theme="dark"] .backdrop-spotlight { mix-blend-mode: screen; opacity: 0.35; }
-@keyframes grain {
-  25% { transform: translate3d(-3%, 2%, 0); }
-  50% { transform: translate3d(2%, -4%, 0); }
-  75% { transform: translate3d(-1%, 3%, 0); }
 }
 .backdrop-grain {
   position: fixed;
-  inset: -50%;
+  inset: 0;
   z-index: 41;
   pointer-events: none;
   opacity: 0.06;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 0.9s steps(4) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .label,
-  .backdrop-grid,
-  .backdrop-grain { animation: none; }
+  .label { animation: none; }
 }
 
 /* ---------------------------------------------------------------- ink wash

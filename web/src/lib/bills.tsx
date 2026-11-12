@@ -1,18 +1,16 @@
-// Falling NEAR notes drawn in ASCII on a terminal panel: escrow paying out. Each note is a flat
+// Falling NEAR notes drawn in ASCII over the page: escrow paying out. Each note is a flat
 // pattern (border, frame, portrait, seals, corner marks) that tumbles in 3D and bends in an S that
 // rolls along it as it falls; the sampled surface is projected onto a character grid with a depth
 // buffer, and characters are picked by pattern part and lighting. Written for this app after an
 // ASCII "falling bills" clip; no code from it.
 import { useEffect, useRef } from 'react'
 
-const CHAR_W = 7 // px per character cell
-const CHAR_H = 12
+const CHAR_H = 12 // px per character row; the cell width is measured from the font
 const FPS = 30
 const SAMPLES_U = 46 // surface samples along the note
 const SAMPLES_V = 20 // and across it
 const ASPECT = 0.43 // note height / length
 const LIGHT = normalize([-0.35, -0.6, 0.72])
-const INK = '127 250 183' // --color-green as RGB
 
 type Part = 'paper' | 'border' | 'frame' | 'portrait' | 'face' | 'seal' | 'corner'
 type Vec = [number, number, number]
@@ -65,7 +63,8 @@ function rotate([x, y, z]: Vec, [a, b, c]: Vec): Vec {
   return [x2 * Math.cos(c) - y1 * Math.sin(c), x2 * Math.sin(c) + y1 * Math.cos(c), z2]
 }
 
-export function Bills({ count = 12, className }: { count?: number; className?: string }) {
+/** Falling notes over whatever is behind the canvas (transparent). `scale` sizes the notes. */
+export function Bills({ count = 12, scale = 1, className }: { count?: number; scale?: number; className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -73,7 +72,7 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
     const isStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    let [cols, rows, w, h] = [0, 0, 0, 0]
+    let [cols, rows, w, h, charW] = [0, 0, 0, 0, 7]
     let depth = new Float32Array(0)
     let light = new Float32Array(0)
     let cell: string[] = []
@@ -84,7 +83,10 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
       canvas.width = w * devicePixelRatio
       canvas.height = h * devicePixelRatio
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0)
-      cols = Math.ceil(w / CHAR_W)
+      ctx.font = `${CHAR_H - 1}px "JetBrains Mono", ui-monospace, monospace`
+      ctx.textBaseline = 'top'
+      charW = ctx.measureText('M').width // rows are drawn as whole strings, so cells must match the font
+      cols = Math.ceil(w / charW)
       rows = Math.ceil(h / CHAR_H)
       depth = new Float32Array(cols * rows)
       light = new Float32Array(cols * rows)
@@ -101,7 +103,7 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
         const local = t + first.delay
         const n = makeNote(i, Math.floor(local / span) + 1)
         const p = (local % span) / span // 0..1 through its fall
-        const L = n.size * Math.min(w, h * 1.5) // notes keep a size that fits short, wide panels
+        const L = n.size * Math.min(w, h * 1.5) * scale
         const cx = (n.x + n.sway * Math.sin(local * 1.1 + n.phase)) * w
         const cy = (p * 1.8 - 0.4) * h
         const ang: Vec = [n.tilt[0] + n.spin[0] * local, n.tilt[1] + n.spin[1] * local, n.tilt[2] + n.spin[2] * local]
@@ -114,7 +116,7 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
           for (let b = 0; b < SAMPLES_V; b++) {
             const v = (b / (SAMPLES_V - 1)) * 2 - 1
             const [x, y, z] = rotate([u * L, v * L * ASPECT, bend], ang)
-            const col = Math.floor((cx + x) / CHAR_W)
+            const col = Math.floor((cx + x) / charW)
             const row = Math.floor((cy + y) / CHAR_H)
             if (col < 0 || row < 0 || col >= cols || row >= rows) continue
             const k = row * cols + col
@@ -128,16 +130,28 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
         }
       }
       ctx.clearRect(0, 0, w, h)
-      ctx.font = `${CHAR_H - 1}px "JetBrains Mono", ui-monospace, monospace`
-      ctx.textBaseline = 'top'
-      // A few brightness buckets keep fillStyle changes rare.
+      // Green on the dark theme, ink on the light one; read each frame so a theme switch follows.
+      const root = getComputedStyle(document.documentElement)
+      const isDark = document.documentElement.dataset.theme === 'dark'
+      const color = (isDark ? root.getPropertyValue('--color-green') : root.getPropertyValue('--color-ink')).trim() || '#7ffab7'
+      const strength = isDark ? 0.75 : 0.35 // faint enough to read the page through
+      // One string per row per brightness bucket: a few hundred fillText calls instead of thousands.
       for (let bucket = 1; bucket <= 4; bucket++) {
-        ctx.fillStyle = `rgb(${INK} / ${0.15 + bucket * 0.2})`
-        for (let k = 0; k < cell.length; k++) {
-          if (!cell[k] || Math.min(4, Math.max(1, Math.ceil(light[k] * 4))) !== bucket) continue
-          ctx.fillText(cell[k], (k % cols) * CHAR_W, Math.floor(k / cols) * CHAR_H)
+        ctx.fillStyle = color
+        ctx.globalAlpha = (0.15 + bucket * 0.2) * strength
+        for (let r = 0; r < rows; r++) {
+          let line = ''
+          let any = false
+          for (let c = 0; c < cols; c++) {
+            const k = r * cols + c
+            const isHere = cell[k] !== '' && Math.min(4, Math.max(1, Math.ceil(light[k] * 4))) === bucket
+            line += isHere ? cell[k] : ' '
+            any ||= isHere
+          }
+          if (any) ctx.fillText(line, 0, r * CHAR_H)
         }
       }
+      ctx.globalAlpha = 1
     }
 
     resize()
@@ -169,7 +183,7 @@ export function Bills({ count = 12, className }: { count?: number; className?: s
       visibility.disconnect()
       window.removeEventListener('resize', onResize)
     }
-  }, [count])
+  }, [count, scale])
 
   return <canvas ref={ref} className={className} aria-hidden="true" />
 }
