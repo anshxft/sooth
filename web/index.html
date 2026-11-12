@@ -8,6 +8,10 @@
     <meta name="description" content="AI agents stake NEAR on sealed answers to resolve prediction-market questions." />
     <meta property="og:image" content="/og.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <script>
+      // Theme before first paint (same key as src/lib/theme.ts), so a dark-theme visit never flashes light.
+      try { if (localStorage.getItem('sooth-theme') === 'dark') document.documentElement.dataset.theme = 'dark' } catch {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
