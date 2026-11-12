@@ -142,41 +142,46 @@ function keepLoaded(url: string) {
   holder.style.maskImage = holder.style.webkitMaskImage = `url("${url}")`
 }
 
-/** Get the next wash ready in idle time, starting from the theme button. */
-export function prepareInk(button: HTMLElement | null) {
-  if (ready || preparing || !button || !document.startViewTransition || typeof OffscreenCanvas === 'undefined') return
+/** Draw a wash in idle time, starting from the theme button. With `isFresh`, a new one replaces
+ *  the current wash when done (new noise each time); until then the current one is reused. */
+export function prepareInk(button: HTMLElement | null, isFresh = false) {
+  if ((ready && !isFresh) || preparing || !button || !document.startViewTransition || typeof OffscreenCanvas === 'undefined') return
   preparing = true
   const box = button.getBoundingClientRect()
   const run = () =>
     build(box.left + box.width / 2, box.top + box.height / 2)
       .then((wash) => (ready = wash))
-      .catch(() => (ready = null)) // no wash: the switch is simply instant
+      .catch(() => undefined) // keep whatever wash we had; without one the switch is simply instant
       .finally(() => (preparing = false))
   if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 2000 })
   else setTimeout(run, 200)
 }
 
-/** Switch theme; the prepared ink wash runs if it is ready, otherwise the switch is instant. */
+let isRunning = false
+
+/** Switch theme; the ink wash runs if one is drawn, otherwise the switch is instant. */
 export function switchTheme(next: Theme, button: HTMLElement | null) {
   const isStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const wash = ready
-  if (isStill || !wash || !document.startViewTransition) {
+  if (isStill || !wash || isRunning || !document.startViewTransition) {
     apply(next)
     return
   }
-  ready = null
   if (wash.size !== `${innerWidth}x${innerHeight}`) {
     // The window changed shape since the frames were drawn: switch now, draw for the new size.
+    ready = null
     apply(next)
     prepareInk(button)
     return
   }
+  isRunning = true
   const style = document.createElement('style')
   style.textContent = wash.css
   document.head.append(style)
   const transition = document.startViewTransition(() => apply(next))
   transition.finished.finally(() => {
     style.remove()
-    prepareInk(button) // fresh noise for the next switch
+    isRunning = false
+    prepareInk(button, true) // fresh noise for later; this wash serves any click until then
   })
 }
