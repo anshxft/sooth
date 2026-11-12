@@ -6,8 +6,8 @@
 //   node swarm.mts --brief <text>      store a client brief, print its link and hash for create_task
 import { randomBytes } from 'node:crypto'
 import { appendFileSync } from 'node:fs'
-import { Account, JsonRpcProvider, KeyPair } from 'near-api-js'
-import { type Bot, HERE, REVIEW_PROMPT, config, getDoc, llm, loadState, log, putDoc, saveState, sha256, toYocto } from './lib.mts'
+import { Account, KeyPair } from 'near-api-js'
+import { type Bot, HERE, REVIEW_PROMPT, config, getDoc, llm, loadState, log, putDoc, saveState, sha256, toYocto, rpc } from './lib.mts'
 
 type Worker = (typeof config.swarm.workers)[number]
 type Task = { id: number; contractor: string; brief_uri: string; brief_hash: string; available: string; status: 'Open' | 'Closed'; banned: string[] }
@@ -25,7 +25,9 @@ const POLL_MS = 10_000
 // `dispute` forwards 30 Tgas to SOOTH and keeps 20 Tgas for its callback.
 const GAS = 100_000_000_000_000n
 const ETA_SECS = 300
-const JOB_TIMINGS = { commit_secs: 90, reveal_secs: 90, delivery_secs: 300, review_secs: 300 }
+// Long enough that a scheduled runner (GitHub Actions, every ~5 min and often late) gets a turn in
+// every phase. Run locally with `npm start` for a fast demo; the windows only bound the slowest case.
+const JOB_TIMINGS = { commit_secs: 1200, reveal_secs: 1200, delivery_secs: 1800, review_secs: 1800 }
 const MAX_JOBS_PER_PART = 2
 /** Held back per job besides its price: the jury fee and job storage (contract config). */
 const JOB_OVERHEAD = BigInt(toYocto('0.35'))
@@ -46,13 +48,13 @@ const WORK_PROMPT = [
   'Reply with JSON only: {"markdown":"<the full document>"}.',
 ].join(' ')
 
-const provider = new JsonRpcProvider({ url: config.rpc })
+const provider = rpc
 const view = <T,>(method: string, args: object) => provider.callFunction({ contractId: S.contract, method, args }) as Promise<T>
 
 function account(bot: Bot): Account {
   const key = process.env[bot.key_env]
   if (!key) throw new Error(`no ${bot.key_env} in agents/.env`)
-  return new Account(bot.account_id, config.rpc, key as `ed25519:${string}`)
+  return new Account(bot.account_id, rpc, key as `ed25519:${string}`)
 }
 
 const call = (bot: Bot, methodName: string, args: object) =>

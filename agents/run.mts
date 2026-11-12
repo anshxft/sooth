@@ -5,8 +5,8 @@
 //   node run.mts --new-key <agent>   create a bot key into agents/.env, print only the public key
 import { randomBytes } from 'node:crypto'
 import { appendFileSync } from 'node:fs'
-import { Account, JsonRpcProvider, KeyPair } from 'near-api-js'
-import { type Config, HERE, REVIEW_PROMPT, config, getDoc, http, llm, loadState, log, putDoc, saveState, sha256 } from './lib.mts'
+import { Account, KeyPair } from 'near-api-js'
+import { type Config, HERE, REVIEW_PROMPT, config, getDoc, http, llm, loadState, log, putDoc, saveState, sha256, rpc } from './lib.mts'
 
 type Answer = 'YES' | 'NO' | 'INVALID'
 type Agent = Config['agents'][number]
@@ -26,7 +26,7 @@ const SYSTEM_PROMPT = [
   'confidence = your probability that the answer is correct; overconfident wrong answers lose stake.',
 ].join(' ')
 
-const provider = new JsonRpcProvider({ url: config.rpc })
+const provider = rpc
 
 const view = <T,>(method: string, args: object) => provider.callFunction({ contractId: config.contract, method, args }) as Promise<T>
 
@@ -148,7 +148,7 @@ function sharedReads(open: Shared['open']): Shared {
 async function tick(agent: Agent, { open, question, cranked }: Shared) {
   const key = process.env[agent.key_env]
   if (!key) return log(agent.name, `no ${agent.key_env} in agents/.env, skipping`)
-  const account = new Account(agent.account_id, config.rpc, key as `ed25519:${string}`)
+  const account = new Account(agent.account_id, rpc, key as `ed25519:${string}`)
   const state = loadState<Entry>(agent.name)
   for (const s of open) {
     try {
