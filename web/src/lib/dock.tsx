@@ -69,7 +69,7 @@ export function Dock() {
               onClick={(e) => {
                 const next = theme === 'dark' ? 'light' : 'dark'
                 // detail 0 = keyboard click: spread from the screen centre instead of the pointer.
-                switchTheme(next, e.detail === 0 ? undefined : { x: e.clientX, y: e.clientY })
+                void switchTheme(next, e.detail === 0 ? undefined : { x: e.clientX, y: e.clientY })
                 setTheme(next)
               }}
             >
