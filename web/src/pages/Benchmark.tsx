@@ -52,8 +52,8 @@ export function Benchmark() {
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="label text-left text-muted">
-                  <th className="py-2 font-normal">Case</th><th className="font-normal">Kind</th><th className="font-normal">Truth</th>
-                  <th className="font-normal">Jury</th><th className="font-normal">Votes (4 honest + mallory)</th>
+                  <th className="py-2 pr-3 font-normal">Case</th><th className="pr-3 font-normal">Kind</th><th className="pr-3 font-normal">Truth</th>
+                  <th className="pr-3 font-normal">Jury</th><th className="font-normal">Votes (4 honest + mallory)</th>
                 </tr>
               </thead>
               <tbody>{disputes.map((d) => <DisputeRow key={d.id} d={d} />)}</tbody>
@@ -100,9 +100,9 @@ function DisputeRow({ d }: { d: Dispute }) {
   const isOk = isRight(d)
   return (
     <tr className="border-t border-line">
-      <td className="py-2 font-mono">{d.id}</td>
-      <td className="text-muted">{d.kind}</td>
-      <td className="font-mono">{d.label}</td>
+      <td className="py-2 pr-3 font-mono">{d.id}</td>
+      <td className="pr-3 text-muted">{d.kind}</td>
+      <td className="pr-3 font-mono">{d.label}</td>
       <td>
         <span className={cn('label border border-ink px-1.5 py-0.5', isOk ? 'bg-ink text-canvas' : 'bg-red/10')}>
           {isOk ? '✓' : '✗'} {d.jury.winner} · {d.jury.isConfident ? 'auto' : 'round 2'}
