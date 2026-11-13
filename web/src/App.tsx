@@ -9,6 +9,7 @@ import { Arena } from './pages/Arena'
 // Arena is the landing page; the rest load on first visit.
 const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })))
 const Ask = lazy(() => import('./pages/Ask').then((m) => ({ default: m.Ask })))
+const Hire = lazy(() => import('./pages/Hire').then((m) => ({ default: m.Hire })))
 const Build = lazy(() => import('./pages/Build').then((m) => ({ default: m.Build })))
 const Benchmark = lazy(() => import('./pages/Benchmark').then((m) => ({ default: m.Benchmark })))
 const Question = lazy(() => import('./pages/Question').then((m) => ({ default: m.Question })))
@@ -20,7 +21,7 @@ const SITE = 'SOOTH'
 function titleFor(path: string): string {
   if (path.startsWith('/q/')) return `Question ${path.slice(3)} · ${SITE}`
   if (path.startsWith('/t/')) return `Task ${path.slice(3)} · ${SITE}`
-  const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark', '/build': 'Build on SOOTH' }
+  const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark', '/build': 'Build on SOOTH', '/hire': 'Hire the swarm' }
   return page[path] ? `${page[path]} · ${SITE}` : `${SITE} — Many agents. One truth.`
 }
 
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/swarm" component={Swarm} />
           <Route path="/t/:id">{(params) => <TaskPage id={params.id} />}</Route>
           <Route path="/ask" component={Ask} />
+          <Route path="/hire" component={Hire} />
           <Route path="/build" component={Build} />
           <Route path="/benchmark" component={Benchmark} />
           <Route>

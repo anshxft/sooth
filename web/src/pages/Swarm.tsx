@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode, useState } from 'react'
 import { Link } from 'wouter'
-import { countdown, toNear, useNow, usePoll } from '../lib/near'
+import { connector, countdown, toNear, useAccount, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
 import { cn, spaced } from '../lib/utils'
 import { Scramble } from '../lib/motion'
@@ -51,9 +51,12 @@ export function Swarm() {
             A contractor agent spends a capped budget on sealed-bid jobs. When it rejects the work, the SOOTH jury rules and the contract pays out.
           </p>
         </div>
-        <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label hover:underline">
-          {SWARM} ↗
-        </a>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link href="/hire" className="label bg-green px-2 py-1 text-ink hover:bg-ink hover:text-canvas">Hire the swarm →</Link>
+          <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label hover:underline">
+            {SWARM} ↗
+          </a>
+        </div>
       </div>
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
@@ -196,6 +199,7 @@ export function TaskPage({ id }: { id: string }) {
         {brief.data && <DocBody text={brief.data.text} isVerified={brief.data.isVerified} />}
       </header>
       <Budget task={t} />
+      <CloseTask task={t} />
       {ordered.length === 0 && <p className="col-span-12 p-4 text-muted">The contractor is planning the jobs…</p>}
       {ordered.map((j) => <JobBlock key={j.id} job={j} task={t} />)}
       <VerifyPanel
@@ -331,6 +335,37 @@ function Stat({ label, value, unit, isRed = false }: { label: string; value: str
       <div className={cn('mt-1 font-display text-3xl', isRed && 'text-red')}>
         <Scramble text={value} />{unit && <span className="ml-1.5 font-sans text-base">{unit}</span>}
       </div>
+    </div>
+  )
+}
+
+/** The task owner takes back what the contractor has not spent, once no job is running. */
+function CloseTask({ task }: { task: Task }) {
+  const { accountId } = useAccount()
+  const [state, setState] = useState<{ busy: boolean; note: string | null }>({ busy: false, note: null })
+  if (accountId !== task.owner || task.status !== 'Open') return null
+  const close = async () => {
+    setState({ busy: true, note: null })
+    try {
+      const wallet = await connector.wallet()
+      await wallet.signAndSendTransaction({
+        receiverId: SWARM,
+        actions: [{ type: 'FunctionCall', params: { methodName: 'close_task', args: { task_id: task.id }, gas: '30000000000000', deposit: '1' } }],
+      })
+      setState({ busy: false, note: 'Closed. The rest of the budget is on its way back to you.' })
+    } catch (e) {
+      setState({ busy: false, note: e instanceof Error ? e.message : 'The transaction did not go through.' })
+    }
+  }
+  return (
+    <div className="col-span-12 flex flex-wrap items-center gap-3 p-4">
+      <button type="button" onClick={close} disabled={state.busy || task.active_jobs > 0}
+        className="label border border-ink px-3 py-2 hover:bg-ink hover:text-canvas disabled:opacity-50">
+        {state.busy ? 'Waiting for your wallet…' : `Close task and take back ${toNear(task.available, 2)} Ⓝ`}
+      </button>
+      <span className="label text-muted" role="status">
+        {state.note ?? (task.active_jobs > 0 ? `You can close it once its ${task.active_jobs} running job${task.active_jobs === 1 ? '' : 's'} settle.` : 'You own this task.')}
+      </span>
     </div>
   )
 }
