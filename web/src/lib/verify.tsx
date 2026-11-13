@@ -26,7 +26,7 @@ export function VerifyPanel({ checks, links }: Props) {
   )
 }
 
-function Command({ label, command }: Check) {
+export function Command({ label, command }: Check) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
   const copy = async () => {
     try {

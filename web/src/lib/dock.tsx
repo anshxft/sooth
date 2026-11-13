@@ -22,6 +22,7 @@ const ICONS = {
   swarm: icon(<><path d="M12 3l4 2.3v4.6L12 12 8 9.9V5.3z" /><path d="M7 12l4 2.3v4.6L7 21l-4-2.1v-4.6z" /><path d="M17 12l4 2.3v4.6L17 21l-4-2.1v-4.6z" /></>),
   agents: icon(<><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" /><path d="M16 5.5a3 3 0 010 5M18 14.5c1.8.8 3 2.6 3 4.5" /></>),
   ask: icon(<><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.2-1.5 2.3M12 17.5v.01" /></>),
+  build: icon(<><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16" /></>),
   benchmark: icon(<><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></>),
   github: icon(<path d="M9 19c-4 1.3-4-2-6-2.5m12 5v-3.2a2.8 2.8 0 00-.8-2.2c2.6-.3 5.3-1.3 5.3-5.8a4.5 4.5 0 00-1.2-3.1 4.2 4.2 0 00-.1-3.1s-1-.3-3.2 1.2a11 11 0 00-5.8 0C7 3.3 6 3.6 6 3.6a4.2 4.2 0 00-.1 3.1A4.5 4.5 0 004.7 9.8c0 4.5 2.7 5.5 5.3 5.8a2.8 2.8 0 00-.8 2.2V21" />),
   explorer: icon(<><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5" /></>),
@@ -35,6 +36,7 @@ const PAGES = [
   ['/swarm', 'Swarm', ICONS.swarm],
   ['/agents', 'Agents', ICONS.agents],
   ['/benchmark', 'Benchmark', ICONS.benchmark],
+  ['/build', 'Build on it', ICONS.build],
 ] as const
 
 export function Dock() {
@@ -54,8 +56,8 @@ export function Dock() {
             {(cls) => <Link href={href} aria-label={label} aria-current={isActive(href) ? 'page' : undefined} className={cls}>{glyph}</Link>}
           </Item>
         ))}
-        <span aria-hidden="true" className="mx-1 mb-1 h-8 w-px self-end bg-line" />
-        <Item mouseX={mouseX} label="Source on GitHub">
+        <span aria-hidden="true" className="mx-1 mb-1 hidden h-8 w-px self-end bg-line sm:block" />
+        <Item mouseX={mouseX} label="Source on GitHub" className="hidden sm:flex">
           {(cls) => <a href={GITHUB} target="_blank" rel="noopener noreferrer" aria-label="Source on GitHub" className={cls}>{ICONS.github}</a>}
         </Item>
         <Item mouseX={mouseX} label="Contract on explorer" className="hidden sm:flex">
