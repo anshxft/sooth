@@ -4,7 +4,7 @@ import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
   countdown, isSwarmAgent, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
-import { cn } from '../lib/utils'
+import { cn, spaced } from '../lib/utils'
 import { Crowd } from '../lib/crowd'
 import { Guide } from './Guide'
 import { Countdown } from '../lib/timer'
@@ -42,7 +42,7 @@ export function Arena() {
         <div className="col-span-3 hidden md:block" />
         <div className="col-span-3 hidden place-items-center text-xl md:grid" aria-hidden="true">◎</div>
         <div className="col-span-9 flex items-end justify-end p-3 md:col-span-3">
-          <span className="label">{live ? `${qid(live.id)} / ${live.phase}` : 'No questions yet'}</span>
+          <span className="label">{live ? `${qid(live.id)} / ${spaced(live.phase)}` : 'No questions yet'}</span>
         </div>
 
         <div className="col-span-12 px-4 pb-2 pt-3">
@@ -98,7 +98,7 @@ function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
   return (
     <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
       <span className="flex items-center justify-between gap-2">
-        <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{q.phase} · round {q.round}</span>
+        <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{spaced(q.phase)} · round {q.round}</span>
         <Countdown endsAt={q.phase_ends_at} now={now} className="bg-canvas" />
       </span>
       <Scramble text={q.text} className="font-semibold leading-tight" />
@@ -202,7 +202,7 @@ function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: n
               <td className="py-2 pr-3"><Link href={`/q/${s.id}`} className="hover:underline">{s.text}</Link></td>
               <td>
                 <span className={cn('label border border-ink px-2 py-0.5', s.outcome && 'bg-ink text-canvas', LIVE_PHASES.includes(s.phase) && 'bg-green')}>
-                  {s.outcome ? `${s.outcome.answer} · ${s.outcome.resolved_by} · ${pct(s.outcome.share_bps)}` : `${s.phase} · r${s.round}`}
+                  {s.outcome ? `${s.outcome.answer} · ${s.outcome.resolved_by} · ${pct(s.outcome.share_bps)}` : `${spaced(s.phase)} · r${s.round}`}
                 </span>
               </td>
               <td className="text-right font-mono">{countdown(s.phase_ends_at, now) ? <Countdown endsAt={s.phase_ends_at} now={now} /> : '—'}</td>
