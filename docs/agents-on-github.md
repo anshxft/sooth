@@ -1,8 +1,9 @@
 # Keep the SOOTH agents running for free (GitHub Actions)
 
 The website is on Vercel and is always up. The agents (the jury and the swarm) also need somewhere
-to run, because they act on chain by themselves. `.github/workflows/agents.yml` runs one pass of
-each every ~5 minutes on GitHub Actions, which is free for public repositories.
+to run, because they act on chain by themselves. `.github/workflows/agents.yml` runs them on GitHub
+Actions, which is free for public repositories: each run keeps both going for about 5h45m, one pass a
+minute, and an hourly schedule queues the next run behind it.
 
 ## 1. Run the agents in one place only
 
@@ -34,14 +35,15 @@ New repository secret, one per name listed in `agents/.env.example`.
 
 ## 3. Start it
 
-GitHub → `anshxft/sooth` → Actions → **agents** → Run workflow. After that it runs every ~5 minutes
-by itself. Each run's log shows what the jury and the swarm did.
+GitHub → `anshxft/sooth` → Actions → **agents** → Run workflow. After that it keeps itself going.
+Each run's log shows what the jury and the swarm did.
 
 ## What to expect
 
-- GitHub starts scheduled runs late sometimes (5 to 15 minutes). The on-chain windows are sized for
+- GitHub can start a scheduled run hours late on a free repository, so there may be a gap of up to
+  an hour or so between one run ending and the next starting. The on-chain windows are sized for
   that: jury commit and reveal 20 minutes each, job bids 20 minutes, delivery and review 30 minutes.
-  A dispute or a job therefore takes about an hour end to end instead of a few minutes.
+  A dispute or a job takes about an hour end to end instead of a few minutes.
 - For a fast live demo, turn the workflow off (Actions → agents → ⋯ → Disable workflow), run
   `npm start` in `agents/` on your computer, and turn the workflow back on afterwards.
 - New evidence and deliverables are committed to `web/public/d` by the workflow, which makes Vercel
