@@ -1,13 +1,14 @@
-# Runs the SOOTH agents for free on GitHub Actions: one pass of the jury and one of the swarm
-# every ~5 minutes. Setup (secrets) and caveats: docs/agents-on-github.md.
+# Runs the SOOTH agents for free on GitHub Actions. GitHub starts scheduled runs hours late on free
+# repositories, so each run keeps the agents going for ~5h45m (a pass every minute) and the hourly
+# schedule queues the next run behind it. Setup (secrets) and caveats: docs/agents-on-github.md.
 name: agents
 
 on:
   schedule:
-    - cron: "*/5 * * * *" # GitHub may start these late; the on-chain windows allow for that
+    - cron: "17 * * * *" # queues the next run; concurrency keeps it waiting until this one ends
   workflow_dispatch: {}
 
-# One pass at a time: two runs signing with the same keys would fight over nonces and salts.
+# One run at a time: two runs signing with the same keys would fight over nonces and salts.
 concurrency:
   group: agents
   cancel-in-progress: false
@@ -18,7 +19,7 @@ permissions:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 360 # GitHub's job limit; the loop below stops 15 minutes before it
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
@@ -52,16 +53,26 @@ jobs:
         run: npm ci
         working-directory: agents
 
-      # Until the secrets are added (docs/agents-on-github.md) the passes are skipped, not failed.
-      - name: Jury pass
-        if: ${{ env.ATLAS_BOT_KEY != '' }}
-        run: node run.mts --once
+      # Until the secrets are added (docs/agents-on-github.md) the loop is skipped, not failed.
+      # New evidence, briefs and deliverables are stored by hash under web/public/d; pushing them
+      # makes Vercel redeploy so the links on chain resolve, so they are published every pass.
+      - name: Run the jury and the swarm
+        if: ${{ env.ATLAS_BOT_KEY != '' && env.CONTRACTOR_BOT_KEY != '' }}
         working-directory: agents
-
-      - name: Swarm pass
-        if: ${{ always() && env.CONTRACTOR_BOT_KEY != '' }}
-        run: node swarm.mts --once
-        working-directory: agents
+        run: |
+          git config user.name "sooth-agents"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          stop_at=$(( $(date +%s) + 345 * 60 ))
+          while [ "$(date +%s)" -lt "$stop_at" ]; do
+            node run.mts --once || echo "jury pass failed, retrying next minute"
+            node swarm.mts --once || echo "swarm pass failed, retrying next minute"
+            git add ../web/public/d
+            if ! git diff --cached --quiet; then
+              git commit -q -m "chore(agents): publish evidence and deliverables"
+              git pull --rebase -q && git push -q || echo "publish failed, retrying next pass"
+            fi
+            sleep 60
+          done
 
       - name: Save agent state
         if: always()
@@ -69,16 +80,3 @@ jobs:
         with:
           path: agents/.state
           key: agent-state-${{ github.run_id }}
-
-      # New evidence, briefs and deliverables are stored by hash under web/public/d; pushing them
-      # makes Vercel redeploy so the links on chain resolve.
-      - name: Publish new documents
-        if: always()
-        run: |
-          git add web/public/d
-          if git diff --cached --quiet; then echo "no new documents"; exit 0; fi
-          git config user.name "sooth-agents"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(agents): publish evidence and deliverables"
-          git pull --rebase --quiet
-          git push

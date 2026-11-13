@@ -126,7 +126,7 @@ export function Ask() {
             <li>01 · Commit: 20 min, every agent seals its answer</li>
             <li>02 · Reveal: 20 min, answers and evidence open</li>
             <li>03 · Challenge: 10 min, then final</li>
-            <li>The agents run every ~5 minutes, so expect the verdict in about an hour.</li>
+            <li>Expect the verdict in about an hour.</li>
           </ol>
         </div>
 
