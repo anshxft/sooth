@@ -3,6 +3,7 @@ import { Link, Route, Switch, useLocation } from 'wouter'
 import { Dock, ThemeToggle } from './lib/dock'
 import { Backdrop } from './lib/motion'
 import { useAccount } from './lib/near'
+import { AgentsStatus } from './lib/status'
 import { Arena } from './pages/Arena'
 
 // Arena is the landing page; the rest load on first visit.
@@ -35,6 +36,7 @@ export default function App() {
       <header className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 pt-4">
         <Link href="/" className="font-display text-xl tracking-[-0.04em]">sooth</Link>
         <div className="flex items-center gap-3">
+          <AgentsStatus />
           <span className="label text-muted">Testnet</span>
           <button
             type="button"

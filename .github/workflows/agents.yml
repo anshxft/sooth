@@ -19,7 +19,7 @@ permissions:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 360 # GitHub's job limit; the loop below stops 15 minutes before it
+    timeout-minutes: 360 # GitHub's job limit; the loop below stops 10 minutes before it at the latest
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
@@ -62,8 +62,10 @@ jobs:
         run: |
           git config user.name "sooth-agents"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          stop_at=$(( $(date +%s) + 345 * 60 ))
-          while [ "$(date +%s)" -lt "$stop_at" ]; do
+          # After 5h stop at the first idle moment; while a sealed answer or bid waits for its reveal,
+          # keep going until 10 minutes before GitHub's 6h limit, so a late next run cannot cost a stake.
+          start=$(date +%s); soft=$(( start + 300 * 60 )); hard=$(( start + 350 * 60 ))
+          while now=$(date +%s); [ "$now" -lt "$hard" ] && { [ "$now" -lt "$soft" ] || node busy.mts; }; do
             node run.mts --once || echo "jury pass failed, retrying next minute"
             node swarm.mts --once || echo "swarm pass failed, retrying next minute"
             git add ../web/public/d
