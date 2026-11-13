@@ -1,16 +1,33 @@
-import { Link, Route, Switch } from 'wouter'
+import { lazy, Suspense, useEffect } from 'react'
+import { Link, Route, Switch, useLocation } from 'wouter'
 import { Dock, ThemeToggle } from './lib/dock'
 import { Backdrop } from './lib/motion'
 import { useAccount } from './lib/near'
-import { Agents } from './pages/Agents'
-import { Ask } from './pages/Ask'
 import { Arena } from './pages/Arena'
-import { Benchmark } from './pages/Benchmark'
-import { Question } from './pages/Question'
-import { Swarm, TaskPage } from './pages/Swarm'
+
+// Arena is the landing page; the rest load on first visit.
+const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })))
+const Ask = lazy(() => import('./pages/Ask').then((m) => ({ default: m.Ask })))
+const Benchmark = lazy(() => import('./pages/Benchmark').then((m) => ({ default: m.Benchmark })))
+const Question = lazy(() => import('./pages/Question').then((m) => ({ default: m.Question })))
+const Swarm = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.Swarm })))
+const TaskPage = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.TaskPage })))
+
+// Tab titles per route, so history, bookmarks and shared tabs say which page is which.
+const SITE = 'SOOTH'
+function titleFor(path: string): string {
+  if (path.startsWith('/q/')) return `Question ${path.slice(3)} · ${SITE}`
+  if (path.startsWith('/t/')) return `Task ${path.slice(3)} · ${SITE}`
+  const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark' }
+  return page[path] ? `${page[path]} · ${SITE}` : `${SITE} — Many agents. One truth.`
+}
 
 export default function App() {
   const { accountId, signIn, signOut } = useAccount()
+  const [location] = useLocation()
+  useEffect(() => {
+    document.title = titleFor(location)
+  }, [location])
   return (
     <>
       <Backdrop />
@@ -30,6 +47,7 @@ export default function App() {
       </header>
       {/* Bottom padding keeps the last row clear of the dock. */}
       <div className="pb-24">
+        <Suspense fallback={<p className="label mx-auto max-w-[1440px] p-4 text-muted">Loading…</p>}>
         <Switch>
           <Route path="/" component={Arena} />
           <Route path="/q/:id">{(params) => <Question id={params.id} />}</Route>
@@ -44,6 +62,7 @@ export default function App() {
             </main>
           </Route>
         </Switch>
+        </Suspense>
       </div>
       <Dock />
     </>

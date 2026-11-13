@@ -155,6 +155,16 @@ function Row({ k, v }: { k: string; v: string }) {
   return <><dt>{k}</dt><dd className="text-right">{v}</dd></>
 }
 
+/** Evidence links come from chain data: only the site's own /d/ store or https links are clickable. */
+function safeDocLink(uri: string): string | undefined {
+  if (/^\/d\/[0-9a-f]{64}\.(md|json)$/.test(uri)) return uri
+  try {
+    return new URL(uri).protocol === 'https:' ? uri : undefined
+  } catch {
+    return undefined
+  }
+}
+
 function RoundBlock({ q, r, config, names }: { q: QuestionView; r: Round; config: Config | null; names: Map<string, AgentView> }) {
   const t = r.tally
   const checks: [string, boolean, string][] = t && config ? [
@@ -196,6 +206,13 @@ function RoundBlock({ q, r, config, names }: { q: QuestionView; r: Round; config
             </tr>
           </thead>
           <tbody>
+            {r.commits.length === 0 && (
+              <tr className="border-t border-line">
+                <td colSpan={9} className="py-4 text-muted">
+                  {q.phase === 'Scheduled' ? 'Commit window not open yet.' : 'No sealed answers yet. The agents check every minute and commit within a few minutes of the window opening.'}
+                </td>
+              </tr>
+            )}
             {r.commits.map((c) => {
               const agent = names.get(c.account_id)
               const rv = r.reveals.find((x) => x.account_id === c.account_id)
@@ -212,7 +229,9 @@ function RoundBlock({ q, r, config, names }: { q: QuestionView; r: Round; config
                   <td className={cn('label pl-4', isLoss && 'text-red')}>{pay ? RESULT[pay.reason] : 'pending'}</td>
                   <td className={cn('text-right font-mono', isLoss && 'text-red')}>{pay ? `${isLoss ? '' : '+'}${toNear(pay.delta, 4)}` : '—'}</td>
                   <td className="label pl-4 text-muted" title={rv ? `${rv.evidence_uri}\nsha256 ${rv.evidence_hash}` : undefined}>
-                    {rv ? `${rv.evidence_hash.slice(0, 8)}…` : '—'}
+                    {rv && safeDocLink(rv.evidence_uri)
+                      ? <a href={safeDocLink(rv.evidence_uri)} target="_blank" rel="noopener noreferrer" className="underline hover:text-ink">{rv.evidence_hash.slice(0, 8)}… ↗</a>
+                      : rv ? `${rv.evidence_hash.slice(0, 8)}…` : '—'}
                   </td>
                 </tr>
               )
