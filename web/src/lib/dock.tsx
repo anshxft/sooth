@@ -42,7 +42,7 @@ const PAGES = [
 export function Dock() {
   const mouseX = useMotionValue(Infinity)
   const [location] = useLocation()
-  const isActive = (href: string) => (href === '/' ? location === '/' || location.startsWith('/q/') : location.startsWith(href) || (href === '/swarm' && location.startsWith('/t/')))
+  const isActive = (href: string) => (href === '/' ? location === '/' || location.startsWith('/q/') : location.startsWith(href) || (href === '/swarm' && (location.startsWith('/t/') || location === '/hire')))
 
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-[max(12px,env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
