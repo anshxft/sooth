@@ -2,7 +2,7 @@ import { Fragment, type ReactNode, useState } from 'react'
 import { Link } from 'wouter'
 import { countdown, toNear, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
-import { cn } from '../lib/utils'
+import { cn, spaced } from '../lib/utils'
 import { Scramble } from '../lib/motion'
 import { Bills } from '../lib/bills'
 import { VerifyPanel, cli } from '../lib/verify'
@@ -131,7 +131,7 @@ function WorkerCard({ worker: w, jobs, tasks, isOpen, onToggle }: WorkerCardProp
 function BidLine({ job: j, account }: { job: Job; account: string }) {
   const bid = j.bids.find((b) => b.account_id === account)
   const isWinner = j.winner === account
-  const status = j.result ? RESULT[j.result].text : j.phase
+  const status = j.result ? RESULT[j.result].text : spaced(j.phase)
   const outcome = !isWinner && j.winner ? `lost to ${short(j.winner)}` : status
   const isBad = isWinner && j.result !== null && RESULT[j.result].isBad
   return (
@@ -165,7 +165,7 @@ function TaskRow({ task, jobs }: { task: Task; jobs: Job[] }) {
       <p className="label mt-1 flex flex-wrap gap-x-3 text-muted">
         <span>budget {toNear(task.budget, 2)} Ⓝ</span><span>paid {toNear(task.paid, 2)} Ⓝ</span>
         <span>{jobs.length} job{jobs.length === 1 ? '' : 's'}</span>
-        <span className={cn('border border-ink px-1.5 text-ink', live && 'live-dot bg-green')}>{live ? live.phase : task.status}</span>
+        <span className={cn('border border-ink px-1.5 text-ink', live && 'live-dot bg-green')}>{live ? spaced(live.phase) : task.status}</span>
       </p>
     </li>
   )

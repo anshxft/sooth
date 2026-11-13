@@ -4,7 +4,7 @@ import {
   type AgentView, type Config, type QuestionView, type Round,
   CONTRACT, countdown, nsToMs, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
-import { cn } from '../lib/utils'
+import { cn, spaced } from '../lib/utils'
 import { Scramble } from '../lib/motion'
 import { VerifyPanel, cli } from '../lib/verify'
 import { Timer, elapsed } from '../lib/timer'
@@ -53,7 +53,7 @@ export function Question({ id }: { id: string }) {
         <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.05] tracking-[-0.03em]"><Scramble text={q.text} /></h1>
         <p className="label mt-3 flex flex-wrap gap-x-3 gap-y-1 text-muted">
           <span>{q.category}</span><span>asked by {q.asker}</span><span>fee {toNear(q.fee)} Ⓝ</span>
-          <span>opened {clock(q.created_at)}</span><span className="border border-ink px-1.5 text-ink">{q.phase}</span>
+          <span>opened {clock(q.created_at)}</span><span className="border border-ink px-1.5 text-ink">{spaced(q.phase)}</span>
         </p>
       </header>
       <Verdict q={q} now={now} />
@@ -107,8 +107,8 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
   return (
     <div className={cn(box, 'bg-term! text-term-text')} aria-live="polite">
       <span className="live-dot label text-green">Pending · round {q.round}</span>
-      <span className="font-display text-[clamp(3rem,7vw,5rem)] leading-none">{left || (q.phase === 'Dao' ? 'DAO' : q.phase)}</span>
-      <span className="label">{q.phase === 'Dao' ? 'Agents could not agree. Waiting for the DAO.' : `${q.phase} phase`}</span>
+      <span className="font-display text-[clamp(3rem,7vw,5rem)] leading-none">{left || (q.phase === 'Dao' ? 'DAO' : spaced(q.phase))}</span>
+      <span className="label">{q.phase === 'Dao' ? 'Agents could not agree. Waiting for the DAO.' : `${spaced(q.phase)} phase`}</span>
     </div>
   )
 }
