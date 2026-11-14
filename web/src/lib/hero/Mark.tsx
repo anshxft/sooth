@@ -32,12 +32,28 @@ function band(p: number, a: number, b: number, c: number, d: number): number {
 
 type Drive = MutableRefObject<number>
 
+// First visit in a session: the mark spins in from far away and settles where it rests, so the
+// page opens on the logo itself instead of a separate splash. Reduced motion skips it.
+const ENTRY_SECONDS = 2.4
+const playsEntry = (() => {
+  try {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || sessionStorage.getItem('sooth-entry')) return false
+    sessionStorage.setItem('sooth-entry', '1')
+  } catch {
+    // storage blocked: play it on this load
+  }
+  return true
+})()
+const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4)
+
 function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean; isReduced: boolean }) {
   const group = useRef<THREE.Group>(null)
   const blades = useRef<(THREE.Group | null)[]>([])
   const eased = useRef(drive.current)
   const grid = useRef<THREE.Group>(null)
   const glow = useRef<THREE.PointLight>(null)
+  const entryStart = useRef<number | null>(null)
+  const restX = useRef(0)
 
   const parts = useMemo(() => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg">${BLADES.map((d) => `<path d="${d}"/>`).join('')}</svg>`
@@ -90,12 +106,17 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
     const lean = Math.cos(Math.PI * (p * CHAPTERS - 0.5))
     const x = isWide ? lean * 1.9 : 0
     const size = isWide ? 1 : 0.72
+    if (entryStart.current === null) entryStart.current = state.clock.elapsedTime
+    const left = playsEntry ? 1 - easeOut((state.clock.elapsedTime - entryStart.current) / ENTRY_SECONDS) : 0 // 1 → 0
     if (group.current) {
-      group.current.position.x = THREE.MathUtils.damp(group.current.position.x, x, 4, dt)
-      group.current.rotation.z = -p * Math.PI * 2 - idle
-      group.current.rotation.x = -0.55 + Math.sin(p * Math.PI) * 0.35
-      group.current.rotation.y = Math.sin(p * Math.PI * 2) * 0.45
-      group.current.scale.setScalar(size * (1 + open * 0.06))
+      restX.current = THREE.MathUtils.damp(restX.current, x, 4, dt)
+      group.current.position.x = restX.current - left * left * 5
+      group.current.position.y = left * left * 2.6
+      group.current.position.z = -left * 9
+      group.current.rotation.z = -p * Math.PI * 2 - idle + left * Math.PI * 3
+      group.current.rotation.x = -0.55 + Math.sin(p * Math.PI) * 0.35 + left * 0.9
+      group.current.rotation.y = Math.sin(p * Math.PI * 2) * 0.45 - left * 1.4
+      group.current.scale.setScalar(size * (1 + open * 0.06) * (1 - left * 0.5))
     }
     parts.forEach((part, i) => {
       const b = blades.current[i]
@@ -103,14 +124,14 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
       // Blades slide out from the centre in svg units (the group is scaled to world size).
       b.position.set(part.out.x * open * 22, part.out.y * open * 22, Math.sin(i * 1.7) * open * 7)
     })
-    solid.opacity = 1 - wire * 0.92
+    solid.opacity = (1 - wire * 0.92) * (1 - left * left)
     lines.opacity = wire * 0.9 + open * 0.15
     core.opacity = lit
     gridMaterial.opacity = 0.05 + wire * 0.22
     if (glow.current) glow.current.intensity = lit * 8
     if (grid.current && group.current) {
       grid.current.rotation.z = group.current.rotation.z * 0.25
-      grid.current.position.x = group.current.position.x
+      grid.current.position.x = restX.current
     }
   })
 
