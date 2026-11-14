@@ -36,8 +36,8 @@ type Drive = MutableRefObject<number>
 // First visit in a session: the mark spins in from far away and settles where it rests, so the
 // page opens on the logo itself instead of a separate splash. Reduced motion skips it.
 const ENTRY_SECONDS = 2.4
-// Phones: the mark sits low, under the opening words and buttons, instead of on top of them.
-const NARROW_Y = -1.9
+// Phones: how far the mark moves down (text above) or up (text below) to stay clear of the words.
+const NARROW_Y = -1.8
 const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4)
 
 function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean; isReduced: boolean }) {
@@ -48,6 +48,7 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
   const glow = useRef<THREE.PointLight>(null)
   const entryStart = useRef<number | null>(null)
   const restX = useRef(0)
+  const restY = useRef(0)
 
   const parts = useMemo(() => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg">${BLADES.map((d) => `<path d="${d}"/>`).join('')}</svg>`
@@ -107,7 +108,10 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
     if (group.current) {
       restX.current = THREE.MathUtils.damp(restX.current, x, 4, dt)
       group.current.position.x = restX.current - left * left * 5
-      group.current.position.y = (isWide ? 0 : NARROW_Y) + left * left * 2.6
+      // Phones stack text and mark: words at the top (left chapters) put the mark low, words at the
+      // bottom (right chapters) put it high, gliding between them with the scroll.
+      restY.current = THREE.MathUtils.damp(restY.current, isWide ? 0 : lean * NARROW_Y, 4, dt)
+      group.current.position.y = restY.current + left * left * 2.6
       group.current.position.z = -left * 9
       group.current.rotation.z = -p * Math.PI * 2 - idle + left * Math.PI * 3
       group.current.rotation.x = -0.55 + Math.sin(p * Math.PI) * 0.35 + left * 0.9
