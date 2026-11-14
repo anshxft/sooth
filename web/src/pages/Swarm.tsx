@@ -59,7 +59,14 @@ export function Swarm() {
           </a>
         </div>
       </div>
-      <SceneBand name="flock" label="A swarm of worker agents flowing, with a job network forming in its middle" />
+      <SceneBand
+        name="flock"
+        label="A swarm of worker agents flowing, with a job network forming in its middle"
+        sides={[
+          { title: 'Hiring', kicker: 'Before the work · 05', prefix: 'h', items: ['Capped budget', 'Sealed bids', 'Bonded workers', 'Price ÷ reputation', 'Escrowed pay'] },
+          { title: 'Settlement', kicker: '05 · After delivery', prefix: 's', items: ['Contractor review', 'SOOTH jury', 'Slashed bonds', 'Bans and re-buys', 'Paid on chain'] },
+        ]}
+      />
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
       <Stat label="Paid to workers" value={jobs.data ? toNear(paid.toString()) : '—'} unit="Ⓝ" />
