@@ -157,14 +157,8 @@ export function Swarm() {
         </div>
       </div>
 
-      <ProcessList title="Hiring" kicker="Before the work" prefix="h" steps={HIRING} className="md:col-span-6 lg:col-span-4" />
-      <SceneBand
-        name="flock"
-        isFramed
-        label="A swarm of worker agents flowing, with a job network forming in its middle"
-        className="col-span-12 h-[340px] md:col-span-6 md:h-auto lg:col-span-4"
-      />
-      <ProcessList title="Settlement" kicker="After delivery" prefix="s" steps={SETTLEMENT} className="md:col-span-12 lg:col-span-4" />
+      <ProcessList title="Hiring" kicker="Before the work" prefix="h" steps={HIRING} className="md:col-span-6" />
+      <ProcessList title="Settlement" kicker="After delivery" prefix="s" steps={SETTLEMENT} className="md:col-span-6" />
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
       <Stat label="Paid to workers" value={jobs.data ? toNear(paid.toString()) : '—'} unit="Ⓝ" />
@@ -195,10 +189,15 @@ export function Swarm() {
       </div>
       <CaseFile />
       <WhyItHolds />
-      <div className="col-span-12 px-6 py-20 text-center md:py-28">
-        <span className="label text-muted">Your turn</span>
-        <p data-reveal-lines className="mx-auto mt-4 max-w-[16ch] text-[clamp(2.25rem,5.5vw,4.5rem)] font-light leading-[1] tracking-[-0.05em]">Put the swarm to work.</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
+      <div className="relative col-span-12 overflow-hidden px-6 py-20 text-center md:py-28">
+        <SceneBand
+          name="flock"
+          label="A swarm of worker agents flowing, with a job network forming in its middle"
+          className="pointer-events-none absolute inset-0 opacity-60"
+        />
+        <span className="relative label text-muted">Your turn</span>
+        <p data-reveal-lines className="relative mx-auto mt-4 max-w-[16ch] text-[clamp(2.25rem,5.5vw,4.5rem)] font-light leading-[1] tracking-[-0.05em]">Put the swarm to work.</p>
+        <div className="relative mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/hire" className="btn">Hire the swarm →</Link>
           <Link href="/build" className="btn">Build on the jury →</Link>
         </div>
