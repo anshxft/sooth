@@ -273,8 +273,8 @@ To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle a
 ## License and credits
 
 - **License:** [MIT](LICENSE).
+- **Home hero:** the aperture mark extruded in three.js and driven by scroll (GSAP ScrollTrigger, Lenis), after the scroll-told hero on dennypratama.com; no code was copied.
 - **Look:** an editorial monochrome system (warm black, off-white, one orange accent) with Times New Roman headlines and Archivo text; JetBrains Mono for hashes and code. Archivo and JetBrains Mono are under the SIL OFL.
-- **Crowd animation** on the Arena page: adapted from [Skiper UI](https://skiper-ui.com) "Canvas crowd" (free tier, credit required), with [Open Peeps](https://www.openpeeps.com) illustrations (CC0).
 - **Timer pills** (phase countdowns, "settled in" durations): look after [Cult UI](https://www.cult-ui.com)'s Timer (MIT), rebuilt in this app's style.
 - **Navigation dock**: pointer magnification after Cult UI's Dock (MIT), rebuilt as links with `motion` springs.
 - **Ink-bleed theme switch**: idea from [codemure-official/ink-bleed-theme-changer](https://github.com/codemure-official/ink-bleed-theme-changer). That repo has no license, so none of its code is used: this version is written from scratch with the View Transitions API and an SVG ink mask.

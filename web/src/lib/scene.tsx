@@ -8,7 +8,6 @@ import { cn } from './utils'
 export type SceneProps = { isLive: boolean; isDark: boolean; isReduced: boolean; isFramed?: boolean }
 
 const SCENES: Record<string, ComponentType<SceneProps>> = {
-  consensus: lazy(() => import('./scenes/Consensus')),
   flock: lazy(() => import('./scenes/Flock')),
 }
 
