@@ -8,7 +8,7 @@ type Props = { checks: Check[]; links: { label: string; href: string }[] }
 export function VerifyPanel({ checks, links }: Props) {
   return (
     <section className="col-span-12 p-6 md:p-8" aria-labelledby="verify-title">
-      <span className="label text-muted">Don't trust this page</span>
+      <span className="label text-muted">Verify on NEAR</span>
       <h2 id="verify-title" className="mt-2 text-2xl font-semibold tracking-[-0.02em]">Check it yourself on NEAR</h2>
       <p className="mt-2 max-w-2xl text-muted">
         Every number here comes from the contracts. These read-only calls return the same data, free, with{' '}
