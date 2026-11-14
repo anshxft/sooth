@@ -2,9 +2,9 @@
 // Five sealed pods (commit) open (reveal), their answers drop on a balance (tally), and a dial reads the
 // winning share against the 80% line. Click to switch between a confident round and one that is not.
 // The whole state is a pure function of time, so reduced motion simply shows one settled frame.
-import { useEffect, useMemo, useRef, useState } from 'react'
 import * as k from './iso-kit'
-import { useIsDark } from './scene'
+import { along, ease } from './iso-kit-extra'
+import { IsoFigure, type Query } from './IsoFigure'
 
 const W = 720
 const H = 340
@@ -34,7 +34,6 @@ const P = k.fitProjection(
 )
 const S = (paths: k.SolidPaths, style?: k.SolidStyle) => k.solidSvg(paths, style)
 const L = (d: string, style?: k.LineStyle) => k.lineSvg(d, style)
-const ease = (t: number) => (t <= 0 ? 0 : t >= 1 ? 1 : 1 - Math.pow(1 - t, 3))
 
 function base(): string {
   const out = [`<path class="iso-halo" d="${k.haloOf(PLATE, -10, 10, P)}"/>`]
@@ -116,109 +115,61 @@ function caption(t: number, s: ReturnType<typeof stateAt>): string {
     : `${pct}% < 80% · not confident, round 2 at double stake`
 }
 
+const SVG = k.figureSvg({
+  width: W,
+  height: H,
+  label: 'A balance machine: five sealed pods open, each answer drops as a weight on a YES or NO tray, and a dial reads the winning share against the 80 percent line.',
+  body: [
+    base(),
+    ...PODS.map(pod),
+    ...PODS.map((x, i) => `<g data-part="lid${i}">${lid(x)}</g>`),
+    dial(),
+    `<path data-part="needle" class="iso-line" data-tone="lit" d="${needleAt(0)}" style="stroke-width:1.2"/>`,
+    balance(),
+    `<path data-part="beam" class="iso-line" data-tone="hi" style="stroke-width:1.4" d=""/>`,
+    `<path data-part="hangers" class="iso-line" data-tone="mid" d=""/>`,
+    `<g data-part="trayY">${tray('YES')}</g>`,
+    `<g data-part="trayN">${tray('NO')}</g>`,
+    ...PODS.map((_, i) => `<g data-part="w${i}" class="vb-weight"><g data-yes>${weight(true)}</g><g data-no>${weight(false)}</g></g>`),
+  ],
+})
+
+function draw(q: Query, t: number, scene: number): string {
+  const s = stateAt(t, SCENARIOS[scene].answers)
+  const drop = s.tilt * 9
+  const yEnd: k.Point3 = [POST[0] - ARM, 0, BEAM_Z - drop]
+  const nEnd: k.Point3 = [POST[0] + ARM, 0, BEAM_Z + drop]
+  const yTray = TRAY_Z - drop
+  const nTray = TRAY_Z + drop
+  q('beam').setAttribute('d', k.segment(yEnd, nEnd, P))
+  q('hangers').setAttribute('d', [-1, 1].flatMap((side) => [
+    k.segment(yEnd, [yEnd[0] + side * 10, side * 10, yTray], P),
+    k.segment(nEnd, [nEnd[0] + side * 10, side * 10, nTray], P),
+  ]).join(''))
+  q('trayY').setAttribute('transform', k.translateAlong(P, [yEnd[0], 0, yTray]))
+  q('trayN').setAttribute('transform', k.translateAlong(P, [nEnd[0], 0, nTray]))
+  for (const p of s.parts) {
+    q(`lid${p.i}`).setAttribute('transform', k.translateAlong(P, [0, 0, p.open * 10]))
+    const home: k.Point3 = [PODS[p.i], 0, 2 + p.open * 15]
+    const dest: k.Point3 = [(p.yes ? yEnd[0] : nEnd[0]) - 6 + (p.slot % 2) * 12, -5 + Math.floor(p.slot / 2) * 10, p.yes ? yTray : nTray]
+    const w = q(`w${p.i}`)
+    w.setAttribute('transform', k.translateAlong(P, along(home, dest, p.fly, 26)))
+    w.toggleAttribute('data-show-yes', p.open > 0.5 && p.yes)
+    w.toggleAttribute('data-show-no', p.open > 0.5 && !p.yes)
+    w.toggleAttribute('data-out', s.settled && s.winnerShare >= LINE && p.yes !== s.yesWins)
+  }
+  q('needle').setAttribute('d', needleAt(s.needle))
+  return caption(t, s)
+}
+
 export function VerdictBalance() {
-  const isDark = useIsDark()
-  const stage = useRef<HTMLDivElement>(null)
-  const [scene, setScene] = useState(0)
-  const [readout, setReadout] = useState('commit · five answers sealed')
-  const svg = useMemo(() => k.figureSvg({
-    width: W,
-    height: H,
-    label: 'A balance machine: five sealed pods open, each answer drops as a weight on a YES or NO tray, and a dial reads the winning share against the 80 percent line.',
-    body: [
-      base(),
-      ...PODS.map(pod),
-      ...PODS.map((x, i) => `<g data-part="lid${i}">${lid(x)}</g>`),
-      dial(),
-      `<path data-part="needle" class="iso-line" data-tone="lit" d="${needleAt(0)}" style="stroke-width:1.2"/>`,
-      balance(),
-      `<path data-part="beam" class="iso-line" data-tone="hi" style="stroke-width:1.4" d=""/>`,
-      `<path data-part="hangers" class="iso-line" data-tone="mid" d=""/>`,
-      `<g data-part="trayY">${tray('YES')}</g>`,
-      `<g data-part="trayN">${tray('NO')}</g>`,
-      ...PODS.map((_, i) => `<g data-part="w${i}" class="vb-weight"><g data-yes>${weight(true)}</g><g data-no>${weight(false)}</g></g>`),
-    ],
-  }), [])
-
-  useEffect(() => {
-    const root = stage.current
-    if (!root) return
-    const q = (name: string) => root.querySelector(`[data-part="${name}"]`) as SVGElement
-    const answers = SCENARIOS[scene].answers
-    const draw = (t: number) => {
-      const s = stateAt(t, answers)
-      const drop = s.tilt * 9
-      const yEnd: k.Point3 = [POST[0] - ARM, 0, BEAM_Z - drop]
-      const nEnd: k.Point3 = [POST[0] + ARM, 0, BEAM_Z + drop]
-      const yTray = TRAY_Z - drop
-      const nTray = TRAY_Z + drop
-      q('beam').setAttribute('d', k.segment(yEnd, nEnd, P))
-      q('hangers').setAttribute('d', [-1, 1].flatMap((side) => [
-        k.segment(yEnd, [yEnd[0] + side * 10, side * 10, yTray], P),
-        k.segment(nEnd, [nEnd[0] + side * 10, side * 10, nTray], P),
-      ]).join(''))
-      q('trayY').setAttribute('transform', k.translateAlong(P, [yEnd[0], 0, yTray]))
-      q('trayN').setAttribute('transform', k.translateAlong(P, [nEnd[0], 0, nTray]))
-      for (const p of s.parts) {
-        q(`lid${p.i}`).setAttribute('transform', k.translateAlong(P, [0, 0, p.open * 10]))
-        const home: k.Point3 = [PODS[p.i], 0, 2 + p.open * 15]
-        const dest: k.Point3 = [(p.yes ? yEnd[0] : nEnd[0]) - 6 + (p.slot % 2) * 12, -5 + Math.floor(p.slot / 2) * 10, p.yes ? yTray : nTray]
-        const lift = Math.sin(p.fly * Math.PI) * 26
-        const pos: k.Point3 = [home[0] + (dest[0] - home[0]) * p.fly, home[1] + (dest[1] - home[1]) * p.fly, home[2] + (dest[2] - home[2]) * p.fly + lift]
-        const w = q(`w${p.i}`)
-        w.setAttribute('transform', k.translateAlong(P, pos))
-        w.toggleAttribute('data-show-yes', p.open > 0.5 && p.yes)
-        w.toggleAttribute('data-show-no', p.open > 0.5 && !p.yes)
-        w.toggleAttribute('data-out', s.settled && s.winnerShare >= LINE && p.yes !== s.yesWins)
-      }
-      q('needle').setAttribute('d', needleAt(s.needle))
-      const text = caption(t, s)
-      setReadout((old) => (old === text ? old : text))
-    }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { draw(STILL_AT); return }
-    let frame = 0
-    let start = 0
-    let visible = false
-    const tick = (now: number) => {
-      if (!start) start = now
-      draw(((now - start) / 1000) % CYCLE)
-      frame = visible ? requestAnimationFrame(tick) : 0
-    }
-    draw(0)
-    const io = new IntersectionObserver(([e]) => {
-      visible = e.isIntersecting
-      if (visible && !frame) frame = requestAnimationFrame(tick)
-    })
-    io.observe(root)
-    return () => { io.disconnect(); cancelAnimationFrame(frame) }
-  }, [scene])
-
-  const next = () => setScene((s) => (s + 1) % SCENARIOS.length)
   return (
-    <figure className="iso vb" data-theme={isDark ? 'dark' : 'light'}>
-      <style>{k.ISO_CSS + VB_CSS}</style>
-      <div className="flex flex-wrap items-baseline justify-between gap-2 pb-2">
-        <span className="label text-muted">Fig 1 · How a question settles</span>
-        <span className="label text-muted">Click to switch · {SCENARIOS[scene].name}</span>
-      </div>
-      <div
-        ref={stage}
-        role="button"
-        tabIndex={0}
-        aria-label={`Verdict balance, ${SCENARIOS[scene].name}. Press to switch round.`}
-        onClick={next}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); next() } }}
-        className="cursor-pointer"
-        // Our own generated geometry, no user input.
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
-      <figcaption className="label pt-2" aria-live="polite">{readout}</figcaption>
-    </figure>
+    <IsoFigure fig="Fig 1" title="How a question settles" label="Verdict balance." svg={SVG}
+      scenes={SCENARIOS.map((s) => s.name)} cycle={CYCLE} stillAt={STILL_AT} css={VB_CSS} draw={draw} />
   )
 }
 
 const VB_CSS = `
-.vb{--anatomy-paper:var(--color-canvas);--anatomy-red:#ff4f2b}
 .vb-weight>g{display:none}
 .vb-weight[data-show-yes]>[data-yes],.vb-weight[data-show-no]>[data-no]{display:inline}
 .vb-weight[data-out] .iso-edge{stroke:var(--anatomy-red)}

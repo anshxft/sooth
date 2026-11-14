@@ -1,3 +1,4 @@
+import { SwarmLoop } from '../lib/SwarmLoop'
 import { Fragment, type ReactNode, useState } from 'react'
 import { AgentFace } from '../lib/face'
 import { SceneBand } from '../lib/scene'
@@ -188,6 +189,9 @@ export function Swarm() {
             />
           ))}
         </ul>
+      </div>
+      <div className="col-span-12 border-t border-line p-4 md:p-8">
+        <SwarmLoop />
       </div>
       <CaseFile />
       <WhyItHolds />
