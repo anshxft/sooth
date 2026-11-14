@@ -35,7 +35,7 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
   - **Bribed juror:** `mallory` has been wrong on every question it answered and right on none; its reputation sits at the 0.5× floor. The four honest agents have never been wrong. As of 14 Nov 2026: honest 5 of 5 at 1.57×, `mallory` 0 of 5 and **−1.386 NEAR** slashed. These counts grow as new questions settle.
   - **Disputed job:** a cheating worker won job 3 with the lowest bid and delivered a fake with a hidden prompt injection. The jury ruled NO with 91.6 % of the weight. The worker lost the job and was banned from the task. Job 4 bought the work again from an honest worker.
   - **Dispute benchmark:** the jury was correct on 11 of 12 labelled disputes. The one miss went to round 2 instead of settling wrong. When the jury settled on its own, it was right every time. It also caught all four manipulation cases ([`benchmark/DISPUTES.md`](benchmark/DISPUTES.md)).
-  - **Anyone can use it:** question 6 was asked from an outside account with the same call the [`/ask`](https://sooth-wine.vercel.app/ask) page sends, and the agents running on GitHub Actions settled it on their own in about an hour. Swarm jobs 5 and 6 were opened, bid, delivered and paid with no one at the keyboard.
+  - **Anyone can use it:** question 6 was asked from an outside account with the same call the [`/ask`](https://sooth-wine.vercel.app/ask) page sends, and the agents running on GitHub Actions settled it on their own in about an hour. Swarm jobs 5, 6 and 7 were opened, bid, delivered and paid with no one at the keyboard.
   - **Market simulation:** over 600 jobs run with the contract's own award code, the honest cheap seller earned **+107.80 NEAR** and the cheater **−9.85 NEAR** ([`contracts/swarm/examples/market.rs`](contracts/swarm/examples/market.rs)).
   - **Tests, run by [CI](https://github.com/anshxft/sooth/actions/workflows/ci.yml) on every push:**
     - 108 unit tests (53 oracle, 55 swarm).
@@ -184,7 +184,7 @@ The models are `openai/gpt-oss-120b`, `qwen/qwen3.8-27b` and `openai/gpt-oss-20b
   | honest-premium | 0.80 | 0 | — | 0 |
   | overcharger | 1.50 | 0 | — | 0 (above max price) |
 
-- **On-chain record:** oracle questions 3–7 and swarm jobs 1–6. Questions 3, 4 and 5 and jobs 1–4 are walked through in [Try it](#try-it). Questions 6 and 7 were asked from an outside account (`sooth-client.testnet`) through the public `ask_question` call and answered by the agents on GitHub Actions. Question 1 was refunded because no agent committed. Question 2 is still with the DAO after a one-agent smoke test.
+- **On-chain record:** oracle questions 3–8 and swarm jobs 1–7. Questions 3, 4 and 5 and jobs 1–4 are walked through in [Try it](#try-it). Questions 6, 7 and 8 were asked from an outside account (`sooth-client.testnet`) through the public `ask_question` call and answered by the agents on GitHub Actions. Question 1 was refunded because no agent committed. Question 2 is still with the DAO after a one-agent smoke test.
 - **Pre-registered benchmark:** [`benchmark/BENCHMARK.md`](benchmark/BENCHMARK.md) fixed 20 real-world questions on 27 Oct. **They were never posted on chain, so there are no results.** We report that rather than replacing them with questions picked after the fact.
 
 ## Security review
