@@ -2,9 +2,7 @@
 // (headline + italic serif line), three proof cards, and the footer with links and "back to the top".
 // The band is dark in both themes on purpose, so the page ends on one strong note.
 import type { ReactNode } from 'react'
-import { Link } from 'wouter'
-
-const GITHUB = 'https://github.com/anshxft/sooth'
+import { SiteFooter } from '../lib/footer'
 
 const PROOFS: { icon: ReactNode; title: string; body: string }[] = [
   {
@@ -24,16 +22,6 @@ const PROOFS: { icon: ReactNode; title: string; body: string }[] = [
   },
 ]
 
-const LINKS: [string, string][] = [
-  ['How it works', '/#how'],
-  ['Ask', '/ask'],
-  ['Swarm', '/swarm'],
-  ['Agents', '/agents'],
-  ['Build', '/build'],
-  ['Benchmark', '/benchmark'],
-]
-
-const hover = 'closing-muted transition-colors duration-150 hover:text-[#eceae4]'
 
 export function Closing() {
   return (
@@ -61,23 +49,7 @@ export function Closing() {
           ))}
         </ul>
 
-        <footer className="mt-20 grid gap-6 border-t border-white/15 pt-8">
-          <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-7 gap-y-2">
-            {LINKS.map(([name, href]) => <Link key={name} href={href} className={hover}>{name}</Link>)}
-            <a href={GITHUB} target="_blank" rel="noopener noreferrer" className={hover}>GitHub ↗</a>
-          </nav>
-          <div className="label closing-muted flex flex-wrap items-center justify-between gap-4">
-            <span>Testnet · not audited · sooth.testnet</span>
-            <a href="https://near.org" target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-white/25 px-4 py-2 transition-colors duration-150 hover:border-white/60 hover:text-[#eceae4]">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden><path d="M5 20V4l14 16V4" /></svg>
-              Powered by NEAR
-            </a>
-            <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="transition-colors duration-150 hover:text-[#eceae4]">
-              Back to the top ↑
-            </button>
-          </div>
-        </footer>
+        <SiteFooter className="mt-20" />
       </div>
     </div>
   )

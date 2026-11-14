@@ -9,6 +9,7 @@ import { useTextReveal } from './lib/reveal'
 import { useHoverText } from './lib/hovertext'
 import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
+import { PageFooter } from './lib/footer'
 
 // Arena is the landing page; the rest load on first visit.
 const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })))
@@ -78,6 +79,7 @@ export default function App() {
           </Route>
         </Switch>
         </Suspense>
+        {location !== '/' && <PageFooter />}
       </div>
       <MyRequests />
       <Dock />
