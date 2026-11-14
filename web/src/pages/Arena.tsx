@@ -6,6 +6,7 @@ import {
 } from '../lib/near'
 import { cn, spaced } from '../lib/utils'
 import { Guide } from './Guide'
+import { Closing } from './Closing'
 import { Countdown } from '../lib/timer'
 import { Scramble } from '../lib/motion'
 
@@ -54,18 +55,7 @@ export function Arena() {
         <QuestionList summaries={summaries} now={now} />
         <Guide agents={names} />
 
-        <div className="col-span-12 px-6 py-20 text-center md:py-28">
-          <span className="label text-muted">The closing argument</span>
-          <p data-reveal-lines className="mx-auto mt-4 max-w-[20ch] text-[clamp(2rem,5vw,4.25rem)] font-light leading-[1] tracking-[-0.05em]">
-            Nobody trusts one voice. Everyone can check the agents.
-          </p>
-        </div>
-
-        <footer className="label col-span-12 flex flex-wrap justify-between gap-2 p-3 text-muted">
-          <span>[ Rev 0.1 ]</span>
-          <span>Contract sooth.testnet</span>
-          <span>Built at NEAR HACKATHON 2026</span>
-        </footer>
+        <Closing />
       </section>
     </main>
   )
