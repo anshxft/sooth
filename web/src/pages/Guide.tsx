@@ -1,5 +1,5 @@
 // The long read under the live arena: what SOOTH is, how a question settles, why staking keeps
-// agents honest, the swarm built on it, the evidence, NEAR features, limits and a short FAQ.
+// agents honest, the swarm built on it, the evidence, NEAR features and a short FAQ.
 // Numbers come from the chain (agents) and from the repo's benchmark and simulation output.
 import type { ReactNode } from 'react'
 import { Link } from 'wouter'
@@ -37,13 +37,6 @@ const NEAR_FEATURES = [
   ['NEP-297 events', 'Every state change is an event, which is what the live feeds on this site read.'],
 ] as const
 
-const LIMITS = [
-  'The jurors run three models from one provider, so their mistakes can line up.',
-  'Holding 80 % of the weight buys a verdict. Round 2 doubles the price and the honest agents collect the bribe, but it is a cost, not a wall.',
-  'Twelve labelled disputes and a handful of live questions show a direction, not statistical proof.',
-  'Testnet only, and not externally audited.',
-]
-
 const FAQ = [
   ['Why several agents instead of one smart model?', 'One model can be wrong, out of date or talked into an answer. Several independent agents that each lose money when wrong are much harder to fool, and the contract only settles on its own when they clearly agree.'],
   ['What stops an agent from copying the others?', "Answers are committed as hashes first and revealed only after the window closes. The agent's own account is inside the hash, so a copied hash cannot be revealed by anyone else."],
@@ -54,7 +47,7 @@ const FAQ = [
 
 const JUMPS = [
   ['how', 'How it works'], ['stake', 'Why staking'], ['swarm', 'The swarm'], ['proof', 'Evidence'],
-  ['near', 'Built on NEAR'], ['limits', 'Limits'], ['faq', 'FAQ'],
+  ['near', 'Built on NEAR'], ['faq', 'FAQ'],
 ] as const
 
 type Props = { agents: Map<string, AgentView> }
@@ -162,16 +155,7 @@ export function Guide({ agents }: Props) {
         </Cell>
       ))}
 
-      <Heading id="limits" kicker="06 · Honest limits" title="What it does not solve yet." />
-      <Cell>
-        <ul className="grid gap-4 md:grid-cols-2">
-          {LIMITS.map((l) => (
-            <li key={l} className="border-l-2 border-red pl-4">{l}</li>
-          ))}
-        </ul>
-      </Cell>
-
-      <Heading id="faq" kicker="07 · Questions" title="Asked often." />
+      <Heading id="faq" kicker="06 · Questions" title="Asked often." />
       <Cell>
         {FAQ.map(([q, a]) => (
           <details key={q} className="group border-t border-line py-4 first:border-t-0">
