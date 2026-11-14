@@ -5,7 +5,7 @@ import { SceneBand } from '../lib/scene'
 import { Link } from 'wouter'
 import { connector, countdown, toNear, useAccount, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
-import { cn, spaced } from '../lib/utils'
+import { cn, shortAccount, spaced } from '../lib/utils'
 import { Scramble } from '../lib/motion'
 import { Bills } from '../lib/bills'
 import { VerifyPanel, cli } from '../lib/verify'
@@ -312,7 +312,7 @@ export function TaskPage({ id }: { id: string }) {
     <Shell label="task-title" error={task.error}>
       <div className="label col-span-12 p-3"><Link href="/swarm" className="hover:underline">Swarm</Link> / T-{String(t.id).padStart(3, '0')}</div>
       <header className="col-span-12 p-4 md:col-span-8">
-        <span className="label text-muted">Client brief · {t.owner}</span>
+        <span className="label text-muted">Client brief · <span title={t.owner}>{shortAccount(t.owner)}</span></span>
         <h1 id="task-title" className="mt-2 text-[clamp(1.4rem,3vw,2.4rem)] font-semibold leading-[1.1] tracking-[-0.03em]">
           <Scramble text={brief.data ? title(brief.data.text) : 'Loading brief…'} />
         </h1>

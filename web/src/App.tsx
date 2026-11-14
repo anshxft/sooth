@@ -8,6 +8,7 @@ import { MyRequests } from './lib/mine'
 import { useTextReveal } from './lib/reveal'
 import { useHoverText } from './lib/hovertext'
 import { useSmoothScroll } from './lib/smooth'
+import { shortAccount } from './lib/utils'
 import { Arena } from './pages/Arena'
 import { PageFooter } from './lib/footer'
 import { PageLoader } from './lib/loader'
@@ -73,7 +74,7 @@ export default function App() {
             onClick={accountId ? signOut : signIn}
             className="wallet btn btn-sm"
           >
-            {accountId ? <><span className="inline-block max-w-[9rem] truncate align-bottom sm:max-w-[16rem]">{accountId}</span> ×</> : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
+            {accountId ? <><span title={accountId} className="inline-block max-w-[9rem] truncate align-bottom sm:max-w-[16rem]">{shortAccount(accountId)}</span> ×</> : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
           </button>
           <ThemeToggle />
         </div>
