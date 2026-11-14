@@ -108,7 +108,7 @@ export function Hero({ status }: { status: string }) {
               )}
             >
               <span className="ch-fade label text-muted">{ch.kicker}</span>
-              <h2 className="text-[clamp(2.6rem,6.4vw,6.5rem)] font-light leading-[0.98] tracking-[-0.055em]">
+              <h2 className="pointer-events-auto text-[clamp(2.6rem,6.4vw,6.5rem)] font-light leading-[0.98] tracking-[-0.055em]">
                 {ch.title.filter(Boolean).map((t) => (
                   <span key={t} className="block overflow-hidden pb-[0.06em]">
                     <span className="ch-line block" style={i === 0 ? undefined : { transform: 'translateY(110%)' }}>{t}</span>

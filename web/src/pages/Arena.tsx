@@ -126,7 +126,7 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
   return (
     <div className="col-span-12 px-6 py-10 md:px-8 md:py-14">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2 className="max-w-4xl text-[clamp(1.6rem,3.2vw,2.6rem)] font-light leading-[1.08] tracking-[-0.04em]"><Scramble text={q.text} /></h2>
+        <h2 data-no-hover className="max-w-4xl text-[clamp(1.6rem,3.2vw,2.6rem)] font-light leading-[1.08] tracking-[-0.04em]"><Scramble text={q.text} /></h2>
         <span className="label text-muted">{q.category} · {qid(q.id)}</span>
       </div>
 
