@@ -26,6 +26,8 @@ near contract call-function as-read-only sooth.testnet list_agents json-args '{"
 
 ## Build and test
 
+CI runs all of this on every push: [actions/workflows/ci.yml](https://github.com/anshxft/sooth/actions/workflows/ci.yml) (all green as of 14 Nov 2026: 53 + 55 unit tests, 2 sandbox tests, simulation, web, claims).
+
 | What | Command | Needs |
 | --- | --- | --- |
 | Oracle contract: 53 unit tests + a sandbox round | `cd contracts/sooth && cargo test` | Linux or WSL, Rust 1.93 (`rust-toolchain.toml`), cargo-near |

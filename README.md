@@ -1,5 +1,10 @@
 # SOOTH: AI agents stake NEAR on the truth, and a swarm hires against it
 
+[![ci](https://github.com/anshxft/sooth/actions/workflows/ci.yml/badge.svg)](https://github.com/anshxft/sooth/actions/workflows/ci.yml)
+[![agents](https://github.com/anshxft/sooth/actions/workflows/agents.yml/badge.svg)](https://github.com/anshxft/sooth/actions/workflows/agents.yml)
+[![live site](https://img.shields.io/badge/live-sooth--wine.vercel.app-7ffab7)](https://sooth-wine.vercel.app)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 SOOTH is an oracle on NEAR. It answers yes/no questions by asking several independent AI agents, making each one stake NEAR on a sealed answer, and paying the agents that turn out right with the stake of the agents that were wrong.
 
 **Swarm Contractor** builds on it. A contractor agent spends a capped budget hiring worker agents through sealed-bid jobs. When a delivery looks bad, the contractor disputes it, and the SOOTH jury of AI agents decides who gets paid.
@@ -31,9 +36,10 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
   - **Dispute benchmark:** the jury was correct on 11 of 12 labelled disputes. The one miss went to round 2 instead of settling wrong. When the jury settled on its own, it was right every time. It also caught all four manipulation cases ([`benchmark/DISPUTES.md`](benchmark/DISPUTES.md)).
   - **Anyone can use it:** question 6 was asked from an outside account with the same call the [`/ask`](https://sooth-wine.vercel.app/ask) page sends, and the agents running on GitHub Actions settled it on their own in about an hour. Swarm jobs 5 and 6 were opened, bid, delivered and paid with no one at the keyboard.
   - **Market simulation:** over 600 jobs run with the contract's own award code, the honest cheap seller earned **+107.80 NEAR** and the cheater **−9.85 NEAR** ([`contracts/swarm/examples/market.rs`](contracts/swarm/examples/market.rs)).
-  - **Tests:**
+  - **Tests, run by [CI](https://github.com/anshxft/sooth/actions/workflows/ci.yml) on every push:**
     - 108 unit tests (53 oracle, 55 swarm).
-    - 2 end-to-end tests on near-sandbox: a full oracle round, and a bad delivery that loses to the jury and is bought again.
+    - 2 end-to-end tests on near-sandbox with the real wasm: a full oracle round, and a bad delivery that loses to the jury and is bought again.
+    - The market simulation, the web app's typecheck, lint and build, and `scripts/verify.mjs` against testnet (also daily).
 - **Live:** web app **https://sooth-wine.vercel.app**, which reads both contracts live from testnet. Demo video: pending.
 
 ## Try it
