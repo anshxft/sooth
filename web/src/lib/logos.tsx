@@ -26,6 +26,11 @@ export function SignInWith({ className }: { className?: string }) {
           </li>
         ))}
       </ul>
+      <p className="w-full text-xs text-muted">
+        New to testnet? HOT and MyNearWallet are mainnet-only, so make a free testnet account in{' '}
+        <a href="https://meteorwallet.app" target="_blank" rel="noopener noreferrer" className="underline">Meteor</a> (about a minute), then take free NEAR from{' '}
+        <a href="https://near-faucet.io/" target="_blank" rel="noopener noreferrer" className="underline">near-faucet.io</a>.
+      </p>
     </div>
   )
 }
