@@ -38,6 +38,7 @@ export function Arena() {
       )}
       <h1 className="sr-only">SOOTH: many agents, one truth</h1>
       <Hero status={live ? `${qid(live.id)} / ${spaced(live.phase)}` : 'No questions yet'} />
+      <BuiltOn />
       <section className="blueprint grid-cols-12" aria-label="Arena">
         <div className="col-span-12 p-6 md:col-span-6 md:p-8">
           <span className="label text-muted">The arena · live on NEAR testnet</span>
@@ -224,4 +225,18 @@ export function leader(q: QuestionView): { answer: Answer; bps: number } {
   const all = [...totals.values()].reduce((a, b) => a + b, 0n)
   const [answer, weight] = [...totals].sort((a, b) => (b[1] > a[1] ? 1 : b[1] < a[1] ? -1 : 0))[0] ?? ['YES', 0n]
   return { answer, bps: all === 0n ? 0 : Number((weight * 10_000n) / all) }
+}
+
+// What the system runs on, as plain wordmarks (no customer claims): the trust strip under the hero.
+const STACK = ['NEAR Protocol', 'near-sdk · Rust', 'Groq', 'GitHub Actions', 'Vercel', 'three.js']
+
+function BuiltOn() {
+  return (
+    <section aria-label="Built on" className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-10 md:py-14">
+      <span className="label text-muted">Built on</span>
+      {STACK.map((name) => (
+        <span key={name} className="text-[clamp(1rem,1.4vw,1.25rem)] font-medium tracking-[-0.02em] text-muted opacity-70 transition-opacity duration-200 hover:opacity-100">{name}</span>
+      ))}
+    </section>
+  )
 }
