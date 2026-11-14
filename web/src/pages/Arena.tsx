@@ -56,8 +56,8 @@ export function Arena() {
         <QuestionList summaries={summaries} now={now} />
         <Guide agents={names} />
 
-        <Closing />
       </section>
+      <Closing />
     </main>
   )
 }

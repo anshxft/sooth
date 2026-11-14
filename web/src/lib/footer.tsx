@@ -42,9 +42,12 @@ export function SiteFooter({ className }: { className?: string }) {
 /** The footer on its own, for pages without the home page's closing band. */
 export function PageFooter() {
   return (
-    <div className="mx-auto max-w-[1440px] px-4">
-      <div className="closing-band rounded-2xl px-6 pb-8 pt-2 md:px-16">
-        <SiteFooter className="border-t-0" />
+    <div className="bleed bleed-fade mt-8">
+      <div aria-hidden className="closing-glow h-24" />
+      <div className="closing-band">
+        <div className="mx-auto max-w-[1440px] px-6 pb-16 pt-2 md:px-16">
+          <SiteFooter className="border-t-0" />
+        </div>
       </div>
     </div>
   )
