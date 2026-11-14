@@ -1,6 +1,6 @@
 // "Check it yourself": the exact read-only CLI calls that return what a page shows, with copy
 // buttons, plus explorer links. Nothing on this site has to be taken on trust.
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 
 export type Check = { label: string; command: string }
 type Props = { checks: Check[]; links: { label: string; href: string }[] }
@@ -41,9 +41,12 @@ export function Command({ label, command }: Check) {
     <li className="min-w-0 border border-line">
       <div className="flex items-center justify-between gap-3 border-b border-line px-3 py-2">
         <span className="label text-muted">{label}</span>
-        <button type="button" onClick={copy} className="btn btn-sm">
-          {state === 'copied' ? 'Copied ✓' : state === 'failed' ? 'Select & copy' : 'Copy'}
-        </button>
+        <span className="relative inline-flex">
+          <button type="button" onClick={copy} className="btn btn-sm">
+            {state === 'copied' ? 'Copied ✓' : state === 'failed' ? 'Select & copy' : 'Copy'}
+          </button>
+          {state === 'copied' && <Burst />}
+        </span>
       </div>
       <pre className="overflow-x-auto p-3 font-mono text-xs leading-5 select-all"><code>{command}</code></pre>
     </li>
@@ -54,3 +57,21 @@ const call = (contract: string, method: string, args: object) =>
   `near contract call-function as-read-only ${contract} ${method} json-args '${JSON.stringify(args)}' network-config testnet now`
 
 export const cli = { call }
+
+// Secondary action for a successful copy: a ring and a few sparks leave the button, then fade
+// (CSS only, ~0.6 s; hidden for reduced motion). Sparks sit on an ellipse to follow the pill shape.
+const SPARKS = Array.from({ length: 8 }, (_, i) => {
+  const a = (i / 8) * Math.PI * 2 + 0.3
+  return { x: `${Math.round(Math.cos(a) * 60)}px`, y: `${Math.round(Math.sin(a) * 32)}px`, delay: `${(i % 3) * 30}ms` }
+})
+
+function Burst() {
+  return (
+    <span aria-hidden className="burst">
+      <span className="burst-ring" />
+      {SPARKS.map((p) => (
+        <i key={p.x + p.y} style={{ '--x': p.x, '--y': p.y, animationDelay: p.delay } as CSSProperties} />
+      ))}
+    </span>
+  )
+}
