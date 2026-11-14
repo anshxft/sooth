@@ -10,7 +10,9 @@ import { cn } from '../lib/utils'
 import { playsEntry } from '../lib/hero/entry'
 
 gsap.registerPlugin(ScrollTrigger)
-const Mark = lazy(() => import('../lib/hero/Mark'))
+// Start fetching the 3D mark (three.js) as soon as this module runs, alongside the page, not after it renders.
+const markChunk = import('../lib/hero/Mark')
+const Mark = lazy(() => markChunk)
 
 type Chapter = { kicker: string; title: [string, string?]; body?: string; side: 'left' | 'right' }
 const CHAPTERS: Chapter[] = [
