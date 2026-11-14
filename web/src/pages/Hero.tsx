@@ -7,6 +7,7 @@ import { Link } from 'wouter'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { cn } from '../lib/utils'
+import { playsEntry } from '../lib/hero/entry'
 
 gsap.registerPlugin(ScrollTrigger)
 const Mark = lazy(() => import('../lib/hero/Mark'))
@@ -83,7 +84,7 @@ export function Hero({ status }: { status: string }) {
   }, [isReduced])
 
   return (
-    <section ref={track} data-no-reveal aria-label="SOOTH, in five steps" className="relative h-[520vh]">
+    <section ref={track} data-no-reveal data-entry={playsEntry ? '' : undefined} aria-label="SOOTH, in five steps" className="relative h-[520vh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <div className="absolute inset-0">
           <Suspense fallback={null}>
@@ -102,6 +103,7 @@ export function Hero({ status }: { status: string }) {
             <div
               key={ch.kicker}
               data-chapter
+              data-first={i === 0 ? '' : undefined}
               className={cn(
                 'pointer-events-none absolute flex max-w-[92vw] flex-col gap-4 px-4 md:max-w-[44vw] md:px-8',
                 isRight ? 'bottom-24 right-0 items-end text-right md:bottom-20' : 'left-0 top-16 md:top-24',

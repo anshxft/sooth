@@ -7,6 +7,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
+import { playsEntry } from './entry'
 
 // brand/mark-ink.svg: six blades around a hexagonal opening, 60 degrees apart.
 export const BLADES = [
@@ -35,15 +36,6 @@ type Drive = MutableRefObject<number>
 // First visit in a session: the mark spins in from far away and settles where it rests, so the
 // page opens on the logo itself instead of a separate splash. Reduced motion skips it.
 const ENTRY_SECONDS = 2.4
-const playsEntry = (() => {
-  try {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || sessionStorage.getItem('sooth-entry')) return false
-    sessionStorage.setItem('sooth-entry', '1')
-  } catch {
-    // storage blocked: play it on this load
-  }
-  return true
-})()
 const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4)
 
 function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean; isReduced: boolean }) {
@@ -103,9 +95,11 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
     // Make room for the words: chapters alternate left and right, so the mark leans the other way
     // (+1 while a left chapter shows, -1 for a right one). Narrow screens keep it centred and smaller.
     const isWide = state.size.width / state.size.height > 1.2
-    const lean = Math.cos(Math.PI * (p * CHAPTERS - 0.5))
-    const x = isWide ? lean * 1.9 : 0
-    const size = isWide ? 1 : 0.72
+    const lean = Math.cos(Math.PI * (Math.max(p * CHAPTERS, 0.5) - 0.5)) // held at +1 until chapter 1 is centred
+    // Wide screens: a bigger mark out on the free side, past the words (half-width at z=0 is 3.73·aspect).
+    const halfWidth = 3.73 * (state.size.width / state.size.height)
+    const x = isWide ? lean * Math.min(halfWidth * 0.42, 3.9) : 0
+    const size = isWide ? Math.min(1.45, halfWidth * 0.2) : 0.72
     if (entryStart.current === null) entryStart.current = state.clock.elapsedTime
     const left = playsEntry ? 1 - easeOut((state.clock.elapsedTime - entryStart.current) / ENTRY_SECONDS) : 0 // 1 → 0
     if (group.current) {
