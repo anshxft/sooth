@@ -11,16 +11,30 @@ import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
 import { PageFooter } from './lib/footer'
 
-// Arena is the landing page; the rest load on first visit.
-const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })))
-const Ask = lazy(() => import('./pages/Ask').then((m) => ({ default: m.Ask })))
-const Hire = lazy(() => import('./pages/Hire').then((m) => ({ default: m.Hire })))
-const Build = lazy(() => import('./pages/Build').then((m) => ({ default: m.Build })))
-const Benchmark = lazy(() => import('./pages/Benchmark').then((m) => ({ default: m.Benchmark })))
-const Question = lazy(() => import('./pages/Question').then((m) => ({ default: m.Question })))
-const Docs = lazy(() => import('./pages/Docs').then((m) => ({ default: m.Docs })))
-const Swarm = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.Swarm })))
-const TaskPage = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.TaskPage })))
+// Arena is the landing page; every other page is its own chunk. Each chunk is fetched once (the
+// promise is kept), and all of them are fetched in the background soon after the first page is up,
+// so opening a section later shows it at once instead of a blank "Loading…".
+const once = <T,>(load: () => Promise<T>) => { let p: Promise<T> | undefined; return () => (p ??= load()) }
+const PAGES = {
+  agents: once(() => import('./pages/Agents')),
+  ask: once(() => import('./pages/Ask')),
+  hire: once(() => import('./pages/Hire')),
+  build: once(() => import('./pages/Build')),
+  benchmark: once(() => import('./pages/Benchmark')),
+  question: once(() => import('./pages/Question')),
+  docs: once(() => import('./pages/Docs')),
+  swarm: once(() => import('./pages/Swarm')),
+}
+const PREFETCH_AFTER_MS = 1500
+const Agents = lazy(() => PAGES.agents().then((m) => ({ default: m.Agents })))
+const Ask = lazy(() => PAGES.ask().then((m) => ({ default: m.Ask })))
+const Hire = lazy(() => PAGES.hire().then((m) => ({ default: m.Hire })))
+const Build = lazy(() => PAGES.build().then((m) => ({ default: m.Build })))
+const Benchmark = lazy(() => PAGES.benchmark().then((m) => ({ default: m.Benchmark })))
+const Question = lazy(() => PAGES.question().then((m) => ({ default: m.Question })))
+const Docs = lazy(() => PAGES.docs().then((m) => ({ default: m.Docs })))
+const Swarm = lazy(() => PAGES.swarm().then((m) => ({ default: m.Swarm })))
+const TaskPage = lazy(() => PAGES.swarm().then((m) => ({ default: m.TaskPage })))
 
 // Tab titles per route, so history, bookmarks and shared tabs say which page is which.
 const SITE = 'SOOTH'
@@ -41,6 +55,10 @@ export default function App() {
   useEffect(() => {
     document.title = titleFor(location)
   }, [location])
+  useEffect(() => {
+    const timer = setTimeout(() => Object.values(PAGES).forEach((load) => { load().catch(() => {}) }), PREFETCH_AFTER_MS) // a failed prefetch just loads on click
+    return () => clearTimeout(timer)
+  }, [])
   return (
     <>
       <Backdrop />

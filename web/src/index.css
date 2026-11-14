@@ -134,7 +134,7 @@ body {
 
 /* Page entry: blueprint cells assemble 30 ms apart instead of popping in at once. The cell
    background stays put (so the grid lines never flash); only what is inside it rises. */
-.blueprint > * > * { animation: rise 360ms var(--ease-out) both; animation-delay: calc(var(--stagger, 13) * 30ms); }
+.blueprint > * > * { animation: rise 280ms var(--ease-out) both; animation-delay: calc(var(--stagger, 13) * 15ms); }
 .blueprint > :nth-child(1) { --stagger: 0; }
 .blueprint > :nth-child(2) { --stagger: 1; }
 .blueprint > :nth-child(3) { --stagger: 2; }
