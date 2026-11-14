@@ -44,7 +44,7 @@ export default function App() {
           <button
             type="button"
             onClick={accountId ? signOut : signIn}
-            className="wallet label rounded-full bg-green px-4 py-2 text-ink transition-transform duration-150 active:scale-[0.96]"
+            className="wallet btn btn-sm"
           >
             {accountId ? <><span className="inline-block max-w-[9rem] truncate align-bottom sm:max-w-[16rem]">{accountId}</span> ×</> : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
           </button>

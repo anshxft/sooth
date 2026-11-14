@@ -52,7 +52,7 @@ export function Swarm() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <Link href="/hire" className="label bg-green px-2 py-1 text-ink hover:bg-ink hover:text-canvas">Hire the swarm →</Link>
+          <Link href="/hire" className="btn btn-sm">Hire the swarm →</Link>
           <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label hover:underline">
             {SWARM} ↗
           </a>

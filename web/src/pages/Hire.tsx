@@ -99,7 +99,7 @@ export function Hire() {
     }
   }
 
-  const field = 'w-full border border-line bg-canvas px-3 py-2 text-ink focus:border-ink focus:outline-none'
+  const field = 'w-full rounded-lg border border-line bg-canvas px-4 py-3 text-ink focus:border-ink focus:outline-none'
   const label = 'label text-muted'
 
   return (
@@ -129,7 +129,7 @@ export function Hire() {
             <div className="flex gap-2">
               <input id="brief-uri" required value={uri} onChange={(e) => { setUri(e.target.value); setBrief(null) }} className={field}
                 placeholder="https://gist.githubusercontent.com/you/abc123/raw/brief.md" />
-              <button type="button" onClick={load} className="label shrink-0 border border-ink px-3 hover:bg-ink hover:text-canvas">Load</button>
+              <button type="button" onClick={load} className="btn btn-sm shrink-0">Load</button>
             </div>
             <span className={label}>{uri.trim().length}/{MAX_URI_LEN}</span>
           </div>
@@ -156,7 +156,7 @@ export function Hire() {
 
           {error && <p role="alert" className="label text-red">{error}</p>}
 
-          <button type="submit" disabled={busy} className="label w-fit rounded-full bg-green px-5 py-3 text-ink transition-transform duration-150 active:scale-[0.96] disabled:opacity-60">
+          <button type="submit" disabled={busy} className="btn w-fit disabled:opacity-60">
             {busy ? 'Waiting for your wallet…' : accountId ? 'Hire the swarm →' : 'Connect wallet to hire →'}
           </button>
 

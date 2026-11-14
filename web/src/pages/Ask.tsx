@@ -112,7 +112,7 @@ export function Ask() {
   }
 
   const total = (Number(fee) || 0) + STORAGE_MILLI / 1000
-  const field = 'w-full border border-line bg-canvas px-3 py-2 text-ink focus:border-ink focus:outline-none'
+  const field = 'w-full rounded-lg border border-line bg-canvas px-4 py-3 text-ink focus:border-ink focus:outline-none'
   const label = 'label text-muted'
 
   return (
@@ -141,7 +141,7 @@ export function Ask() {
                 type="button"
                 aria-pressed={kind === k}
                 onClick={() => setKind(k)}
-                className={cn('label border px-3 py-2 transition-colors duration-150', kind === k ? 'border-ink bg-ink text-canvas' : 'border-line hover:border-ink')}
+                className={cn('label rounded-full border px-4 py-2 transition-colors duration-150', kind === k ? 'border-ink bg-ink text-canvas' : 'border-line hover:border-ink')}
               >
                 {name}
               </button>
@@ -196,7 +196,7 @@ export function Ask() {
           <button
             type="submit"
             disabled={busy}
-            className="label w-fit rounded-full bg-green px-5 py-3 text-ink transition-transform duration-150 active:scale-[0.96] disabled:opacity-60"
+            className="btn w-fit disabled:opacity-60"
           >
             {busy ? 'Waiting for your wallet…' : accountId ? 'Ask the jury →' : 'Connect wallet to ask →'}
           </button>
