@@ -47,6 +47,8 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
 
 No wallet is needed. Every call below is a free view call. `node scripts/verify.mjs` runs the same checks in one go.
 
+To ask your own question on the site you need a **testnet** wallet. The Connect popup offers Meteor, Intear, Nightly, Ledger, Ethereum wallets (EVM-on-NEAR) and NEAR CLI; HOT and MyNearWallet are mainnet-only. Meteor is quickest: create a testnet account at meteorwallet.app, then take free NEAR from near-faucet.io.
+
 1. **Read the settled dispute** in the oracle. You see five sealed commits and five reveals. The four honest jurors say NO at 95 % confidence and `mallory` says YES at 99 %. The outcome is `NO, resolved_by: auto`, and the payouts slash `mallory`.
    ```bash
    near contract call-function as-read-only sooth.testnet get_question json-args '{"question_id":5}' network-config testnet now
