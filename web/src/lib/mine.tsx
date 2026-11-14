@@ -52,21 +52,29 @@ export function MyRequests() {
   if (list.length === 0) return null
 
   return (
-    <aside aria-label="Following live" className="fixed bottom-24 left-4 z-40 w-[min(18rem,calc(100vw-2rem))] border border-ink bg-canvas shadow-[0_8px_30px_rgb(0_0_0/0.12)]">
-      <button type="button" onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen}
-        className="label flex w-full items-center justify-between gap-2 px-3 py-2 hover:bg-ink hover:text-canvas">
+    <aside aria-label="Following live" className="glass fixed bottom-24 left-4 z-40 w-[min(18rem,calc(100vw-2rem))] border border-ink shadow-[0_8px_30px_rgb(0_0_0/0.12)]">
+      <button type="button" onClick={() => setIsOpen((o) => !o)} aria-expanded={isOpen} aria-controls="following-more"
+        className="label flex w-full items-center justify-between gap-2 px-3 py-2 transition-colors duration-150 hover:bg-ink hover:text-canvas">
         <span className="live-dot">Following ({list.length})</span>
         <span aria-hidden="true">{isOpen ? '–' : list.length > 1 ? `+${list.length - 1}` : '+'}</span>
       </button>
-      <ul className="border-t border-line">
-          {(isOpen ? list : list.slice(0, 1)).map((m) => (
-            <li key={`${m.kind}${m.id}`} className="flex items-start gap-2 border-b border-line px-3 py-2 last:border-b-0">
-              {m.kind === 'q' ? <QuestionRow id={m.id} isCompact={!isOpen} /> : <TaskRow id={m.id} />}
-              <button type="button" onClick={() => forget(m)} aria-label="Stop following" className="label text-muted hover:text-ink">×</button>
-            </li>
-          ))}
-      </ul>
+      {/* The newest stays in view; the rest open in place, so the card grows from where it sits. */}
+      <ul className="border-t border-line">{list.slice(0, 1).map((m) => <Row key={`${m.kind}${m.id}`} m={m} isCompact={!isOpen} />)}</ul>
+      {list.length > 1 && (
+        <div id="following-more" className="expand" data-open={isOpen} inert={!isOpen}>
+          <ul className="min-h-0 overflow-hidden">{list.slice(1).map((m) => <Row key={`${m.kind}${m.id}`} m={m} isCompact={false} />)}</ul>
+        </div>
+      )}
     </aside>
+  )
+}
+
+function Row({ m, isCompact }: { m: Mine; isCompact: boolean }) {
+  return (
+    <li className="flex items-start gap-2 border-t border-line px-3 py-2 first:border-t-0">
+      {m.kind === 'q' ? <QuestionRow id={m.id} isCompact={isCompact} /> : <TaskRow id={m.id} />}
+      <button type="button" onClick={() => forget(m)} aria-label="Stop following" className="label text-muted hover:text-ink">×</button>
+    </li>
   )
 }
 
