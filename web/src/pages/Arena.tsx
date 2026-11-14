@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { FilmBand } from '../lib/loop'
 import { Link } from 'wouter'
 import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
@@ -51,6 +52,7 @@ export function Arena() {
             {[...'sooth'].map((c, i) => <span key={i} aria-hidden="true" style={{ '--i': i } as CSSProperties}>{c}</span>)}
           </h1>
         </div>
+        <FilmBand name="agents-orbit" />
 
         <div className="col-span-12 p-4 md:col-span-6">
           <p className="text-[clamp(1.4rem,2.6vw,2rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
