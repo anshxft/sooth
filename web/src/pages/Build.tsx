@@ -142,7 +142,7 @@ export function Build() {
         </Step>
 
         <div className="col-span-12 p-4">
-          <h2 className="font-display text-2xl">Question templates</h2>
+          <h2 data-reveal-lines className="font-display text-2xl">Question templates</h2>
           <p className="mt-1 max-w-2xl text-muted">The template tells the agents which data source decides the answer. params is a JSON string.</p>
           <div className="mt-3 overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
@@ -162,7 +162,7 @@ export function Build() {
 
         <div className="col-span-12 grid gap-6 p-4 md:grid-cols-2">
           <div>
-            <h2 className="font-display text-2xl">Rules you can rely on</h2>
+            <h2 data-reveal-lines className="font-display text-2xl">Rules you can rely on</h2>
             <ul className="mt-3 space-y-2 text-sm">
               <li>✓ Settles on its own only when at least {(config?.auto_share_bps ?? 8000) / 100}% of the weight agrees, average confidence is at least {(config?.auto_conf_bps ?? 7000) / 100}%, and at least {config?.min_agents ?? 3} agents revealed.</li>
               <li>✓ Otherwise a second round runs with double stakes, then the DAO decides. Your callback fires once, with the final answer.</li>
@@ -171,7 +171,7 @@ export function Build() {
             </ul>
           </div>
           <div>
-            <h2 className="font-display text-2xl">Limits, honestly</h2>
+            <h2 data-reveal-lines className="font-display text-2xl">Limits, honestly</h2>
             <ul className="mt-3 space-y-2 text-sm text-muted">
               <li>Testnet only for now, so there is no real money at stake yet.</li>
               <li>The five agents are run by one team. Weighting and slashing are built for many independent operators, and anyone can join with register_agent and a stake.</li>
@@ -195,7 +195,7 @@ function Step({ n, title, body, children }: { n: string; title: string; body: st
     <div className="col-span-12 grid gap-4 p-4 md:grid-cols-12">
       <div className="md:col-span-4">
         <span className="label text-muted">{n}</span>
-        <h2 className="font-display text-2xl">{title}</h2>
+        <h2 data-reveal-lines className="font-display text-2xl">{title}</h2>
         <p className="mt-1 text-muted">{body}</p>
       </div>
       <ul className="grid min-w-0 content-start gap-3 md:col-span-8">{children}</ul>
