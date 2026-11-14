@@ -7,6 +7,7 @@ import { type Theme, currentTheme, prepareInk, switchTheme } from './theme'
 import { cn } from './utils'
 
 const SIZE = 44 // resting icon size, px
+const DRAG_START = 8 // px a finger must slide before the dock starts magnifying
 const PHONE_SIZE = 40 // narrow phones: seven icons fit with room to spare
 const PEAK = 68 // size right under the pointer
 const REACH = 140 // px from an icon's centre where it stops growing
@@ -44,16 +45,40 @@ const PAGES = [
 
 export function Dock() {
   const mouseX = useMotionValue(Infinity)
+  const touch = useRef<{ x: number; isDragging: boolean } | null>(null)
+  const dragged = useRef(false)
   const [location] = useLocation()
   const isActive = (href: string) => (href === '/' ? location === '/' || location.startsWith('/q/') : location.startsWith(href) || (href === '/swarm' && (location.startsWith('/t/') || location === '/hire')))
 
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-[max(12px,env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
       <motion.div
-        // Only a real mouse magnifies: a tap on a phone would make the icons jump under the finger.
-        onPointerMove={(e) => { if (e.pointerType === 'mouse') mouseX.set(e.clientX) }}
-        onPointerLeave={() => mouseX.set(Infinity)}
-        className="flex h-[56px] items-end gap-1 rounded-2xl sm:h-[60px] sm:gap-1.5 border border-line bg-canvas px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)]"
+        // Mouse: magnify on hover. Touch: a plain tap just opens the page (nothing jumps), but press and
+        // slide along the dock and it magnifies under the finger like on desktop; lift to open that page.
+        onPointerDown={(e) => { if (e.pointerType !== 'mouse') touch.current = { x: e.clientX, isDragging: false } }}
+        onPointerMove={(e) => {
+          if (e.pointerType === 'mouse') { mouseX.set(e.clientX); return }
+          const t = touch.current
+          if (!t) return
+          if (!t.isDragging && Math.abs(e.clientX - t.x) < DRAG_START) return
+          t.isDragging = true
+          mouseX.set(e.clientX)
+        }}
+        onPointerUp={(e) => {
+          const wasDragging = touch.current?.isDragging
+          touch.current = null
+          mouseX.set(Infinity)
+          if (!wasDragging) return
+          e.preventDefault()
+          document.elementFromPoint(e.clientX, e.clientY)?.closest('a')?.click()
+          // The browser may still send its own click to where the finger went down: swallow that one.
+          dragged.current = true
+          setTimeout(() => { dragged.current = false }, 0)
+        }}
+        onPointerCancel={() => { touch.current = null; mouseX.set(Infinity) }}
+        onPointerLeave={(e) => { if (e.pointerType === 'mouse') mouseX.set(Infinity) }}
+        onClickCapture={(e) => { if (dragged.current) { e.preventDefault(); dragged.current = false } }}
+        className="flex h-[56px] touch-none select-none items-end gap-1 rounded-2xl sm:h-[60px] sm:gap-1.5 border border-line bg-canvas px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)]"
       >
         {PAGES.map(([href, label, glyph]) => (
           <Item key={href} mouseX={mouseX} label={label} isActive={isActive(href)}>
