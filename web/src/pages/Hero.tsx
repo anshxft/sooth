@@ -110,10 +110,12 @@ export function Hero({ status }: { status: string }) {
               )}
             >
               <span className="ch-fade label text-muted">{ch.kicker}</span>
-              <h2 className="pointer-events-auto text-[clamp(2.6rem,6.4vw,6.5rem)] font-light leading-[0.98] tracking-[-0.055em]">
+              <h2 className="text-[clamp(2.6rem,6.4vw,6.5rem)] font-light leading-[0.98] tracking-[-0.055em]">
+                {/* Only the lines take the pointer (for the hover letters). A hidden chapter's lines sit outside
+                    their masks, so its heading box never covers the buttons of the chapter on screen. */}
                 {ch.title.filter(Boolean).map((t) => (
                   <span key={t} className="block overflow-hidden pb-[0.06em]">
-                    <span className="ch-line block" style={i === 0 ? undefined : { transform: 'translateY(110%)' }}>{t}</span>
+                    <span className="ch-line pointer-events-auto block" style={i === 0 ? undefined : { transform: 'translateY(110%)' }}>{t}</span>
                   </span>
                 ))}
               </h2>
