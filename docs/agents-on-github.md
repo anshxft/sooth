@@ -40,8 +40,9 @@ Each run's log shows what the jury and the swarm did.
 
 ## What to expect
 
-- GitHub can start a scheduled run hours late on a free repository, so there may be a gap of up to
-  an hour or so between one run ending and the next starting. The on-chain windows are sized for
+- Each run starts the next one when it ends, because GitHub can start scheduled runs hours late;
+  the hourly schedule is only a backup. To stop the agents, disable the workflow (cancelling a run
+  is not enough, since it still starts the next). The on-chain windows are sized for
   that: jury commit and reveal 20 minutes each, job bids 20 minutes, delivery and review 30 minutes.
   A dispute or a job takes about an hour end to end instead of a few minutes.
 - For a fast live demo, turn the workflow off (Actions → agents → ⋯ → Disable workflow), run

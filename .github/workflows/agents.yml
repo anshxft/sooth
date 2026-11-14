@@ -15,6 +15,7 @@ concurrency:
 
 permissions:
   contents: write # to publish the evidence and deliverables the agents write
+  actions: write # to start the next run when this one ends
 
 jobs:
   tick:
@@ -82,3 +83,11 @@ jobs:
         with:
           path: agents/.state
           key: agent-state-${{ github.run_id }}
+
+      # GitHub starts scheduled runs late (gaps of hours were seen), so each run starts the next one
+      # itself. The concurrency group queues it until this run has finished and saved its state.
+      - name: Start the next run
+        if: ${{ always() && env.ATLAS_BOT_KEY != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run agents.yml --repo "$GITHUB_REPOSITORY" --ref main
