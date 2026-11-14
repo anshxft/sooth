@@ -7,6 +7,7 @@ import { type Theme, currentTheme, prepareInk, switchTheme } from './theme'
 import { cn } from './utils'
 
 const SIZE = 44 // resting icon size, px
+const PHONE_SIZE = 40 // narrow phones: seven icons fit with room to spare
 const PEAK = 68 // size right under the pointer
 const REACH = 140 // px from an icon's centre where it stops growing
 const SPRING = { mass: 0.1, stiffness: 170, damping: 13 }
@@ -49,9 +50,10 @@ export function Dock() {
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-[max(12px,env(safe-area-inset-bottom))] z-50 flex justify-center px-4">
       <motion.div
-        onMouseMove={(e) => mouseX.set(e.clientX)}
-        onMouseLeave={() => mouseX.set(Infinity)}
-        className="flex h-[60px] items-end gap-1.5 rounded-2xl border border-line bg-canvas px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)]"
+        // Only a real mouse magnifies: a tap on a phone would make the icons jump under the finger.
+        onPointerMove={(e) => { if (e.pointerType === 'mouse') mouseX.set(e.clientX) }}
+        onPointerLeave={() => mouseX.set(Infinity)}
+        className="flex h-[56px] items-end gap-1 rounded-2xl sm:h-[60px] sm:gap-1.5 border border-line bg-canvas px-2 pb-2 shadow-[0_8px_30px_rgb(0_0_0/0.12)]"
       >
         {PAGES.map(([href, label, glyph]) => (
           <Item key={href} mouseX={mouseX} label={label} isActive={isActive(href)}>
@@ -104,7 +106,8 @@ function Item({ mouseX, label, isActive = false, className, children }: ItemProp
     const box = ref.current?.getBoundingClientRect()
     return box ? x - box.left - box.width / 2 : Infinity
   })
-  const size = useSpring(useTransform(distance, [-REACH, 0, REACH], [SIZE, PEAK, SIZE]), SPRING)
+  const base = window.innerWidth < 400 ? PHONE_SIZE : SIZE
+  const size = useSpring(useTransform(distance, [-REACH, 0, REACH], [base, PEAK, base]), SPRING)
 
   return (
     <motion.div ref={ref} style={{ width: size, height: size }} className={cn('group relative flex flex-col items-center', className)}>
@@ -114,7 +117,7 @@ function Item({ mouseX, label, isActive = false, className, children }: ItemProp
           isActive ? 'border-ink bg-green text-ink' : 'border-line bg-canvas text-ink hover:border-ink',
         ),
       )}
-      <span className="label pointer-events-none absolute -top-7 whitespace-nowrap rounded-md bg-ink px-1.5 py-0.5 text-canvas opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+      <span className="label pointer-events-none absolute -top-7 whitespace-nowrap rounded-md bg-ink px-1.5 py-0.5 text-canvas opacity-0 transition-opacity duration-150 [@media(hover:hover)]:group-hover:opacity-100">
         {label}
       </span>
       {isActive && <span aria-hidden="true" className="absolute -bottom-1.5 size-1 rounded-full bg-ink" />}

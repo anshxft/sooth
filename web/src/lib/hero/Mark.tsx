@@ -36,6 +36,8 @@ type Drive = MutableRefObject<number>
 // First visit in a session: the mark spins in from far away and settles where it rests, so the
 // page opens on the logo itself instead of a separate splash. Reduced motion skips it.
 const ENTRY_SECONDS = 2.4
+// Phones: the mark sits low, under the opening words and buttons, instead of on top of them.
+const NARROW_Y = -1.9
 const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 4)
 
 function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean; isReduced: boolean }) {
@@ -99,13 +101,13 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
     // Wide screens: a bigger mark out on the free side, past the words (half-width at z=0 is 3.73·aspect).
     const halfWidth = 3.73 * (state.size.width / state.size.height)
     const x = isWide ? lean * Math.min(halfWidth * 0.42, 3.9) : 0
-    const size = isWide ? Math.min(1.45, halfWidth * 0.2) : 0.72
+    const size = isWide ? Math.min(1.45, halfWidth * 0.2) : 0.6
     if (entryStart.current === null) entryStart.current = state.clock.elapsedTime
     const left = playsEntry ? 1 - easeOut((state.clock.elapsedTime - entryStart.current) / ENTRY_SECONDS) : 0 // 1 → 0
     if (group.current) {
       restX.current = THREE.MathUtils.damp(restX.current, x, 4, dt)
       group.current.position.x = restX.current - left * left * 5
-      group.current.position.y = left * left * 2.6
+      group.current.position.y = (isWide ? 0 : NARROW_Y) + left * left * 2.6
       group.current.position.z = -left * 9
       group.current.rotation.z = -p * Math.PI * 2 - idle + left * Math.PI * 3
       group.current.rotation.x = -0.55 + Math.sin(p * Math.PI) * 0.35 + left * 0.9

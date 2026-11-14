@@ -144,7 +144,7 @@ export function Docs() {
   }, [shown])
 
   return (
-    <main className="mx-auto grid max-w-[1440px] gap-8 p-4 md:grid-cols-[240px_1fr]" data-no-reveal>
+    <main className="mx-auto grid max-w-[1440px] grid-cols-1 gap-8 p-4 md:grid-cols-[240px_1fr]" data-no-reveal>
       <nav aria-label="Docs" className="hidden md:block">
         <div className="sticky top-6 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 pt-10">
           {shown.map((g) => (
@@ -172,7 +172,7 @@ export function Docs() {
         </div>
       </nav>
 
-      <article className="max-w-[760px] pb-16 md:pt-10">
+      <article className="min-w-0 max-w-[760px] pb-16 md:pt-10">
         <span className="label text-muted">SOOTH docs · testnet</span>
         <h1 className="mt-4 text-[clamp(3rem,7vw,5.5rem)] font-medium leading-[0.95] tracking-[-0.05em]">
           How SOOTH <em className="font-display font-normal text-green">works</em>
@@ -188,12 +188,27 @@ export function Docs() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search the docs, or paste what the page said"
+            placeholder="Search the docs"
             aria-label="Search the docs"
             className="w-full bg-transparent outline-none placeholder:text-muted"
           />
           <kbd className="label whitespace-nowrap rounded-md border border-line px-2 py-0.5 text-muted">Ctrl K</kbd>
         </label>
+
+        {/* Phones: the sidebar is hidden, so the topics fold into one menu here. */}
+        <details className="mt-4 rounded-xl border border-line md:hidden">
+          <summary className="label cursor-pointer list-none px-4 py-3 text-muted">All topics ⌄</summary>
+          <div className="grid gap-4 px-4 pb-4">
+            {shown.map((g) => (
+              <div key={g.name}>
+                <span className="label text-muted">{g.name}</span>
+                <ul className="mt-1">
+                  {g.sections.map((s) => <li key={s.id}><a href={`#${s.id}`} className="block py-1.5">{s.title}</a></li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </details>
 
         <div className="mt-4 flex flex-wrap gap-3">
           <Link href="/ask" className="rounded-xl bg-green px-5 py-3 text-[#0c0c0b] transition-opacity duration-150 hover:opacity-90">
