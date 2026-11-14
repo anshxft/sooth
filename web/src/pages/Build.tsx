@@ -29,7 +29,7 @@ impl Contract {
             "callback": { "contract_id": env::current_account_id(), "method": "on_sooth_resolved" },
         });
         Promise::new(SOOTH.parse::<AccountId>().unwrap())
-            .function_call("ask_question".into(), args.to_string().into_bytes(),
+            .function_call("ask_question".to_string(), args.to_string().into_bytes(),
                            env::attached_deposit(), Gas::from_tgas(30))
             .then(Self::ext(env::current_account_id())
                 .with_static_gas(Gas::from_tgas(10))
@@ -49,7 +49,8 @@ impl Contract {
     pub fn on_sooth_resolved(&mut self, question_id: u64, answer: String) {
         if env::predecessor_account_id().as_str() != SOOTH { return; }
         if !self.pending.remove(&question_id) { return; }
-        // answer is "YES", "NO" or "INVALID"
+        // answer is "YES", "NO" or "INVALID": act on it here
+        env::log_str(&format!("question {question_id} settled {answer}"));
     }
 }`
 
