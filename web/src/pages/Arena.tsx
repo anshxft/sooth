@@ -1,12 +1,10 @@
-import type { CSSProperties } from 'react'
-import { SceneBand } from '../lib/scene'
+import { Hero } from './Hero'
 import { Link } from 'wouter'
 import {
   type AgentView, type Answer, type Phase, type QuestionSummary, type QuestionView,
   countdown, isSwarmAgent, pct, qid, toNear, useAgents, useNow, usePoll, view,
 } from '../lib/near'
 import { cn, spaced } from '../lib/utils'
-import { Crowd } from '../lib/crowd'
 import { Guide } from './Guide'
 import { Countdown } from '../lib/timer'
 import { Scramble } from '../lib/motion'
@@ -38,28 +36,13 @@ export function Arena() {
           Can't reach NEAR testnet. Retrying…
         </p>
       )}
+      <h1 className="sr-only">SOOTH: many agents, one truth</h1>
+      <Hero status={live ? `${qid(live.id)} / ${spaced(live.phase)}` : 'No questions yet'} />
       <section className="blueprint grid-cols-12" aria-label="Arena">
-        <div className="col-span-3 h-16 halftone" aria-hidden="true" />
-        <div className="col-span-3 hidden md:block" />
-        <div className="col-span-3 hidden place-items-center text-xl md:grid" aria-hidden="true">◎</div>
-        <div className="col-span-9 flex items-end justify-end p-3 md:col-span-3">
-          <span className="label">{live ? `${qid(live.id)} / ${spaced(live.phase)}` : 'No questions yet'}</span>
-        </div>
-
-        <div className="col-span-12 px-4 pb-2 pt-3">
-          <div className="label flex justify-between"><span>✳ Many agents ✦ one truth</span><span>✳</span></div>
-          <h1 aria-label="sooth" className="letters text-center font-display text-[clamp(5rem,18vw,15rem)] leading-[0.95] tracking-[-0.05em]">
-            {[...'sooth'].map((c, i) => <span key={i} aria-hidden="true" style={{ '--i': i } as CSSProperties}>{c}</span>)}
-          </h1>
-        </div>
-        <SceneBand name="consensus" label="Five agents orbit, then line up behind one answer" />
-
-        <div className="col-span-12 p-4 md:col-span-6">
-          <p className="text-[clamp(1.4rem,2.6vw,2rem)] font-semibold leading-[1.05] tracking-[-0.04em]">
-            Truth, settled by many agents who stake on it.
-          </p>
-          <p className="mt-3 text-muted">/an oracle for contracts, and a jury for agents that pay agents, on NEAR/</p>
-          <div className="mt-4 flex flex-wrap gap-2">
+        <div className="col-span-12 p-6 md:col-span-6 md:p-8">
+          <span className="label text-muted">The arena · live on NEAR testnet</span>
+          <h2 data-reveal-lines className="mt-3 text-[clamp(2rem,4vw,3.5rem)] font-light leading-[1] tracking-[-0.05em]">The latest question, as the agents work on it.</h2>
+          <div className="mt-6 flex flex-wrap gap-2">
             <Link href="/ask" className="btn btn-sm">Ask your own question →</Link>
             <Link href="/swarm" className="btn btn-sm">See the swarm hire against it →</Link>
             <Link href="/build" className="btn btn-sm">Use it in your contract →</Link>
@@ -72,23 +55,17 @@ export function Arena() {
         <QuestionList summaries={summaries} now={now} />
         <Guide agents={names} />
 
-        <div className="relative col-span-12 h-[360px] overflow-hidden md:h-[460px]">
-          <div className="relative z-10 p-4 text-center">
-            <span className="label text-muted">✳ the closing argument ✳</span>
-            <p className="mx-auto mt-3 max-w-[18ch] text-[clamp(1.6rem,4vw,3rem)] font-semibold leading-[1] tracking-[-0.04em]">
-              Nobody trusts one voice. Everyone can check the crowd.
-            </p>
-          </div>
-          <Crowd className="absolute inset-x-0 bottom-0 h-[68%] w-full" />
+        <div className="col-span-12 px-6 py-20 text-center md:py-28">
+          <span className="label text-muted">The closing argument</span>
+          <p data-reveal-lines className="mx-auto mt-4 max-w-[20ch] text-[clamp(2rem,5vw,4.25rem)] font-light leading-[1] tracking-[-0.05em]">
+            Nobody trusts one voice. Everyone can check the agents.
+          </p>
         </div>
 
         <footer className="label col-span-12 flex flex-wrap justify-between gap-2 p-3 text-muted">
           <span>[ Rev 0.1 ]</span>
           <span>Contract sooth.testnet</span>
-          <span>
-            Crowd: <a href="https://skiper-ui.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Skiper UI</a> ·{' '}
-            <a href="https://www.openpeeps.com" target="_blank" rel="noopener noreferrer" className="hover:underline">Open Peeps</a>
-          </span>
+          <span>Built at NEAR HACKATHON 2026</span>
         </footer>
       </section>
     </main>

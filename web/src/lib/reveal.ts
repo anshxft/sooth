@@ -32,7 +32,7 @@ export function useTextReveal(route: string) {
       if (!main) return
       // Headings: masked lines.
       for (const el of document.querySelectorAll<HTMLElement>('main [data-reveal-lines]')) {
-        if (seen.has(el)) continue
+        if (seen.has(el) || el.closest('[data-no-reveal]')) continue
         seen.add(el)
         const split = SplitText.create(el, { type: 'lines', mask: 'lines' })
         splits.push(split)
@@ -57,7 +57,7 @@ export function useTextReveal(route: string) {
         if (seen.has(el)) return false
         seen.add(el)
         // Not inside marked text, live regions, or closed panels (those fade in on their own).
-        return !el.closest('[data-reveal-lines], [data-reveal-group], [aria-live], .expand, [inert]') && isBelow(el)
+        return !el.closest('[data-reveal-lines], [data-reveal-group], [aria-live], .expand, [inert], [data-no-reveal]') && isBelow(el)
       })
       if (bodies.length) {
         gsap.set(bodies, { opacity: 0, y: 14 })

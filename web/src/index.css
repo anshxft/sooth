@@ -40,10 +40,8 @@
 @media (min-width: 768px) {
   html { font-size: 106.25%; } /* 17px */
 }
-/* In-page jumps (home page's "Read on") glide instead of cutting, unless motion is reduced. */
-@media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
-}
+/* Scrolling is smoothed by Lenis (App.tsx), which also glides in-page jumps; native smooth
+   scrolling would fight it, so it is not set here. */
 
 html,
 body {
@@ -188,6 +186,13 @@ body {
    measuring it (the accordion case, where no transform can stand in for height). */
 .expand { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 260ms var(--ease-out), opacity 200ms ease; }
 .expand[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+
+/* Agent faces: a slow float and a blink every few seconds, each on its own beat. */
+.face { overflow: visible; animation: face-float 4.6s ease-in-out infinite; animation-delay: calc(var(--float-delay, 0s) * -1); }
+.face-eyes { transform-box: fill-box; transform-origin: center; animation: face-blink 5.2s infinite; animation-delay: var(--blink-delay, 0s); }
+@keyframes face-float { 50% { transform: translateY(-3px); } }
+@keyframes face-blink { 0%, 91%, 97%, 100% { transform: scaleY(1); } 94% { transform: scaleY(0.12); } }
+@media (prefers-reduced-motion: reduce) { .face, .face-eyes { animation: none; } }
 
 /* Press feedback, Apple-style: it answers on pointer-down, not on release. `scale` is its own
    property, so it never fights a button's transform; :where() keeps it below any utility class. */

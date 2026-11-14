@@ -6,6 +6,7 @@ import { useAccount } from './lib/near'
 import { AgentsStatus } from './lib/status'
 import { MyRequests } from './lib/mine'
 import { useTextReveal } from './lib/reveal'
+import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
 
 // Arena is the landing page; the rest load on first visit.
@@ -31,6 +32,7 @@ function titleFor(path: string): string {
 export default function App() {
   const { accountId, signIn, signOut } = useAccount()
   const [location] = useLocation()
+  useSmoothScroll()
   useTextReveal(location)
   useEffect(() => {
     document.title = titleFor(location)

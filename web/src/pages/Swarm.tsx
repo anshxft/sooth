@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode, useState } from 'react'
+import { AgentFace } from '../lib/face'
 import { SceneBand } from '../lib/scene'
 import { Link } from 'wouter'
 import { connector, countdown, toNear, useAccount, useNow, usePoll } from '../lib/near'
@@ -110,6 +111,7 @@ function WorkerCard({ worker: w, jobs, tasks, isOpen, onToggle }: WorkerCardProp
   return (
     <li className={cn('border border-ink transition-colors duration-200', isOpen ? 'bg-canvas' : 'bg-canvas hover:bg-ink/5', net < 0n && 'border-red')}>
       <button type="button" onClick={onToggle} aria-expanded={isOpen} aria-controls={panelId} className="flex w-full items-center gap-3 p-3 text-left">
+        <AgentFace name={w.name} size={30} />
         <span className="font-display text-xl">{w.name}</span>
         <span className="label text-muted">{(w.rep_bps / 10_000).toFixed(2)}× rep</span>
         <span className={cn('ml-auto font-mono text-sm font-semibold', net < 0n && 'text-red')}>{net > 0n ? '+' : ''}{toNear(net.toString())} Ⓝ</span>

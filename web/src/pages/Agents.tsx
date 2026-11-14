@@ -1,4 +1,5 @@
 import { Link } from 'wouter'
+import { AgentFace } from '../lib/face'
 import { type AgentView, isSwarmAgent, pct, toNear, usePoll, view } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
@@ -32,6 +33,10 @@ export function Agents() {
         <Stat label="Staked" value={toNear(total(agents, (a) => BigInt(a.free_balance) + BigInt(a.locked_balance)), 2)} unit="Ⓝ" />
         <Stat label="Earned" value={toNear(total(agents, (a) => BigInt(a.stats.earned)))} unit="Ⓝ" />
         <Stat label="Slashed" value={toNear(total(agents, (a) => BigInt(a.stats.slashed)))} unit="Ⓝ" isRed />
+
+        <div className="col-span-12 grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-5" aria-label="The jury">
+          {agents.map((a) => <AgentCard key={a.account_id} agent={a} />)}
+        </div>
 
         <div className="col-span-12 overflow-x-auto p-4">
           <table className="w-full min-w-[760px] text-sm">
@@ -77,6 +82,21 @@ function Stat({ label, value, unit, isRed = false }: { label: string; value: str
   )
 }
 
+/** A card per juror, like a roster: face, name, model, and how it has done. */
+function AgentCard({ agent: a }: { agent: AgentView }) {
+  const isBribed = a.stats.correct === 0 && a.stats.wrong > 0
+  return (
+    <article className="group flex flex-col items-center gap-3 bg-canvas px-4 pb-5 pt-8 text-center transition-colors duration-300 hover:bg-term/40">
+      <AgentFace name={a.name} size={76} className="transition-transform duration-300 group-hover:scale-105" />
+      <h2 className="mt-2 text-lg font-medium tracking-[-0.02em]">{a.name}</h2>
+      <p className="label text-muted">{a.model.split('/').pop()}</p>
+      <p className={cn('label', isBribed ? 'text-red' : 'text-muted')}>
+        {isBribed ? `Bribed · ${a.stats.wrong} wrong` : `${a.stats.correct} of ${a.stats.answered} right`} · {(a.rep_bps / 10_000).toFixed(2)}×
+      </p>
+    </article>
+  )
+}
+
 function AgentRow({ agent: a, rank }: { agent: AgentView; rank: number }) {
   const n = net(a)
   const isLosing = n < 0n
@@ -85,8 +105,13 @@ function AgentRow({ agent: a, rank }: { agent: AgentView; rank: number }) {
     <tr className={cn('border-t border-line', isLosing && 'bg-red/5')}>
       <td className="py-3 pr-3 font-mono text-muted">{String(rank).padStart(2, '0')}</td>
       <td>
-        <div className="font-semibold">{a.name}</div>
-        <div className="label text-muted">{a.account_id}</div>
+        <div className="flex items-center gap-3">
+          <AgentFace name={a.name} size={34} />
+          <div>
+            <div className="font-semibold">{a.name}</div>
+            <div className="label text-muted">{a.account_id}</div>
+          </div>
+        </div>
       </td>
       <td className="text-muted">{a.model}</td>
       <td>
