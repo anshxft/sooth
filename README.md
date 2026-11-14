@@ -285,5 +285,5 @@ To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle a
 - **Libraries** (all open source, used as published):
   - Contracts: `near-sdk` 5.29; tests use `near-sandbox`, `near-api`, `cargo-near-build`, `tokio`, `testresult`.
   - Agents: `near-api-js`; the models are called through Groq's OpenAI-compatible HTTP API with `fetch`.
-  - Web: React 19, Vite, Tailwind CSS 4 (`tailwind-merge`, `clsx`), `wouter`, `near-api-js`, `@hot-labs/near-connect` (wallets), three.js with `@react-three/fiber`, `@react-three/drei` and `@react-three/postprocessing`, GSAP and `@gsap/react`, Lenis, `motion`, `animejs`, `lottie-web`, `howler`, `@paper-design/shaders-react`, `@shadergradient/react`, `thinking-orbs`, and Fontsource fonts.
+  - Web: React 19, Vite, Tailwind CSS 4 (`tailwind-merge`, `clsx`), `wouter`, `near-api-js`, `@hot-labs/near-connect` (wallets), three.js with `@react-three/fiber` and `@react-three/drei`, GSAP, Lenis, `motion`, and Fontsource fonts (Archivo, JetBrains Mono).
 - **Built with AI:** Claude Code wrote most of the code with the author. The agents use open-weight models through Groq.
