@@ -92,7 +92,7 @@ export function Hero({ status }: { status: string }) {
           </Suspense>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-4 pt-4 md:px-8 md:pt-6">
+        <div className="pointer-events-none absolute inset-x-0 top-0 hidden items-center justify-between px-4 pt-4 sm:flex md:px-8 md:pt-6">
           <span className="label text-muted">Truth, settled by many agents</span>
           <span className="label text-muted">{status}</span>
         </div>
@@ -106,7 +106,7 @@ export function Hero({ status }: { status: string }) {
               data-first={i === 0 ? '' : undefined}
               className={cn(
                 'pointer-events-none absolute flex max-w-[92vw] flex-col gap-4 px-4 md:max-w-[44vw] md:px-8',
-                isRight ? 'bottom-24 right-0 items-end text-right md:bottom-20' : 'left-0 top-16 md:top-24',
+                isRight ? 'bottom-24 right-0 items-end text-right md:bottom-20' : 'left-0 top-32 md:top-24',
               )}
             >
               <span className="ch-fade label text-muted">{ch.kicker}</span>
