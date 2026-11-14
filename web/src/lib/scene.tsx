@@ -34,12 +34,14 @@ function SideList({ side, align }: { side: Side; align: 'left' | 'right' }) {
         <h3 className="text-lg font-normal tracking-[-0.01em]">{side.title}</h3>
         <span className="text-sm text-muted">{side.kicker}</span>
       </div>
-      <ol className="mt-5 grid gap-1 md:mt-8">
+      <ol data-reveal-group className="mt-5 grid gap-1 md:mt-8">
         {side.items.map((item, i) => (
           <li key={item} className={cn('group flex items-baseline gap-4', isRight && 'md:flex-row-reverse')}>
             <span className="w-8 shrink-0 text-xs text-muted tabular-nums md:text-right">{side.prefix}.{i + 1}</span>
-            <span className="text-[clamp(1.6rem,3.3vw,3.25rem)] font-light leading-[1.12] tracking-[-0.045em] text-muted transition-colors duration-300 group-hover:text-ink">
-              {item}
+            <span className="overflow-hidden pb-[0.08em]">
+              <span className="rv-up inline-block text-[clamp(1.6rem,3.3vw,3.25rem)] font-light leading-[1.12] tracking-[-0.045em] text-muted transition-colors duration-300 group-hover:text-ink">
+                {item}
+              </span>
             </span>
           </li>
         ))}

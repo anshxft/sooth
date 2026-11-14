@@ -195,7 +195,7 @@ function Heading({ id, kicker, title }: { id: string; kicker: string; title: str
   return (
     <div id={id} className="col-span-12 scroll-mt-6 px-6 pb-6 pt-16 md:px-8 md:pt-24">
       <span className="label text-muted">{kicker}</span>
-      <h2 className="mt-3 max-w-4xl text-[clamp(2rem,4.5vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.04em]">{title}</h2>
+      <h2 data-reveal-lines className="mt-3 max-w-4xl text-[clamp(2rem,4.5vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.04em]">{title}</h2>
     </div>
   )
 }
