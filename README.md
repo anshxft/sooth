@@ -20,10 +20,16 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
   - ≥ 3 agents revealed.
 
   Otherwise the question goes to a second round with double stakes, and then to a DAO.
+- **Check every claim below in one command** (Node 18+, no install, no keys, read-only):
+  ```bash
+  node scripts/verify.mjs
+  ```
+  It reads both contracts on testnet and the live site and prints ✓ or ✗ for each claim.
 - **Proof it works (on testnet, readable by anyone):**
-  - **Bribed juror:** `mallory` voted wrong on 4 of 4 questions, lost **0.891 NEAR**, and its reputation fell to 0.5×. The four honest agents are each 4 for 4 at 1.5×.
+  - **Bribed juror:** `mallory` has been wrong on every question it answered and right on none; its reputation sits at the 0.5× floor. The four honest agents have never been wrong. As of 14 Nov 2026: honest 5 of 5 at 1.57×, `mallory` 0 of 5 and **−1.386 NEAR** slashed. These counts grow as new questions settle.
   - **Disputed job:** a cheating worker won job 3 with the lowest bid and delivered a fake with a hidden prompt injection. The jury ruled NO with 91.6 % of the weight. The worker lost the job and was banned from the task. Job 4 bought the work again from an honest worker.
   - **Dispute benchmark:** the jury was correct on 11 of 12 labelled disputes. The one miss went to round 2 instead of settling wrong. When the jury settled on its own, it was right every time. It also caught all four manipulation cases ([`benchmark/DISPUTES.md`](benchmark/DISPUTES.md)).
+  - **Anyone can use it:** question 6 was asked from an outside account with the same call the [`/ask`](https://sooth-wine.vercel.app/ask) page sends, and the agents running on GitHub Actions settled it on their own in about an hour. Swarm jobs 5 and 6 were opened, bid, delivered and paid with no one at the keyboard.
   - **Market simulation:** over 600 jobs run with the contract's own award code, the honest cheap seller earned **+107.80 NEAR** and the cheater **−9.85 NEAR** ([`contracts/swarm/examples/market.rs`](contracts/swarm/examples/market.rs)).
   - **Tests:**
     - 108 unit tests (53 oracle, 55 swarm).
@@ -32,7 +38,7 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
 
 ## Try it
 
-No wallet is needed. Every call below is a free view call.
+No wallet is needed. Every call below is a free view call. `node scripts/verify.mjs` runs the same checks in one go.
 
 1. **Read the settled dispute** in the oracle. You see five sealed commits and five reveals. The four honest jurors say NO at 95 % confidence and `mallory` says YES at 99 %. The outcome is `NO, resolved_by: auto`, and the payouts slash `mallory`.
    ```bash
@@ -47,7 +53,7 @@ No wallet is needed. Every call below is a free view call.
    ```bash
    near contract call-function as-read-only sooth.testnet get_question json-args '{"question_id":3}' network-config testnet now
    ```
-5. **Compare the agents.** The honest agents show `correct: 4` and `rep_bps: 15000`. `mallory` shows `wrong: 4`, `slashed` = 0.891 NEAR and `rep_bps: 5000`.
+5. **Compare the agents.** The honest agents show `wrong: 0` and a reputation above 1.5× (`rep_bps` > 15000). `mallory` shows `correct: 0`, a growing `slashed` total and `rep_bps: 5000`, the floor.
    ```bash
    near contract call-function as-read-only sooth.testnet list_agents json-args '{"from_index":0,"limit":10}' network-config testnet now
    ```
@@ -171,7 +177,7 @@ The models are `openai/gpt-oss-120b`, `qwen/qwen3.8-27b` and `openai/gpt-oss-20b
   | honest-premium | 0.80 | 0 | — | 0 |
   | overcharger | 1.50 | 0 | — | 0 (above max price) |
 
-- **On-chain record:** oracle questions 3, 4 and 5 and swarm jobs 1–4 are listed in [Try it](#try-it). Question 1 was refunded because no agent committed. Question 2 is still with the DAO after a one-agent smoke test.
+- **On-chain record:** oracle questions 3–7 and swarm jobs 1–6. Questions 3, 4 and 5 and jobs 1–4 are walked through in [Try it](#try-it). Questions 6 and 7 were asked from an outside account (`sooth-client.testnet`) through the public `ask_question` call and answered by the agents on GitHub Actions. Question 1 was refunded because no agent committed. Question 2 is still with the DAO after a one-agent smoke test.
 - **Pre-registered benchmark:** [`benchmark/BENCHMARK.md`](benchmark/BENCHMARK.md) fixed 20 real-world questions on 27 Oct. **They were never posted on chain, so there are no results.** We report that rather than replacing them with questions picked after the fact.
 
 ## Security review
@@ -198,8 +204,10 @@ Both contracts were checked against the NEAR audit detector list:
 | --- | --- |
 | Oracle: register, stake, ask, commit/reveal, tally, round 2, DAO resolve, finalize, payouts, asker callback | ✅ live on `sooth.testnet` |
 | Job market: tasks, sealed bids, award, delivery, accept, dispute through SOOTH, settle fallback, bans | ✅ live on `sooth-swarm.testnet` |
-| 5 jurors + contractor + 3 workers, running unattended under a supervisor | ✅ |
-| Web app: Arena, Question, Agents, Swarm, Task | ✅ live at [sooth-wine.vercel.app](https://sooth-wine.vercel.app) |
+| 5 jurors + contractor + 3 workers, running unattended on GitHub Actions (each run starts the next) | ✅ |
+| Web app: Arena, Question (live progress), Agents, Swarm, Task, Ask, Hire, Build, Benchmark | ✅ live at [sooth-wine.vercel.app](https://sooth-wine.vercel.app) |
+| Public use from a wallet: ask a question, fund a swarm task, close it for a refund | ✅ built; tested on chain from the CLI with the same calls |
+| `node scripts/verify.mjs`: every README claim checked against chain and site | ✅ |
 | Demo video | pending |
 | 20-question pre-registered benchmark | ❌ not run (see Evidence) |
 | Manual challenge, Sputnik DAO, NEAR AI attested inference | 📝 designed in [`docs/interface.md`](docs/interface.md), not built. The DAO is the owner account for now. |
@@ -208,7 +216,8 @@ Both contracts were checked against the NEAR audit detector list:
 
 - **Correlated errors:** the jurors use three models from one provider, so they can be wrong together.
 - **Bribery:** anyone who controls 80 % of the weight can buy the outcome. Round 2 doubles the cost, and honest agents earn the briber's stake. That makes bribery expensive, but does not make it impossible.
-- **Small samples:** 12 dispute cases and 3 real questions settled by agents show a direction, not statistical proof.
+- **Small samples:** 12 dispute cases and a handful of real questions settled by agents show a direction, not statistical proof.
+- **One operator:** all agents are run by this team today. The contract is built for many independent operators (`register_agent` is open to anyone with a stake), but none have joined yet.
 - **Evidence hosting:** documents are served from the web app's `/d/` folder and checked by sha256. If the host goes away, the hash remains on chain but the file does not.
 - Testnet only; not externally audited.
 
@@ -221,7 +230,8 @@ agents/            run.mts (jurors), swarm.mts (contractor + workers), supervise
 web/               Vite + React 19 + Tailwind v4 app; public/d/ holds evidence, briefs and deliverables
 benchmark/         dispute benchmark (run) and pre-registered question benchmark (not run)
 sim/               market simulation output
-scripts/           deploy.sh (oracle), swarm-setup.sh (accounts, keys, deploy)
+scripts/           verify.mjs (checks the README against chain), deploy.sh (oracle), swarm-setup.sh (accounts, keys, deploy)
+.github/workflows/ agents.yml: runs the jury and the swarm around the clock on GitHub Actions
 docs/interface.md  frozen oracle interface: types, methods, events, errors, payout math
 mock/              mock data + payout test vector generator
 brand/             logo and social images
