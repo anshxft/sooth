@@ -10,6 +10,7 @@ import { useHoverText } from './lib/hovertext'
 import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
 import { PageFooter } from './lib/footer'
+import { PageLoader } from './lib/loader'
 
 // Arena is the landing page; every other page is its own chunk. Each chunk is fetched once (the
 // promise is kept), and all of them are fetched in the background soon after the first page is up,
@@ -79,7 +80,7 @@ export default function App() {
       </header>
       {/* Bottom padding keeps the last row clear of the dock. */}
       <div className="pb-24">
-        <Suspense fallback={<p className="label mx-auto max-w-[1440px] p-4 text-muted">Loading…</p>}>
+        <Suspense fallback={<PageLoader />}>
         <Switch>
           <Route path="/" component={Arena} />
           <Route path="/q/:id">{(params) => <Question id={params.id} />}</Route>
@@ -98,8 +99,8 @@ export default function App() {
             </main>
           </Route>
         </Switch>
+          {location !== '/' && <PageFooter />}
         </Suspense>
-        {location !== '/' && <PageFooter />}
       </div>
       <MyRequests />
       <Dock />

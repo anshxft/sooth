@@ -8,6 +8,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { cn } from '../lib/utils'
 import { playsEntry } from '../lib/hero/entry'
+import { MarkLoader } from '../lib/loader'
 
 gsap.registerPlugin(ScrollTrigger)
 // Start fetching the 3D mark (three.js) as soon as this module runs, alongside the page, not after it renders.
@@ -89,7 +90,7 @@ export function Hero({ status }: { status: string }) {
     <section ref={track} data-no-reveal data-entry={playsEntry ? '' : undefined} aria-label="SOOTH, in five steps" className="relative h-[520vh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <div className="absolute inset-0">
-          <Suspense fallback={null}>
+          <Suspense fallback={<MarkLoader className="left-1/2 top-[74%] -translate-x-1/2 -translate-y-1/2 md:left-[71%] md:top-1/2" />}>
             <Mark drive={drive} isDark={isDark} isReduced={isReduced} isLive={isLive && !isReduced} />
           </Suspense>
         </div>
