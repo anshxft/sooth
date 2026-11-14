@@ -1,0 +1,71 @@
+# Tests both contracts (unit tests + near-sandbox end-to-end), checks the web app, and re-checks the
+# README's claims against testnet once a day. The agents' own commits (web/public/d) do not trigger it.
+name: ci
+
+on:
+  push:
+    paths-ignore: ["web/public/d/**"]
+  pull_request:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "23 6 * * *" # daily: are the on-chain claims still true?
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: contract tests (${{ matrix.contract }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        contract: [sooth, swarm]
+    defaults:
+      run:
+        working-directory: contracts/${{ matrix.contract }}
+    steps:
+      - uses: actions/checkout@v4
+      # rust-toolchain.toml pins Rust 1.93 with the wasm target; rustup installs it on first use.
+      - run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts/${{ matrix.contract }}
+      - name: Install cargo-near (the sandbox tests build the real wasm)
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/near/cargo-near/releases/latest/download/cargo-near-installer.sh | sh
+      - name: Unit tests and the near-sandbox end-to-end test
+        run: cargo test --locked
+      - name: Market simulation (swarm only)
+        if: matrix.contract == 'swarm'
+        run: cargo run --locked --example market
+
+  web:
+    name: web app (typecheck, lint, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run lint
+      - run: npm run build
+
+  claims:
+    name: README claims hold on testnet
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/verify.mjs

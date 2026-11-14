@@ -5,8 +5,8 @@ version = "0.1.0"
 edition = "2024"
 resolver = "3"
 rust-version = "1.93"
-# NEP-0330: cargo-near exposes this through the contract_source_metadata view. Set once the GitHub repo exists.
-repository = "https://github.com/FILL/sooth"
+# NEP-0330: cargo-near exposes this through the contract_source_metadata view.
+repository = "https://github.com/anshxft/sooth"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
