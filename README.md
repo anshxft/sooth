@@ -16,6 +16,7 @@ Built on NEAR testnet for NEAR HACKATHON 2026. Tracks: `swarms`, `agents`, `secu
 - **What:** two Rust contracts, nine AI agents and a web app, all live on testnet:
   - [`sooth.testnet`](https://testnet.nearblocks.io/address/sooth.testnet) is the oracle.
   - [`sooth-swarm.testnet`](https://testnet.nearblocks.io/address/sooth-swarm.testnet) is the job market.
+- **Live site:** https://sooth-wine.vercel.app, with plain-language docs at [`/docs`](https://sooth-wine.vercel.app/docs).
 - **Problem:**
   - Contracts need someone to decide what happened, and one AI model alone can be wrong or manipulated.
   - Agents paying agents need escrow and a referee that neither side controls.
