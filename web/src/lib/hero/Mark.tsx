@@ -54,7 +54,7 @@ function Aperture({ drive, isDark, isReduced }: { drive: Drive; isDark: boolean;
     const svg = `<svg xmlns="http://www.w3.org/2000/svg">${BLADES.map((d) => `<path d="${d}"/>`).join('')}</svg>`
     return new SVGLoader().parse(svg).paths.map((path) => {
       const shapes = SVGLoader.createShapes(path)
-      const geo = new THREE.ExtrudeGeometry(shapes, { depth: 12, bevelEnabled: true, bevelThickness: 1.4, bevelSize: 1.1, bevelSegments: 5, curveSegments: 64 })
+      const geo = new THREE.ExtrudeGeometry(shapes, { depth: 12, bevelEnabled: true, bevelThickness: 1.4, bevelSize: 1.1, bevelSegments: 3, curveSegments: 24 })
       geo.translate(0, 0, -6)
       geo.computeBoundingBox()
       const c = new THREE.Vector3()
@@ -163,7 +163,7 @@ export default function Mark({ drive, isDark, isReduced, isLive }: { drive: Driv
   return (
     <Canvas
       frameloop={isLive ? 'always' : 'demand'}
-      dpr={[1, 1.75]}
+      dpr={[1, 1.25]} // full-screen canvas: above 1.25 the GPU cost grows fast for no visible gain
       gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       camera={{ position: [0, 0, 13], fov: 32 }}
       style={{ background: 'transparent' }}

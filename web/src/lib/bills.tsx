@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react'
 import { isWashing } from './theme'
 
 const CHAR_H = 12 // px per character row; the cell width is measured from the font
-const FPS = 30
+const FPS = 24
 const SAMPLES_U = 46 // surface samples along the note
 const SAMPLES_V = 20 // and across it
 const ASPECT = 0.43 // note height / length

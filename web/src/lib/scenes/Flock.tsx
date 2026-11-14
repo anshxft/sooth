@@ -131,7 +131,7 @@ export default function Flock({ isLive, isDark, isReduced, isFramed = false }: S
   return (
     <Canvas
       frameloop={isLive ? 'always' : 'demand'}
-      dpr={[1, 1.75]}
+      dpr={[1, 1.25]}
       gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
       camera={{ position: [0, 0, 8.5], fov: 40 }}
       style={{ background: 'transparent' }}

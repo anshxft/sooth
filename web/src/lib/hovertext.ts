@@ -59,7 +59,14 @@ export function useHoverText(route: string) {
         if (l.hot) { l.hot = false; l.el.style.color = '' }
       }
     }
+    // At most once per frame: reading letter boxes on every pointer event made big headings stutter.
+    let queued: PointerEvent | null = null
+    let frame = 0
     const onMove = (e: PointerEvent) => {
+      queued = e
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; if (queued) handle(queued) })
+    }
+    const handle = (e: PointerEvent) => {
       const hit = (e.target as Element | null)?.closest?.(TARGETS)
       const target = hit && !hit.closest('[data-no-hover]') ? hit : null
       if (target !== active) {
@@ -81,6 +88,7 @@ export function useHoverText(route: string) {
     window.addEventListener('pointermove', onMove, { passive: true })
     document.addEventListener('pointerleave', onLeave)
     return () => {
+      cancelAnimationFrame(frame)
       window.removeEventListener('pointermove', onMove)
       document.removeEventListener('pointerleave', onLeave)
     }
