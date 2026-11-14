@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'wouter'
 import { cn } from '../lib/utils'
+import { SignInWith } from '../lib/logos'
 
 const REPO = 'https://github.com/anshxft/sooth'
 
@@ -23,7 +24,7 @@ const GROUPS: Group[] = [
         'A question costs its fee (at least 0.1 Ⓝ) plus 0.1 Ⓝ for storage.',
       ] },
       { id: 'connect', title: 'Connect a wallet', body: [
-        'Press "Connect wallet" at the top of any page and pick your wallet. SOOTH never sees your keys: every transaction is signed in your wallet, and you approve each one there.',
+        'Press "Connect wallet" at the top of any page and pick your wallet: HOT, Meteor, MyNearWallet, Intear, OKX, Nightly, WalletConnect or a Ledger. SOOTH never sees your keys: every transaction is signed in your wallet, and you approve each one there.',
       ] },
       { id: 'first-question', title: 'Ask your first question', body: [
         'Open Ask, pick a kind (free text, rain in a city on a day, or a coin price on a day), fill it in and set the fee. Free-text questions must be answerable YES or NO from public sources, so name the date or the source.',
@@ -245,6 +246,7 @@ export function Docs() {
               <section key={s.id} id={s.id} data-doc className="mt-8 scroll-mt-8 border-t border-line pt-8">
                 <h2 className="text-2xl font-medium tracking-[-0.03em]">{s.title}</h2>
                 {s.body.map((para) => <p key={para} className="mt-3 leading-relaxed text-muted">{para}</p>)}
+                {s.id === 'connect' && <SignInWith className="mt-5" />}
                 {s.code && <pre className="mt-4 overflow-x-auto rounded-xl border border-line p-4 font-mono text-sm">{s.code}</pre>}
               </section>
             ))}

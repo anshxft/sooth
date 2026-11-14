@@ -1,5 +1,6 @@
 // Hire the swarm: a signed-in visitor funds a writing task. The contractor agent splits it into jobs,
 // workers bid sealed, and a delivery the contractor rejects goes to the SOOTH jury.
+import { SignInWith } from '../lib/logos'
 import { type FormEvent, useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { connector, useAccount } from '../lib/near'
@@ -153,6 +154,7 @@ export function Hire() {
             You pay {((Number(budget) || 0) + STORAGE_MILLI / 1000).toFixed(2)} Ⓝ on testnet: the budget plus {STORAGE_MILLI / 1000} Ⓝ storage. Free testnet NEAR:{' '}
             <a href="https://near-faucet.io/" target="_blank" rel="noopener noreferrer" className="underline">near-faucet.io</a>.
           </p>
+          <SignInWith className="mt-1" />
 
           {error && <p role="alert" className="label text-red">{error}</p>}
 

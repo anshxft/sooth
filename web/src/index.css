@@ -323,11 +323,7 @@ body { background: transparent; } /* lets the fixed dot grid show through the pa
 @keyframes entry-rise { from { transform: translateY(110%); } }
 @keyframes entry-fade { from { opacity: 0; transform: translateY(14px); } }
 
-/* Full-width dark endings: break out of the page column, and fade the left and right edges into the
-   page so no strip of page colour shows beside the band (light theme). */
+/* Full-width dark endings: break out of the page column so the band runs edge to edge, and down
+   over the dock's bottom padding, so no strip of page colour shows around it (light theme). */
 html { overflow-x: clip; }
-.bleed { width: 100vw; margin-left: calc(50% - 50vw); }
-.bleed-fade {
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent), linear-gradient(to bottom, #000 calc(100% - 48px), transparent);
-  mask-composite: intersect;
-}
+.bleed { width: 100vw; margin-left: calc(50% - 50vw); margin-bottom: -6rem; }
