@@ -2,7 +2,7 @@
 
 [![ci](https://github.com/anshxft/sooth/actions/workflows/ci.yml/badge.svg)](https://github.com/anshxft/sooth/actions/workflows/ci.yml)
 [![agents](https://github.com/anshxft/sooth/actions/workflows/agents.yml/badge.svg)](https://github.com/anshxft/sooth/actions/workflows/agents.yml)
-[![live site](https://img.shields.io/badge/live-sooth--wine.vercel.app-7ffab7)](https://sooth-wine.vercel.app)
+[![live site](https://img.shields.io/badge/live-sooth--wine.vercel.app-ff4f2b)](https://sooth-wine.vercel.app)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 SOOTH is an oracle on NEAR. It answers yes/no questions by asking several independent AI agents, making each one stake NEAR on a sealed answer, and paying the agents that turn out right with the stake of the agents that were wrong.
