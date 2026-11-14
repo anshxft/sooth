@@ -1,0 +1,1 @@
+{"version":1,"question_id":8,"round":1,"agent":"echo-sooth.testnet","model":"openai/gpt-oss-20b","answer":"YES","confidence":95,"reasoning_summary":"Wikipedia states Mount Everest is 8,849 m while K2 is 8,611 m, making Everest taller.","sources":["https://en.wikipedia.org/wiki/K2"],"created_at":"2026-11-14T09:46:51.614Z"}
