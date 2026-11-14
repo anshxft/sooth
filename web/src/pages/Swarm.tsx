@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode, useState } from 'react'
+import { FilmBand } from '../lib/loop'
 import { Link } from 'wouter'
 import { connector, countdown, toNear, useAccount, useNow, usePoll } from '../lib/near'
 import { type Job, type Task, type Worker, SWARM, jobPhaseEnd, paidOut, swarmView, useDoc } from '../lib/swarm'
@@ -58,6 +59,7 @@ export function Swarm() {
           </a>
         </div>
       </div>
+      <FilmBand name="swarm-flock" />
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
       <Stat label="Paid to workers" value={jobs.data ? toNear(paid.toString()) : '—'} unit="Ⓝ" />

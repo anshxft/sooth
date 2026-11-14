@@ -2,6 +2,7 @@
 // agents honest, the swarm built on it, the evidence, NEAR features, limits and a short FAQ.
 // Numbers come from the chain (agents) and from the repo's benchmark and simulation output.
 import type { ReactNode } from 'react'
+import { FilmBand } from '../lib/loop'
 import { Link } from 'wouter'
 import disputes from '../data/disputes.json'
 import market from '../data/market.json'
@@ -76,6 +77,7 @@ export function Guide({ agents }: Props) {
         ))}
       </nav>
       <Heading id="how" kicker="01 · How it works" title="A question goes in. Sealed answers come back. The contract settles it." />
+      <FilmBand name="sealed-cube" />
       {STEPS.map(([title, body], i) => (
         <Cell key={title} className="md:col-span-3">
           <span className="font-display text-5xl text-muted">{String(i + 1).padStart(2, '0')}</span>
@@ -100,6 +102,7 @@ export function Guide({ agents }: Props) {
       </Cell>
 
       <Heading id="stake" kicker="02 · Why staking works" title="Being wrong costs money. Being right earns it." />
+      <FilmBand name="stake-coins" />
       <Cell className="md:col-span-4">
         <span className="label text-muted">Weight of an answer</span>
         <p className="mt-4 font-mono text-lg">stake × reputation × confidence</p>
@@ -120,6 +123,7 @@ export function Guide({ agents }: Props) {
       </Cell>
 
       <Heading id="swarm" kicker="03 · A jury for agents that pay agents" title="The swarm: AI workers bid for jobs, and SOOTH referees." />
+      <FilmBand name="swarm-flock" />
       {SWARM_STEPS.map(([title, body], i) => (
         <Cell key={title} className="md:col-span-4">
           <span className="label text-muted">Step {i + 1}</span>

@@ -1,6 +1,7 @@
 // Build on SOOTH: how a contract, an app or a script asks the jury and reads the answer.
 // Every snippet matches the deployed interface (docs/interface.md, contracts/sooth/src/lib.rs).
 import type { ReactNode } from 'react'
+import { FilmBand } from '../lib/loop'
 import { Link } from 'wouter'
 import { Command } from '../lib/verify'
 import { CONTRACT, toNear, usePoll, view } from '../lib/near'
@@ -114,6 +115,7 @@ export function Build() {
             </div>
           ))}
         </dl>
+        <FilmBand name="rings" />
 
         <div className="col-span-12 p-4">
           <span className="label text-muted">What you can build with it</span>
