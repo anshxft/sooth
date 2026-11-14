@@ -309,3 +309,28 @@ body { background: transparent; } /* lets the fixed dot grid show through the pa
 .closing-glow { background: linear-gradient(to bottom, transparent, color-mix(in oklab, #ff4f2b 22%, transparent) 45%, #7a2412 72%, #0c0c0b); }
 .closing-band { background: #0c0c0b; color: #eceae4; }
 .closing-muted { color: #a9a79f; }
+
+/* First-visit intro (lib/intro.tsx). Ease: strong ease-out for entries, drawer curve for the lift. */
+.intro {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: #0c0c0b; color: #eceae4;
+  animation: intro-lift 0.9s cubic-bezier(0.77, 0, 0.175, 1) 2.2s forwards;
+}
+.intro[data-leaving] { animation: intro-lift 0.6s cubic-bezier(0.77, 0, 0.175, 1) forwards; }
+.intro-stage { display: grid; justify-items: center; gap: 1.25rem; }
+.intro-mark { width: clamp(72px, 12vw, 120px); overflow: visible; animation: intro-turn 1.6s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.intro-blade {
+  fill: #eceae4; opacity: 0;
+  animation: intro-blade 0.9s cubic-bezier(0.23, 1, 0.32, 1) both, intro-glow 0.8s ease 1.4s both;
+}
+.intro-name { display: flex; overflow: hidden; font-size: clamp(3rem, 9vw, 6rem); line-height: 1; letter-spacing: -0.04em; }
+.intro-letter { display: inline-block; animation: intro-rise 0.8s cubic-bezier(0.23, 1, 0.32, 1) both; }
+.intro-tag { color: #a9a79f; animation: intro-fade 0.6s ease 1.2s both; }
+.intro-line { width: min(220px, 50vw); height: 1px; background: #ff4f2b; transform-origin: left; animation: intro-fill 1.7s cubic-bezier(0.77, 0, 0.175, 1) 0.3s both; }
+@keyframes intro-blade { from { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(-40deg); } to { opacity: 1; transform: none; } }
+@keyframes intro-glow { 50% { fill: #ff4f2b; } }
+@keyframes intro-turn { from { transform: rotate(-60deg) scale(0.9); } to { transform: none; } }
+@keyframes intro-rise { from { transform: translateY(105%); } to { transform: none; } }
+@keyframes intro-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes intro-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes intro-lift { from { clip-path: inset(0 0 0 0); } to { clip-path: inset(0 0 100% 0); } }

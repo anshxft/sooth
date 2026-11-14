@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 
 // brand/mark-ink.svg: six blades around a hexagonal opening, 60 degrees apart.
-const BLADES = [
+export const BLADES = [
   'M19.32 -6.54 L57.90 15.74 A60.0 60.0 0 0 1 19.32 56.80 Z',
   'M15.32 13.46 L15.32 58.01 A60.0 60.0 0 0 1 -39.53 45.13 Z',
   'M-4.00 20.00 L-42.58 42.27 A60.0 60.0 0 0 1 -58.85 -11.67 Z',
