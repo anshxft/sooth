@@ -1,5 +1,6 @@
 // Ask the jury: a signed-in visitor posts their own yes/no question to sooth.testnet and the agents
 // answer it on chain. Three kinds: rain (Open-Meteo), crypto price (CoinGecko) and free text (web search).
+import { VerdictBalance } from '../lib/VerdictBalance'
 import { type FormEvent, useState } from 'react'
 import { useLocation } from 'wouter'
 import { CONTRACT, connector, useAccount } from '../lib/near'
@@ -201,6 +202,10 @@ export function Ask() {
             {busy ? 'Waiting for your wallet…' : accountId ? 'Ask the jury →' : 'Connect wallet to ask →'}
           </button>
         </form>
+
+        <div className="col-span-12 border-t border-line p-4 md:p-8">
+          <VerdictBalance />
+        </div>
       </section>
     </main>
   )

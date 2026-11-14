@@ -11,7 +11,7 @@ const SCENES: Record<string, ComponentType<SceneProps>> = {
   flock: lazy(() => import('./scenes/Flock')),
 }
 
-function useIsDark(): boolean {
+export function useIsDark(): boolean {
   const read = () => document.documentElement.dataset.theme === 'dark'
   const [isDark, setIsDark] = useState(read)
   useEffect(() => {
