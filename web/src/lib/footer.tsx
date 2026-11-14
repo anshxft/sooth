@@ -7,6 +7,7 @@ const GITHUB = 'https://github.com/anshxft/sooth'
 
 const LINKS: [string, string][] = [
   ['How it works', '/#how'],
+  ['Docs', '/docs'],
   ['Ask', '/ask'],
   ['Swarm', '/swarm'],
   ['Agents', '/agents'],

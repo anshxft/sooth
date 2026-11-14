@@ -18,6 +18,7 @@ const Hire = lazy(() => import('./pages/Hire').then((m) => ({ default: m.Hire })
 const Build = lazy(() => import('./pages/Build').then((m) => ({ default: m.Build })))
 const Benchmark = lazy(() => import('./pages/Benchmark').then((m) => ({ default: m.Benchmark })))
 const Question = lazy(() => import('./pages/Question').then((m) => ({ default: m.Question })))
+const Docs = lazy(() => import('./pages/Docs').then((m) => ({ default: m.Docs })))
 const Swarm = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.Swarm })))
 const TaskPage = lazy(() => import('./pages/Swarm').then((m) => ({ default: m.TaskPage })))
 
@@ -26,7 +27,7 @@ const SITE = 'SOOTH'
 function titleFor(path: string): string {
   if (path.startsWith('/q/')) return `Question ${path.slice(3)} · ${SITE}`
   if (path.startsWith('/t/')) return `Task ${path.slice(3)} · ${SITE}`
-  const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark', '/build': 'Build on SOOTH', '/hire': 'Hire the swarm' }
+  const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark', '/build': 'Build on SOOTH', '/hire': 'Hire the swarm', '/docs': 'Docs' }
   if (path === '/') return `${SITE} — Many agents. One truth.`
   return page[path] ? `${page[path]} · ${SITE}` : `Page not found · ${SITE}`
 }
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/hire" component={Hire} />
           <Route path="/build" component={Build} />
           <Route path="/benchmark" component={Benchmark} />
+          <Route path="/docs" component={Docs} />
           <Route>
             <main className="mx-auto max-w-[1440px] p-4">
               <h1 className="font-display text-[clamp(2.5rem,7vw,5rem)] leading-none tracking-[-0.04em]">404</h1>
