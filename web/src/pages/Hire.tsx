@@ -68,8 +68,8 @@ export function Hire() {
 
   async function submit(e: FormEvent) {
     e.preventDefault()
-    if (!accountId) return signIn()
     if (!brief) return setError('Load the brief first, so you can check what the agents will read.')
+    if (!accountId) return signIn()
     const budgetMilli = Math.round(Number(budget) * 1000)
     if (!(budgetMilli >= MIN_BUDGET * 1000)) return setError(`The budget must be at least ${MIN_BUDGET} NEAR.`)
     setBusy(true)

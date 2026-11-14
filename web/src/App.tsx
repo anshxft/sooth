@@ -22,7 +22,8 @@ function titleFor(path: string): string {
   if (path.startsWith('/q/')) return `Question ${path.slice(3)} · ${SITE}`
   if (path.startsWith('/t/')) return `Task ${path.slice(3)} · ${SITE}`
   const page: Record<string, string> = { '/ask': 'Ask the jury', '/swarm': 'Swarm', '/agents': 'Agents', '/benchmark': 'Benchmark', '/build': 'Build on SOOTH', '/hire': 'Hire the swarm' }
-  return page[path] ? `${page[path]} · ${SITE}` : `${SITE} — Many agents. One truth.`
+  if (path === '/') return `${SITE} — Many agents. One truth.`
+  return page[path] ? `${page[path]} · ${SITE}` : `Page not found · ${SITE}`
 }
 
 export default function App() {
@@ -44,7 +45,7 @@ export default function App() {
             onClick={accountId ? signOut : signIn}
             className="wallet label rounded-full bg-green px-4 py-2 text-ink transition-transform duration-150 active:scale-[0.96]"
           >
-            {accountId ? `${accountId} ×` : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
+            {accountId ? <><span className="inline-block max-w-[9rem] truncate align-bottom sm:max-w-[16rem]">{accountId}</span> ×</> : <>Connect wallet <span className="wallet-arrow" aria-hidden="true">→</span></>}
           </button>
           <ThemeToggle />
         </div>
@@ -64,7 +65,8 @@ export default function App() {
           <Route path="/benchmark" component={Benchmark} />
           <Route>
             <main className="mx-auto max-w-[1440px] p-4">
-              <p className="label">Page not found. <Link href="/" className="underline">Back to arena</Link></p>
+              <h1 className="font-display text-[clamp(2.5rem,7vw,5rem)] leading-none tracking-[-0.04em]">404</h1>
+              <p className="label mt-3">Page not found. <Link href="/" className="underline">Back to arena</Link></p>
             </main>
           </Route>
         </Switch>
