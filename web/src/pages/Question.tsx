@@ -57,7 +57,7 @@ export function Question({ id }: { id: string }) {
         </span>
       </div>
       <header className="col-span-12 p-4">
-        <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.05] tracking-[-0.03em]"><Scramble text={q.text} /></h1>
+        <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-light leading-[1.05] tracking-[-0.045em]"><Scramble text={q.text} /></h1>
         <p className="label mt-3 flex flex-wrap gap-x-3 gap-y-1 text-muted">
           <span>{q.category}</span><span>asked by {q.asker}</span><span>fee {toNear(q.fee)} Ⓝ</span>
           <span>opened {clock(q.created_at)}</span><span className="border border-ink px-1.5 text-ink">{spaced(q.phase)}</span>
@@ -92,7 +92,7 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
   const box = 'col-span-12 flex min-h-56 flex-col justify-between gap-4 p-4 md:col-span-4'
   if (o) {
     return (
-      <div className={cn(box, 'stamp bg-green!')}>
+      <div className={cn(box, 'stamp')}>
         <span className="label">Verdict · {RESOLVED_BY[o.resolved_by]}</span>
         <span className="font-display text-[clamp(4rem,10vw,7rem)] leading-none">{o.answer}</span>
         <span className="flex flex-wrap items-center justify-between gap-2">
@@ -113,7 +113,7 @@ function Verdict({ q, now }: { q: QuestionView; now: number }) {
   }
   const left = countdown(phaseEnd(q), now)
   return (
-    <div className={cn(box, 'bg-term! text-term-text')} aria-live="polite">
+    <div className={box} aria-live="polite">
       <span className="live-dot label text-green">Pending · round {q.round}</span>
       <span className="font-display text-[clamp(3rem,7vw,5rem)] leading-none">{left || (q.phase === 'Dao' ? 'DAO' : spaced(q.phase))}</span>
       <span className="label">{q.phase === 'Dao' ? 'Agents could not agree. Waiting for the DAO.' : `${spaced(q.phase)} phase`}</span>

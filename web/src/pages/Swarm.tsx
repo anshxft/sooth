@@ -265,7 +265,7 @@ function JobBlock({ job: j, task }: { job: Job; task: Task }) {
       </div>
       <ol className="blueprint mt-3 grid-cols-5 rounded-none!">
         {STEPS.map((s, i) => (
-          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && (j.phase === 'Disputed' ? 'bg-term! text-green' : 'bg-green!'), i === step && j.phase !== 'Closed' && 'live-dot', i > step && 'text-muted')}>
+          <li key={s} className={cn('label border-t-2 p-2', i < step && 'border-ink text-ink', i === step && 'border-green text-ink', i === step && j.phase !== 'Closed' && 'live-dot', i > step && 'border-transparent text-muted')}>
             {i === 3 && j.phase === 'Disputed' ? 'Jury' : s}{i === step && left ? ` · ${left}` : ''}
           </li>
         ))}
