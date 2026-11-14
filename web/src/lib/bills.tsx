@@ -151,14 +151,12 @@ export function Bills({ count = 12, scale = 1, className }: { count?: number; sc
       ctx.globalAlpha = 1
     }
 
-    // Green on the dark theme, ink on the light one. Read when the theme changes, not every frame:
-    // getComputedStyle per frame forced a style recalculation of the whole page.
-    let palette = { color: '#111111', strength: 0.35 }
+    // Money is green in both themes (the site accent is orange), deeper on the light theme.
+    // Read when the theme changes, not every frame.
+    let palette = { color: '#7ffab7', strength: 0.75 }
     const readPalette = () => {
       const isDark = document.documentElement.dataset.theme === 'dark'
-      const root = getComputedStyle(document.documentElement)
-      const color = root.getPropertyValue(isDark ? '--color-green' : '--color-ink').trim()
-      palette = { color: color || '#7ffab7', strength: isDark ? 0.75 : 0.35 } // faint enough to read the page through
+      palette = isDark ? { color: '#7ffab7', strength: 0.75 } : { color: '#178a50', strength: 0.4 } // faint enough to read the page through
     }
     readPalette()
     const themeWatch = new MutationObserver(readPalette)
