@@ -188,6 +188,19 @@ body {
 .expand { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 260ms var(--ease-out), opacity 200ms ease; }
 .expand[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
 
+/* Big type that reacts to the cursor (lib/hovertext.ts): words stay whole, letters move on their own. */
+.hw { display: inline-block; white-space: nowrap; }
+.hl { display: inline-block; transition: color 200ms ease; }
+
+/* The cursor is the SOOTH aperture: off-white with a dark rim (reads on both themes), the accent
+   over anything you can press. Mouse and trackpad only; text fields keep the I-beam. */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-75 -75 150 150'%3E%3Cg fill='%23eceae4' stroke='%230c0c0b' stroke-width='9' stroke-linejoin='round' paint-order='stroke'%3E%3Cpath d='M19.32 -6.54 L57.90 15.74 A60.0 60.0 0 0 1 19.32 56.80 Z'/%3E%3Cpath d='M15.32 13.46 L15.32 58.01 A60.0 60.0 0 0 1 -39.53 45.13 Z'/%3E%3Cpath d='M-4.00 20.00 L-42.58 42.27 A60.0 60.0 0 0 1 -58.85 -11.67 Z'/%3E%3Cpath d='M-19.32 6.54 L-57.90 -15.74 A60.0 60.0 0 0 1 -19.32 -56.80 Z'/%3E%3Cpath d='M-15.32 -13.46 L-15.32 -58.01 A60.0 60.0 0 0 1 39.53 -45.13 Z'/%3E%3Cpath d='M4.00 -20.00 L42.58 -42.27 A60.0 60.0 0 0 1 58.85 11.67 Z'/%3E%3C/g%3E%3C/svg%3E") 12 12, auto; }
+  a, button, summary, select, label[for], [role="button"], .btn { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='-75 -75 150 150'%3E%3Cg fill='%23ff4f2b' stroke='%230c0c0b' stroke-width='9' stroke-linejoin='round' paint-order='stroke'%3E%3Cpath d='M19.32 -6.54 L57.90 15.74 A60.0 60.0 0 0 1 19.32 56.80 Z'/%3E%3Cpath d='M15.32 13.46 L15.32 58.01 A60.0 60.0 0 0 1 -39.53 45.13 Z'/%3E%3Cpath d='M-4.00 20.00 L-42.58 42.27 A60.0 60.0 0 0 1 -58.85 -11.67 Z'/%3E%3Cpath d='M-19.32 6.54 L-57.90 -15.74 A60.0 60.0 0 0 1 -19.32 -56.80 Z'/%3E%3Cpath d='M-15.32 -13.46 L-15.32 -58.01 A60.0 60.0 0 0 1 39.53 -45.13 Z'/%3E%3Cpath d='M4.00 -20.00 L42.58 -42.27 A60.0 60.0 0 0 1 58.85 11.67 Z'/%3E%3C/g%3E%3C/svg%3E") 12 12, pointer; }
+  input, textarea { cursor: text; }
+  button:disabled { cursor: not-allowed; }
+}
+
 /* Agent faces: a slow float and a blink every few seconds, each on its own beat. */
 .face { overflow: visible; animation: face-float 4.6s ease-in-out infinite; animation-delay: calc(var(--float-delay, 0s) * -1); }
 .face-eyes { transform-box: fill-box; transform-origin: center; animation: face-blink 5.2s infinite; animation-delay: var(--blink-delay, 0s); }

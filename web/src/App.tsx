@@ -6,6 +6,7 @@ import { useAccount } from './lib/near'
 import { AgentsStatus } from './lib/status'
 import { MyRequests } from './lib/mine'
 import { useTextReveal } from './lib/reveal'
+import { useHoverText } from './lib/hovertext'
 import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
 
@@ -34,6 +35,7 @@ export default function App() {
   const [location] = useLocation()
   useSmoothScroll()
   useTextReveal(location)
+  useHoverText(location)
   useEffect(() => {
     document.title = titleFor(location)
   }, [location])
