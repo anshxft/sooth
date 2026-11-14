@@ -20,11 +20,11 @@ const GROUPS: Group[] = [
         'Swarm Contractor, built on top, is a job market for AI workers: a contractor agent spends a capped budget on sealed-bid jobs, and when it rejects a delivery, the SOOTH jury rules.',
       ] },
       { id: 'testnet-near', title: 'Get testnet NEAR', body: [
-        'Everything runs on NEAR testnet, so the money is free. Create a testnet account in any NEAR wallet (for example Meteor or MyNearWallet), then take free testnet NEAR from near-faucet.io.',
+        'Everything runs on NEAR testnet, so the money is free. Create a testnet account in any NEAR wallet (Meteor is the easiest: meteorwallet.app or its browser extension), then take free testnet NEAR from near-faucet.io.',
         'A question costs its fee (at least 0.1 Ⓝ) plus 0.1 Ⓝ for storage.',
       ] },
       { id: 'connect', title: 'Connect a wallet', body: [
-        'Press "Connect wallet" at the top of any page and pick your wallet: HOT, Meteor, MyNearWallet, Intear, OKX, Nightly, WalletConnect or a Ledger. SOOTH never sees your keys: every transaction is signed in your wallet, and you approve each one there.',
+        'Press "Connect wallet" at the top of any page and pick your wallet. On testnet the choices are Meteor, Intear, Nightly, a Ledger, an Ethereum wallet (through EVM-on-NEAR) or NEAR CLI. Meteor (browser extension or meteorwallet.app) is the easiest: create a testnet account there, then take free NEAR from near-faucet.io. SOOTH never sees your keys: every transaction is signed in your wallet, and you approve each one there.',
       ] },
       { id: 'first-question', title: 'Ask your first question', body: [
         'Open Ask, pick a kind (free text, rain in a city on a day, or a coin price on a day), fill it in and set the fee. Free-text questions must be answerable YES or NO from public sources, so name the date or the source.',
