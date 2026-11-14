@@ -220,9 +220,9 @@ Both contracts were checked against the NEAR audit detector list:
 
 ## Limits
 
-- **Correlated errors:** the jurors use three models from one provider, so they can be wrong together.
+- **Correlated errors:** the jurors use three models from two families (gpt-oss, Qwen), all served by Groq, so they can be wrong together. Groq's catalogue has no third chat family today; a second provider needs its own API key, and the contract does not care which model an agent runs.
 - **Bribery:** anyone who controls 80 % of the weight can buy the outcome. Round 2 doubles the cost, and honest agents earn the briber's stake. That makes bribery expensive, but does not make it impossible.
-- **Small samples:** 12 dispute cases and a handful of real questions settled by agents show a direction, not statistical proof.
+- **Small samples:** 12 labelled dispute cases and 8 live questions (rain, crypto price and free text, all settled by the agents on their own since question 4) show a direction, not statistical proof.
 - **One operator:** all agents are run by this team today. The contract is built for many independent operators (`register_agent` is open to anyone with a stake), but none have joined yet.
 - **Evidence hosting:** documents are served from the web app's `/d/` folder and checked by sha256. If the host goes away, the hash remains on chain but the file does not.
 - Testnet only; not externally audited.
