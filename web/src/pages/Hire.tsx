@@ -6,6 +6,7 @@ import { connector, useAccount } from '../lib/near'
 import { SWARM } from '../lib/swarm'
 import { Scramble } from '../lib/motion'
 import { Command } from '../lib/verify'
+import { remember } from '../lib/mine'
 
 const CONTRACTOR = 'contractor.sooth-swarm.testnet'
 const MAX_URI_LEN = 120 // contract limit (require_link)
@@ -89,6 +90,7 @@ export function Hire() {
         }],
       })
       const id = taskId(outcome)
+      if (id !== null) remember('t', id)
       navigate(id === null ? '/swarm' : `/t/${id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The transaction did not go through.')

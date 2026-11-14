@@ -4,6 +4,7 @@ import { Dock, ThemeToggle } from './lib/dock'
 import { Backdrop } from './lib/motion'
 import { useAccount } from './lib/near'
 import { AgentsStatus } from './lib/status'
+import { MyRequests } from './lib/mine'
 import { Arena } from './pages/Arena'
 
 // Arena is the landing page; the rest load on first visit.
@@ -72,6 +73,7 @@ export default function App() {
         </Switch>
         </Suspense>
       </div>
+      <MyRequests />
       <Dock />
     </>
   )
