@@ -32,7 +32,9 @@ function networkLevel(t: number): number {
   return rise * (1 - fall)
 }
 
-function Swarm({ isDark, isReduced }: { isDark: boolean; isReduced: boolean }) {
+function Swarm({ isDark, isReduced, isFramed }: { isDark: boolean; isReduced: boolean; isFramed: boolean }) {
+  const span = isFramed ? 4.6 : 13 // world units across; framed, it stays between the side texts
+  const lift = isFramed ? 0.7 : 1 // and waves a little less
   const points = useRef<THREE.Points>(null)
   const net = useRef<THREE.Group>(null)
   const lines = useRef<THREE.LineBasicMaterial>(null)
@@ -70,8 +72,8 @@ function Swarm({ isDark, isReduced }: { isDark: boolean; isReduced: boolean }) {
       const u = (seeds[i * 4] + t * 0.018 * seeds[i * 4 + 3]) % 1
       const across = seeds[i * 4 + 1]
       const depth = seeds[i * 4 + 2]
-      const x = (u - 0.5) * 13
-      const wave = Math.sin(u * Math.PI * 3 + t * 0.35) * 1.1 + Math.sin(u * Math.PI * 7 - t * 0.5) * 0.25
+      const x = (u - 0.5) * span
+      const wave = (Math.sin(u * Math.PI * 3 + t * 0.35) * 1.1 + Math.sin(u * Math.PI * 7 - t * 0.5) * 0.25) * lift
       const width = 0.35 + 0.45 * Math.sin(u * Math.PI) // thicker in the middle, thin at the ends
       positions[i * 3] = x
       positions[i * 3 + 1] = wave + across * width + Math.sin(t * 0.9 + i) * 0.02
@@ -122,7 +124,7 @@ function Swarm({ isDark, isReduced }: { isDark: boolean; isReduced: boolean }) {
   )
 }
 
-export default function Flock({ isLive, isDark, isReduced }: SceneProps) {
+export default function Flock({ isLive, isDark, isReduced, isFramed = false }: SceneProps) {
   return (
     <Canvas
       frameloop={isLive ? 'always' : 'demand'}
@@ -131,7 +133,7 @@ export default function Flock({ isLive, isDark, isReduced }: SceneProps) {
       camera={{ position: [0, 0, 8.5], fov: 40 }}
       style={{ background: 'transparent' }}
     >
-      <Swarm isDark={isDark} isReduced={isReduced} />
+      <Swarm isDark={isDark} isReduced={isReduced} isFramed={isFramed} />
     </Canvas>
   )
 }
