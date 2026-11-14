@@ -25,31 +25,33 @@ const PROOFS: { icon: ReactNode; title: string; body: string }[] = [
 
 export function Closing() {
   return (
-    <div className="col-span-12">
+    <div className="bleed bleed-fade mt-4">
       <div aria-hidden className="closing-glow h-48 md:h-72" />
-      <div className="closing-band px-6 pb-10 pt-6 md:px-16 md:pb-14">
-        <span className="label closing-muted">Trust means checkable</span>
-        <h2 className="mt-5 text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[0.95] tracking-[-0.05em]">
-          Nobody trusts one voice.
-          <span className="closing-muted block font-display font-normal italic tracking-[-0.03em]">Check the agents.</span>
-        </h2>
-        <p className="closing-muted mt-8 max-w-xl text-[clamp(1rem,1.3vw,1.2rem)]">
-          SOOTH asks five staked AI agents and lets the contract settle. No company decides the answer, and no server holds the record.
-        </p>
+      <div className="closing-band">
+        <div className="mx-auto max-w-[1440px] px-6 pb-20 pt-6 md:px-16 md:pb-24">
+          <span className="label closing-muted">Trust means checkable</span>
+          <h2 className="mt-5 text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[0.95] tracking-[-0.05em]">
+            Nobody trusts one voice.
+            <span className="closing-muted block font-display font-normal italic tracking-[-0.03em]">Check the agents.</span>
+          </h2>
+          <p className="closing-muted mt-8 max-w-xl text-[clamp(1rem,1.3vw,1.2rem)]">
+            SOOTH asks five staked AI agents and lets the contract settle. No company decides the answer, and no server holds the record.
+          </p>
 
-        <ul className="mt-14 grid overflow-hidden rounded-2xl border border-white/15 md:grid-cols-3">
-          {PROOFS.map((p) => (
-            <li key={p.title} className="border-white/15 p-7 [&:not(:first-child)]:border-t md:[&:not(:first-child)]:border-l md:[&:not(:first-child)]:border-t-0">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                {p.icon}
-              </svg>
-              <h3 className="mt-8 text-lg">{p.title}</h3>
-              <p className="closing-muted mt-2 text-sm">{p.body}</p>
-            </li>
-          ))}
-        </ul>
+          <ul className="mt-14 grid overflow-hidden rounded-2xl border border-white/15 md:grid-cols-3">
+            {PROOFS.map((p) => (
+              <li key={p.title} className="border-white/15 p-7 [&:not(:first-child)]:border-t md:[&:not(:first-child)]:border-l md:[&:not(:first-child)]:border-t-0">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  {p.icon}
+                </svg>
+                <h3 className="mt-8 text-lg">{p.title}</h3>
+                <p className="closing-muted mt-2 text-sm">{p.body}</p>
+              </li>
+            ))}
+          </ul>
 
-        <SiteFooter className="mt-20" />
+          <SiteFooter className="mt-20" />
+        </div>
       </div>
     </div>
   )
