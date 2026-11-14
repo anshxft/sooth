@@ -67,6 +67,9 @@ function Swarm({ isDark, isReduced, isFramed }: { isDark: boolean; isReduced: bo
   }, [network])
 
   useFrame((state) => {
+    // In a tall, narrow box, step back until the ribbon's width fits (fov 40: half-height = z·0.364).
+    const aspect = state.size.width / state.size.height
+    state.camera.position.z = Math.max(8.5, (span * 0.62) / (aspect * 0.364))
     const t = isReduced ? STILL_TIME : state.clock.elapsedTime
     for (let i = 0; i < COUNT; i++) {
       const u = (seeds[i * 4] + t * 0.018 * seeds[i * 4 + 3]) % 1

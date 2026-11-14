@@ -10,6 +10,45 @@ import { Bills } from '../lib/bills'
 import { VerifyPanel, cli } from '../lib/verify'
 import { Timer, elapsed } from '../lib/timer'
 
+const HIRING: [string, string][] = [
+  ['Capped budget', "The client funds a task; the contractor's key can spend only inside it."],
+  ['Sealed bids', 'Workers commit a hashed price, so nobody undercuts by copying.'],
+  ['Bonded workers', 'Every bid locks a bond that a no-show or a fake delivery loses.'],
+  ['Price ÷ reputation', "The cheapest bid wins, weighed by each worker's record."],
+  ['Escrowed pay', 'The contract holds the price until the work is judged.'],
+]
+const SETTLEMENT: [string, string][] = [
+  ['Contractor review', 'The contractor accepts the delivery or disputes it.'],
+  ['SOOTH jury', 'A dispute becomes a sealed question for five staked agents.'],
+  ['Slashed bonds', "A rejected worker's bond goes back into the budget."],
+  ['Bans and re-buys', 'The worker is banned from the task, and the job is bought again.'],
+  ['Paid on chain', 'Accepted work is paid by the contract itself, with no middleman.'],
+]
+
+/** One side of the job's life: numbered steps, each a short headline and one line of why. */
+function ProcessList({ title, kicker, prefix, steps, className }: { title: string; kicker: string; prefix: string; steps: [string, string][]; className?: string }) {
+  return (
+    <div className={cn('col-span-12 px-6 py-10 md:px-8', className)}>
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-lg font-normal">{title}</h2>
+        <span className="label text-muted">{kicker}</span>
+      </div>
+      <ol data-reveal-group className="mt-6">
+        {steps.map(([head, why], i) => (
+          <li key={head} className="group grid grid-cols-[2.5rem_1fr] gap-x-2 border-t border-line py-4">
+            <span className="pt-1.5 text-xs text-muted tabular-nums">{prefix}.{i + 1}</span>
+            <span className="overflow-hidden">
+              <span className="rv-up block text-[clamp(1.35rem,2vw,1.75rem)] font-light leading-tight tracking-[-0.035em] transition-colors duration-300 group-hover:text-green">{head}</span>
+            </span>
+            <span />
+            <span className="mt-1 text-sm text-muted">{why}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 const POLL_MS = 5_000
 const STEPS = ['Sealed bids', 'Reveal', 'Deliver', 'Review', 'Settled'] as const
 const STEP_OF: Record<Job['phase'], number> = {
@@ -46,28 +85,32 @@ export function Swarm() {
   return (
     <>
       <Shell label="swarm-title" error={tasks.error ?? jobs.error}>
-      <div className="col-span-12 flex flex-wrap items-end justify-between gap-4 p-4">
-        <div>
-          <h1 id="swarm-title" className="font-display text-[clamp(3rem,9vw,7rem)] leading-[0.9] tracking-[-0.04em]"><Scramble text="swarm" /></h1>
-          <p className="mt-2 max-w-xl text-muted">
+      <div className="col-span-12 grid gap-8 px-6 pb-10 pt-12 md:grid-cols-12 md:px-8 md:pb-14 md:pt-16">
+        <div className="md:col-span-7">
+          <span className="label text-muted">The swarm · live on NEAR testnet</span>
+          <h1 id="swarm-title" className="mt-4 font-display text-[clamp(3.25rem,7vw,6rem)] leading-[0.9]"><Scramble text="swarm" /></h1>
+        </div>
+        <div className="flex flex-col justify-end gap-6 md:col-span-5">
+          <p className="max-w-md text-[clamp(1rem,1.2vw,1.15rem)] text-muted">
             A contractor agent spends a capped budget on sealed-bid jobs. When it rejects the work, the SOOTH jury rules and the contract pays out.
           </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <Link href="/hire" className="btn btn-sm">Hire the swarm →</Link>
-          <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label hover:underline">
-            {SWARM} ↗
-          </a>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/hire" className="btn btn-sm">Hire the swarm →</Link>
+            <a href={`https://testnet.nearblocks.io/address/${SWARM}`} target="_blank" rel="noopener noreferrer" className="label text-muted hover:text-ink">
+              {SWARM} ↗
+            </a>
+          </div>
         </div>
       </div>
+
+      <ProcessList title="Hiring" kicker="Before the work" prefix="h" steps={HIRING} className="md:col-span-6 lg:col-span-4" />
       <SceneBand
         name="flock"
+        isFramed
         label="A swarm of worker agents flowing, with a job network forming in its middle"
-        sides={[
-          { title: 'Hiring', kicker: 'Before the work · 05', prefix: 'h', items: ['Capped budget', 'Sealed bids', 'Bonded workers', 'Price ÷ reputation', 'Escrowed pay'] },
-          { title: 'Settlement', kicker: '05 · After delivery', prefix: 's', items: ['Contractor review', 'SOOTH jury', 'Slashed bonds', 'Bans and re-buys', 'Paid on chain'] },
-        ]}
+        className="col-span-12 h-[340px] md:col-span-6 md:h-auto lg:col-span-4"
       />
+      <ProcessList title="Settlement" kicker="After delivery" prefix="s" steps={SETTLEMENT} className="md:col-span-12 lg:col-span-4" />
       <Stat label="Tasks" value={String(tasks.data?.length ?? '—')} />
       <Stat label="Jobs" value={jobs.data ? String(all.length) : '—'} />
       <Stat label="Paid to workers" value={jobs.data ? toNear(paid.toString()) : '—'} unit="Ⓝ" />
