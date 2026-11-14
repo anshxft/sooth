@@ -9,7 +9,6 @@ import { useTextReveal } from './lib/reveal'
 import { useHoverText } from './lib/hovertext'
 import { useSmoothScroll } from './lib/smooth'
 import { Arena } from './pages/Arena'
-import { Intro } from './lib/intro'
 
 // Arena is the landing page; the rest load on first visit.
 const Agents = lazy(() => import('./pages/Agents').then((m) => ({ default: m.Agents })))
@@ -42,7 +41,6 @@ export default function App() {
   }, [location])
   return (
     <>
-      <Intro />
       <Backdrop />
       <header className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 pt-4">
         <Link href="/" className="font-display text-xl tracking-[-0.04em]">sooth</Link>
