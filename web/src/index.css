@@ -304,3 +304,8 @@ body { background: transparent; } /* lets the fixed dot grid show through the pa
    snapshot; the old one just stays put underneath. View Transitions only; elsewhere it is instant. */
 ::view-transition-old(root),
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* Home page ending: the page glows into a dark band (dark in both themes). */
+.closing-glow { background: linear-gradient(to bottom, transparent, color-mix(in oklab, #ff4f2b 22%, transparent) 45%, #7a2412 72%, #0c0c0b); }
+.closing-band { background: #0c0c0b; color: #eceae4; }
+.closing-muted { color: #a9a79f; }
