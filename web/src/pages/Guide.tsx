@@ -79,16 +79,16 @@ export function Guide({ agents }: Props) {
       {STEPS.map(([title, body], i) => (
         <Cell key={title} className="md:col-span-3">
           <span className="font-display text-5xl text-muted">{String(i + 1).padStart(2, '0')}</span>
-          <h3 className="mt-6 text-xl font-semibold tracking-[-0.02em]">{title}</h3>
+          <h3 className="mt-6 text-xl font-normal tracking-[-0.02em]">{title}</h3>
           <p className="mt-2 text-muted">{body}</p>
         </Cell>
       ))}
-      <Cell className="bg-green! md:col-span-6">
+      <Cell className="md:col-span-6">
         <span className="label">Settles on its own only when all three hold</span>
-        <ul className="mt-4 space-y-3 text-lg font-semibold">
-          <li>✓ 80 % or more of the weight agrees</li>
-          <li>✓ Their average confidence is 70 % or more</li>
-          <li>✓ At least 3 agents revealed</li>
+        <ul className="mt-4 space-y-3 text-lg font-light">
+          <li><span className="text-green">✓</span> 80 % or more of the weight agrees</li>
+          <li><span className="text-green">✓</span> Their average confidence is 70 % or more</li>
+          <li><span className="text-green">✓</span> At least 3 agents revealed</li>
         </ul>
       </Cell>
       <Cell className="md:col-span-6">
@@ -123,7 +123,7 @@ export function Guide({ agents }: Props) {
       {SWARM_STEPS.map(([title, body], i) => (
         <Cell key={title} className="md:col-span-4">
           <span className="label text-muted">Step {i + 1}</span>
-          <h3 className="mt-2 text-xl font-semibold tracking-[-0.02em]">{title}</h3>
+          <h3 className="mt-2 text-xl font-normal tracking-[-0.02em]">{title}</h3>
           <p className="mt-2 text-muted">{body}</p>
         </Cell>
       ))}
@@ -157,7 +157,7 @@ export function Guide({ agents }: Props) {
       <Heading id="near" kicker="05 · Built on NEAR" title="What the chain does, so nobody has to be trusted." />
       {NEAR_FEATURES.map(([title, body]) => (
         <Cell key={title} className="md:col-span-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
+          <h3 className="text-lg font-normal">{title}</h3>
           <p className="mt-2 text-muted">{body}</p>
         </Cell>
       ))}
@@ -175,7 +175,7 @@ export function Guide({ agents }: Props) {
       <Cell>
         {FAQ.map(([q, a]) => (
           <details key={q} className="group border-t border-line py-4 first:border-t-0">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-normal">
               {q}
               <span aria-hidden="true" className="font-mono transition-transform duration-200 group-open:rotate-45">+</span>
             </summary>
@@ -195,7 +195,7 @@ function Heading({ id, kicker, title }: { id: string; kicker: string; title: str
   return (
     <div id={id} className="col-span-12 scroll-mt-6 px-6 pb-6 pt-16 md:px-8 md:pt-24">
       <span className="label text-muted">{kicker}</span>
-      <h2 data-reveal-lines className="mt-3 max-w-4xl text-[clamp(2rem,4.5vw,3.75rem)] font-semibold leading-[1.02] tracking-[-0.04em]">{title}</h2>
+      <h2 data-reveal-lines className="mt-3 max-w-4xl text-[clamp(2rem,4.5vw,3.75rem)] font-light leading-[1.02] tracking-[-0.05em]">{title}</h2>
     </div>
   )
 }

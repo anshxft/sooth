@@ -75,9 +75,9 @@ export function QuestionProgress({ q, names, now }: Props) {
             key={s}
             aria-current={i === step ? 'step' : undefined}
             className={cn(
-              'label border px-2 py-2 transition-colors duration-300',
-              i < step && 'border-ink bg-ink text-canvas',
-              i === step && 'live-dot border-ink bg-green text-ink',
+              'label border-t-2 pt-2 pb-1 transition-colors duration-300',
+              i < step && 'border-ink text-ink',
+              i === step && 'live-dot border-green text-ink',
               i > step && 'border-line text-muted',
             )}
           >

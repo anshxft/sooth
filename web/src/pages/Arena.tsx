@@ -11,7 +11,6 @@ import { Scramble } from '../lib/motion'
 
 const LIVE_PHASES: Phase[] = ['Commit', 'Reveal', 'AwaitingTally', 'Challenge', 'AwaitingFinalize']
 const STEPS = ['Commit', 'Reveal', 'Tally', 'Final'] as const
-const SLOTS = 5 // agent cells per row on desktop
 const STEP_OF: Record<Phase, number> = {
   Scheduled: -1, Commit: 0, Reveal: 1, AwaitingTally: 2, Challenge: 2, AwaitingFinalize: 2, Dao: 2, Finalized: 3, Refunded: 3,
 }
@@ -73,19 +72,24 @@ export function Arena() {
 }
 
 function LiveCard({ q, now }: { q: QuestionView | null; now: number }) {
-  if (!q) return <div className="col-span-12 bg-green! p-4 md:col-span-3"><span className="label">Loading live round…</span></div>
+  if (!q) return <div className="col-span-12 p-6 md:col-span-3 md:p-8"><span className="label text-muted">Loading the live round…</span></div>
   const lead = leader(q)
+  const isLive = q.phase !== 'Finalized' && q.phase !== 'Refunded'
   return (
-    <Link href={`/q/${q.id}`} className="col-span-12 flex flex-col justify-between gap-3 bg-green! p-4 md:col-span-3">
+    <Link href={`/q/${q.id}`} className="group col-span-12 flex flex-col justify-between gap-8 p-6 transition-colors duration-300 hover:bg-term/30 md:col-span-3 md:p-8">
       <span className="flex items-center justify-between gap-2">
-        <span className={cn('label', q.phase !== 'Finalized' && q.phase !== 'Refunded' && 'live-dot')}>{spaced(q.phase)} · round {q.round}</span>
-        <Countdown endsAt={q.phase_ends_at} now={now} className="bg-canvas" />
+        <span className="label flex items-center gap-2 text-muted">
+          <i className={cn('inline-block rounded-full', isLive ? 'live-dot bg-green' : 'bg-muted')} style={{ width: 6, height: 6 }} />
+          {spaced(q.phase)} · round {q.round}
+        </span>
+        <Countdown endsAt={q.phase_ends_at} now={now} />
       </span>
-      <Scramble text={q.text} className="font-semibold leading-tight" />
       <span>
-        <span className="label flex justify-between"><span>{lead.answer} {pct(lead.bps)}</span><span>auto 80</span></span>
+        <span className="block font-display text-[clamp(3.5rem,6vw,5.5rem)] leading-none">{q.outcome?.answer ?? lead.answer}</span>
+        <span className="mt-2 block text-sm text-muted">{pct(lead.bps)} % of the weight · settles alone at 80</span>
         <Meter bps={lead.bps} />
       </span>
+      <span className="label text-muted transition-colors duration-200 group-hover:text-ink">Open the question →</span>
     </Link>
   )
 }
@@ -94,18 +98,23 @@ function AgentLog({ q, names }: { q: QuestionView | null; names: Map<string, Age
   const round = q?.rounds.at(-1)
   const name = (id: string) => names.get(id)?.name ?? id.split('.')[0]
   const lines = [
-    ...(round?.commits ?? []).map((c) => ({ key: `c${c.account_id}`, text: `${name(c.account_id)}.commit ${toNear(c.stake, 1)} Ⓝ`, red: false })),
-    ...(round?.reveals ?? []).map((r) => ({ key: `r${r.account_id}`, text: `${name(r.account_id)}.reveal ${r.answer} ${r.confidence}`, red: false })),
+    ...(round?.commits ?? []).map((c) => ({ key: `c${c.account_id}`, who: name(c.account_id), what: `sealed ${toNear(c.stake, 1)} Ⓝ`, red: false })),
+    ...(round?.reveals ?? []).map((r) => ({ key: `r${r.account_id}`, who: name(r.account_id), what: `${r.answer} ${r.confidence}`, red: false })),
     ...(q?.payouts ?? []).filter((p) => p.delta.startsWith('-')).map((p) => ({
-      key: `p${p.account_id}${p.round}`, text: `${name(p.account_id)} ${toNear(p.delta)} Ⓝ`, red: true,
+      key: `p${p.account_id}${p.round}`, who: name(p.account_id), what: `${toNear(p.delta)} Ⓝ`, red: true,
     })),
   ]
   return (
-    <div className="col-span-12 bg-term! p-4 font-mono text-[11px] uppercase leading-7 tracking-[0.04em] text-term-text md:col-span-3" aria-live="polite">
-      <div className="text-green">&gt; agent log</div>
-      {lines.length === 0 && <div className="text-[#8a8e8c]">waiting for commits…</div>}
-      {lines.slice(-7).map((l) => <div key={l.key} className={cn('log-line', l.red && 'text-red')}>{l.text}</div>)}
-      <div className="text-green">&gt; _</div>
+    <div className="col-span-12 p-6 md:col-span-3 md:p-8" aria-live="polite">
+      <span className="label text-muted">Agent log</span>
+      {lines.length === 0 && <p className="mt-4 text-sm text-muted">Waiting for the first sealed answer…</p>}
+      <ol className="mt-4 grid gap-2 font-mono text-xs">
+        {lines.slice(-6).map((l) => (
+          <li key={l.key} className={cn('log-line flex justify-between gap-3', l.red ? 'text-red' : 'text-muted')}>
+            <span className={cn(!l.red && 'text-ink')}>{l.who}</span><span>{l.what}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   )
 }
@@ -115,91 +124,96 @@ function LiveStage({ q, names, now }: { q: QuestionView; names: Map<string, Agen
   const step = STEP_OF[q.phase]
   const lead = leader(q)
   return (
-    <div className="col-span-12 p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h2 className="text-[clamp(1.4rem,2.8vw,2.2rem)] font-semibold leading-tight tracking-[-0.03em]"><Scramble text={q.text} /></h2>
-        <span className="label border border-ink px-2 py-1">{q.category} · {qid(q.id)}</span>
+    <div className="col-span-12 px-6 py-10 md:px-8 md:py-14">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="max-w-4xl text-[clamp(1.6rem,3.2vw,2.6rem)] font-light leading-[1.08] tracking-[-0.04em]"><Scramble text={q.text} /></h2>
+        <span className="label text-muted">{q.category} · {qid(q.id)}</span>
       </div>
-      <ol className="blueprint mt-4 grid-cols-4 rounded-none!">
+
+      <ol className="mt-10 grid grid-cols-4 gap-4" aria-label="Phase">
         {STEPS.map((s, i) => (
-          <li key={s} className={cn('label p-2', i < step && 'bg-ink! text-canvas', i === step && 'bg-green! live-dot', i > step && 'text-muted')}>
-            {s}{i === step && q.phase_ends_at ? ` · ${countdown(q.phase_ends_at, now)}` : ''}
+          <li key={s} className={cn('label border-t pt-3', i <= step ? 'border-ink text-ink' : 'border-line text-muted')}>
+            <span className="flex items-center gap-2">
+              {i < step && '✓'}
+              {i === step && <i className="live-dot inline-block rounded-full bg-green" style={{ width: 6, height: 6 }} />}
+              {s}{i === step && q.phase_ends_at ? ` · ${countdown(q.phase_ends_at, now)}` : ''}
+            </span>
           </li>
         ))}
       </ol>
-      <div className="blueprint mt-4 grid-cols-2 rounded-none! md:grid-cols-5">
+
+      <ul className="mt-12 grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
         {round.commits.map((c, i) => {
           const agent = names.get(c.account_id)
           const reveal = round.reveals.find((r) => r.account_id === c.account_id)
           const payout = q.payouts.find((p) => p.account_id === c.account_id && p.round === round.round)
           const slashed = payout?.delta.startsWith('-')
           return (
-            <div key={c.account_id} className={cn('p-3 odd:last:col-span-2 md:odd:last:col-span-1', !reveal && 'bg-term! text-term-text')}>
-              <div className="label opacity-70">Unit / {String(i + 1).padStart(2, '0')}</div>
-              <div className="font-semibold">{agent?.name ?? c.account_id}</div>
-              <div className="text-sm opacity-70">{agent?.model ?? '—'}</div>
-              {reveal ? (
-                <div className="unseal mt-2 font-display text-2xl">{reveal.answer} {reveal.confidence}</div>
-              ) : (
-                <div className="sealed label mt-3">▒▒ sealed {c.hash.slice(0, 6)}</div>
-              )}
+            <li key={c.account_id}>
+              <span className="label text-muted">{String(i + 1).padStart(2, '0')}</span>
+              <div className="mt-2 text-lg">{agent?.name ?? c.account_id}</div>
+              <div className="text-sm text-muted">{agent?.model.split('/').pop() ?? '—'}</div>
+              {reveal
+                ? <div className="unseal mt-4 font-display text-3xl">{reveal.answer} <span className="text-muted">{reveal.confidence}</span></div>
+                : <div className="sealed mt-4 text-sm text-muted">Sealed · {c.hash.slice(0, 6)}</div>}
               {payout && (
-                <div className={cn('stamp label mt-1', slashed ? 'text-red' : '')}>
-                  {slashed ? `✗ slashed ${toNear(payout.delta)}` : `✓ +${toNear(payout.delta)}`} Ⓝ
+                <div className={cn('stamp mt-1 text-sm', slashed ? 'text-red' : 'text-muted')}>
+                  {slashed ? `Slashed ${toNear(payout.delta)}` : `+${toNear(payout.delta)}`} Ⓝ
                 </div>
               )}
-            </div>
+            </li>
           )
         })}
-        {Array.from({ length: Math.max(0, SLOTS - round.commits.length) }, (_, i) => (
-          <div key={`empty${i}`} className="hatch min-h-28 opacity-40 odd:last:col-span-2 md:odd:last:col-span-1" aria-hidden="true" />
-        ))}
+      </ul>
+
+      <div className="mt-12 flex justify-between text-sm text-muted">
+        <span>Weight · <span className="text-ink">{lead.answer} {pct(lead.bps)} %</span></span><span>Settles alone at 80 %</span>
       </div>
-      <div className="label mt-4 flex justify-between">
-        <span>Weight · {lead.answer} {pct(lead.bps)}</span><span>auto-resolve line 80</span>
-      </div>
-      <Meter bps={lead.bps} tall />
+      <Meter bps={lead.bps} />
     </div>
   )
 }
 
 function QuestionList({ summaries, now }: { summaries: QuestionSummary[]; now: number }) {
   return (
-    <div className="col-span-12 overflow-x-auto p-4">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="label text-left text-muted">
-            <th className="py-2 pr-3 font-normal">ID</th><th className="hidden pr-3 font-normal md:table-cell">Category</th>
-            <th className="font-normal">Question</th><th className="font-normal">Phase / outcome</th>
-            <th className="text-right font-normal">Ends</th>
-          </tr>
+    <div className="col-span-12 overflow-x-auto px-6 pb-10 md:px-8">
+      <span className="label text-muted">Every question so far</span>
+      <table className="mt-4 w-full text-sm">
+        <thead className="sr-only">
+          <tr><th>ID</th><th>Category</th><th>Question</th><th>Outcome</th><th>Ends</th></tr>
         </thead>
         <tbody>
-          {summaries.map((s) => (
-            <tr key={s.id} className="border-t border-line">
-              <td className="py-2 pr-3 align-top font-mono">{String(s.id).padStart(4, '0')}</td>
-              <td className="hidden pr-3 md:table-cell">{s.category}</td>
-              <td className="py-2 pr-3"><Link href={`/q/${s.id}`} className="hover:underline">{s.text}</Link></td>
-              <td>
-                <span className={cn('label border border-ink px-2 py-0.5', s.outcome && 'bg-ink text-canvas', LIVE_PHASES.includes(s.phase) && 'bg-green')}>
-                  {s.outcome ? `${s.outcome.answer} · ${s.outcome.resolved_by} · ${pct(s.outcome.share_bps)}` : `${spaced(s.phase)} · r${s.round}`}
-                </span>
-              </td>
-              <td className="text-right font-mono">{countdown(s.phase_ends_at, now) ? <Countdown endsAt={s.phase_ends_at} now={now} /> : '—'}</td>
-            </tr>
-          ))}
+          {summaries.map((s) => {
+            const isLive = LIVE_PHASES.includes(s.phase)
+            return (
+              <tr key={s.id} className="group border-t border-line">
+                <td className="py-4 pr-4 align-top font-mono text-muted">{String(s.id).padStart(4, '0')}</td>
+                <td className="hidden py-4 pr-4 align-top text-muted md:table-cell">{s.category}</td>
+                <td className="py-4 pr-4"><Link href={`/q/${s.id}`} className="transition-colors duration-200 group-hover:text-green">{s.text}</Link></td>
+                <td className="whitespace-nowrap py-4 pr-4 align-top">
+                  <span className="flex items-center gap-2">
+                    {isLive && <i className="live-dot inline-block rounded-full bg-green" style={{ width: 6, height: 6 }} />}
+                    {s.outcome
+                      ? <><span>{s.outcome.answer}</span><span className="text-muted">{s.outcome.resolved_by} · {pct(s.outcome.share_bps)}</span></>
+                      : <span className="text-muted">{spaced(s.phase)} · r{s.round}</span>}
+                  </span>
+                </td>
+                <td className="py-4 text-right align-top font-mono text-muted">{countdown(s.phase_ends_at, now) ? <Countdown endsAt={s.phase_ends_at} now={now} /> : ''}</td>
+              </tr>
+            )
+          })}
         </tbody>
       </table>
     </div>
   )
 }
 
-function Meter({ bps, tall = false }: { bps: number; tall?: boolean }) {
+/** A hairline: the leading answer's share of the weight, with a tick at the 80 % line. */
+function Meter({ bps }: { bps: number }) {
   return (
-    <div className={cn('relative mt-1 overflow-hidden border border-ink bg-canvas', tall ? 'h-3' : 'h-2')} role="img" aria-label={`Leading answer holds ${pct(bps)} percent of weight, auto-resolve at 80`}>
-      <span className="hatch absolute inset-0" />
+    <div className="relative mt-3 h-[2px] bg-line" role="img" aria-label={`Leading answer holds ${pct(bps)} percent of weight, auto-resolve at 80`}>
       <i className="fill absolute inset-0 block bg-ink" style={{ transform: `scaleX(${bps / 10_000})` }} />
-      <b className="absolute -bottom-1 -top-1 w-[2px] bg-ink" style={{ left: '80%' }} />
+      <b className="absolute -top-1.5 h-[14px] w-px bg-green" style={{ left: '80%' }} />
     </div>
   )
 }
