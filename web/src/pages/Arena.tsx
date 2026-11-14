@@ -7,6 +7,7 @@ import {
 import { cn, spaced } from '../lib/utils'
 import { Guide } from './Guide'
 import { Closing } from './Closing'
+import { MarkIcon } from '../lib/logos'
 import { Countdown } from '../lib/timer'
 import { Scramble } from '../lib/motion'
 
@@ -228,14 +229,24 @@ export function leader(q: QuestionView): { answer: Answer; bps: number } {
 }
 
 // What the system runs on, as plain wordmarks (no customer claims): the trust strip under the hero.
-const STACK = ['NEAR Protocol', 'near-sdk · Rust', 'Groq', 'GitHub Actions', 'Vercel', 'three.js']
+const STACK: [string, string?][] = [
+  ['NEAR Protocol', 'si-near.svg'],
+  ['near-sdk · Rust', 'si-rust.svg'],
+  ['Groq'],
+  ['GitHub Actions', 'si-githubactions.svg'],
+  ['Vercel', 'si-vercel.svg'],
+  ['three.js', 'si-threedotjs.svg'],
+]
 
 function BuiltOn() {
   return (
     <section aria-label="Built on" className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-10 md:py-14">
       <span className="label text-muted">Built on</span>
-      {STACK.map((name) => (
-        <span key={name} className="text-[clamp(1rem,1.4vw,1.25rem)] font-medium tracking-[-0.02em] text-muted opacity-70 transition-opacity duration-200 hover:opacity-100">{name}</span>
+      {STACK.map(([name, logo]) => (
+        <span key={name} className="flex items-center gap-2 text-[clamp(1rem,1.4vw,1.25rem)] font-medium tracking-[-0.02em] text-muted opacity-70 transition-opacity duration-200 hover:opacity-100">
+          {logo && <MarkIcon file={logo} />}
+          {name}
+        </span>
       ))}
     </section>
   )

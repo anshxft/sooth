@@ -278,6 +278,7 @@ To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle a
 - **Timer pills** (phase countdowns, "settled in" durations): look after [Cult UI](https://www.cult-ui.com)'s Timer (MIT), rebuilt in this app's style.
 - **Navigation dock**: pointer magnification after Cult UI's Dock (MIT), rebuilt as links with `motion` springs.
 - **Isometric figures** (verdict balance on Ask, job loop on Swarm): drawn with the isometric kit from [wheresryan22/anatomy](https://github.com/wheresryan22/anatomy) (MIT), copied unchanged into `web/src/lib/iso-kit.ts`.
+- **Logos**: wallet icons are the official ones from the [near-connect](https://github.com/hot-dao/near-selector) wallet manifest (the same list the Connect wallet popup shows); stack logos are from [Simple Icons](https://simpleicons.org) (CC0). All marks belong to their owners and only name what SOOTH uses.
 - **Ink-bleed theme switch**: idea from [codemure-official/ink-bleed-theme-changer](https://github.com/codemure-official/ink-bleed-theme-changer). That repo has no license, so none of its code is used: this version is written from scratch with the View Transitions API and an SVG ink mask.
 - **Research basis:** arXiv 2605.30802 (multi-agent AI oracles for prediction-market resolution).
 - **Built with AI:** Claude Code wrote most of the code with the author. The agents use open-weight models through Groq.

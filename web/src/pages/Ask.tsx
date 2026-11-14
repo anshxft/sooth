@@ -1,5 +1,6 @@
 // Ask the jury: a signed-in visitor posts their own yes/no question to sooth.testnet and the agents
 // answer it on chain. Three kinds: rain (Open-Meteo), crypto price (CoinGecko) and free text (web search).
+import { SignInWith } from '../lib/logos'
 import { VerdictBalance } from '../lib/VerdictBalance'
 import { type FormEvent, useState } from 'react'
 import { useLocation } from 'wouter'
@@ -191,6 +192,7 @@ export function Ask() {
             You pay {total.toFixed(2)} Ⓝ on testnet: the fee plus {STORAGE_MILLI / 1000} Ⓝ storage. Free testnet NEAR:{' '}
             <a href="https://near-faucet.io/" target="_blank" rel="noopener noreferrer" className="underline">near-faucet.io</a>.
           </p>
+          <SignInWith className="mt-1" />
 
           {error && <p role="alert" className="label text-red">{error}</p>}
 

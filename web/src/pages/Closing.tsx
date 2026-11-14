@@ -25,10 +25,10 @@ const PROOFS: { icon: ReactNode; title: string; body: string }[] = [
 
 export function Closing() {
   return (
-    <div className="bleed bleed-fade mt-4">
+    <div className="bleed mt-4">
       <div aria-hidden className="closing-glow h-48 md:h-72" />
       <div className="closing-band">
-        <div className="mx-auto max-w-[1440px] px-6 pb-20 pt-6 md:px-16 md:pb-24">
+        <div className="mx-auto max-w-[1440px] px-6 pb-32 pt-6 md:px-16 md:pb-32">
           <span className="label closing-muted">Trust means checkable</span>
           <h2 className="mt-5 text-[clamp(2.5rem,7vw,6rem)] font-medium leading-[0.95] tracking-[-0.05em]">
             Nobody trusts one voice.
