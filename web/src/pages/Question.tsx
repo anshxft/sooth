@@ -8,6 +8,8 @@ import { cn, spaced } from '../lib/utils'
 import { Scramble } from '../lib/motion'
 import { VerifyPanel, cli } from '../lib/verify'
 import { Timer, elapsed } from '../lib/timer'
+import { QuestionProgress } from '../lib/progress'
+import { remember } from '../lib/mine'
 
 const RESOLVED_BY = { auto: 'Auto-resolved', round2: 'Resolved in round 2', dao: 'Resolved by DAO' } as const
 const RESULT = { correct: '✓ correct', wrong: '✗ wrong · slashed', no_reveal: '✗ no reveal', challenge_won: '✓ challenge won', challenge_lost: '✗ challenge lost' } as const
@@ -45,9 +47,14 @@ export function Question({ id }: { id: string }) {
     <Shell>
       <div className="label col-span-12 flex justify-between gap-3 p-3">
         <span><Link href="/" className="hover:underline">Arena</Link> / {qid(q.id)}</span>
-        <a href={`https://testnet.nearblocks.io/address/${CONTRACT}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
-          Contract on explorer ↗
-        </a>
+        <span className="flex gap-4">
+          {!q.outcome && q.phase !== 'Refunded' && (
+            <button type="button" onClick={() => remember('q', q.id)} className="hover:underline">+ Follow live</button>
+          )}
+          <a href={`https://testnet.nearblocks.io/address/${CONTRACT}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            Contract on explorer ↗
+          </a>
+        </span>
       </div>
       <header className="col-span-12 p-4">
         <h1 id="q-title" className="text-[clamp(1.6rem,3.4vw,2.8rem)] font-semibold leading-[1.05] tracking-[-0.03em]"><Scramble text={q.text} /></h1>
@@ -56,6 +63,7 @@ export function Question({ id }: { id: string }) {
           <span>opened {clock(q.created_at)}</span><span className="border border-ink px-1.5 text-ink">{spaced(q.phase)}</span>
         </p>
       </header>
+      <QuestionProgress q={q} names={names} now={now} />
       <Verdict q={q} now={now} />
       <MoneyFlow q={q} />
       {q.rounds.map((r) => <RoundBlock key={r.round} q={q} r={r} config={config} names={names} />)}

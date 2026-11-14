@@ -5,6 +5,7 @@ import { useLocation } from 'wouter'
 import { CONTRACT, connector, useAccount } from '../lib/near'
 import { cn } from '../lib/utils'
 import { Scramble } from '../lib/motion'
+import { remember } from '../lib/mine'
 
 type Kind = 'free' | 'rain' | 'crypto'
 type Draft = { text: string; category: 'news' | 'weather' | 'crypto'; template: 'free_text' | 'weather_rain' | 'crypto_price'; params: string }
@@ -101,6 +102,7 @@ export function Ask() {
         }],
       })
       const id = questionId(outcome)
+      if (id !== null) remember('q', id)
       navigate(id === null ? '/' : `/q/${id}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The transaction did not go through.')
