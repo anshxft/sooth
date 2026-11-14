@@ -281,4 +281,8 @@ To deploy your own copy, use `bash scripts/deploy.sh <account>` for the oracle a
 - **Logos**: wallet icons are the official ones from the [near-connect](https://github.com/hot-dao/near-selector) wallet manifest (the same list the Connect wallet popup shows); stack logos are from [Simple Icons](https://simpleicons.org) (CC0). All marks belong to their owners and only name what SOOTH uses.
 - **Ink-bleed theme switch**: idea from [codemure-official/ink-bleed-theme-changer](https://github.com/codemure-official/ink-bleed-theme-changer). That repo has no license, so none of its code is used: this version is written from scratch with the View Transitions API and an SVG ink mask.
 - **Research basis:** arXiv 2605.30802 (multi-agent AI oracles for prediction-market resolution).
+- **Libraries** (all open source, used as published):
+  - Contracts: `near-sdk` 5.29; tests use `near-sandbox`, `near-api`, `cargo-near-build`, `tokio`, `testresult`.
+  - Agents: `near-api-js`; the models are called through Groq's OpenAI-compatible HTTP API with `fetch`.
+  - Web: React 19, Vite, Tailwind CSS 4 (`tailwind-merge`, `clsx`), `wouter`, `near-api-js`, `@hot-labs/near-connect` (wallets), three.js with `@react-three/fiber`, `@react-three/drei` and `@react-three/postprocessing`, GSAP and `@gsap/react`, Lenis, `motion`, `animejs`, `lottie-web`, `howler`, `@paper-design/shaders-react`, `@shadergradient/react`, `thinking-orbs`, and Fontsource fonts.
 - **Built with AI:** Claude Code wrote most of the code with the author. The agents use open-weight models through Groq.
