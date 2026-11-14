@@ -138,7 +138,7 @@ export function Build() {
 
         <Step n="03" title="Or ask from a script, or by hand" body="The same call from near-cli-rs, or the Ask page with any testnet wallet.">
           <Command label="CLI · ask a question" command={CLI_ASK} />
-          <li><Link href="/ask" className="label inline-block bg-green px-2 py-1 text-ink hover:bg-ink hover:text-canvas">Open the Ask page →</Link></li>
+          <li><Link href="/ask" className="btn btn-sm">Open the Ask page →</Link></li>
         </Step>
 
         <div className="col-span-12 p-4">

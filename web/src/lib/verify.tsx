@@ -41,7 +41,7 @@ export function Command({ label, command }: Check) {
     <li className="min-w-0 border border-line">
       <div className="flex items-center justify-between gap-3 border-b border-line px-3 py-2">
         <span className="label text-muted">{label}</span>
-        <button type="button" onClick={copy} className="label border border-ink px-2 py-1 transition-colors duration-150 hover:bg-ink hover:text-canvas">
+        <button type="button" onClick={copy} className="btn btn-sm">
           {state === 'copied' ? 'Copied ✓' : state === 'failed' ? 'Select & copy' : 'Copy'}
         </button>
       </div>

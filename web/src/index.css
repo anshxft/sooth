@@ -1,35 +1,38 @@
 @import "tailwindcss";
 
-/* Swiss x Cybercore tokens (UI_PLAN v0.4). Green = truth / live / primary only; red = slash only. */
+/* Editorial monochrome (Denny Pratama system): warm black and off-white, one electric accent.
+   Role names are kept from the first theme so every component follows: "green" is now the
+   accent (live / active / verdict) and "red" the error and slash, which share the accent family. */
 @theme {
-  --color-canvas: #e9e9e7;
-  --color-line: #b9b9b4;
-  --color-ink: #111111;
-  --color-muted: #6b6b66;
-  --color-green: #7ffab7;
-  --color-red: #ff2a2a;
-  --color-term: #0f1010;
-  --color-term-text: #e6e6e6;
-  --font-display: "Tektur", system-ui, sans-serif;
-  --font-sans: "Inter Tight", system-ui, sans-serif;
+  --color-canvas: #eceae4;
+  --color-line: #cbc8bf;
+  --color-ink: #0c0c0b;
+  --color-muted: #6b6a64;
+  --color-green: #ff4f2b;
+  --color-red: #e5401d;
+  --color-term: #111111;
+  --color-term-text: #eceae4;
+  --font-display: "Times New Roman", Times, "Liberation Serif", serif;
+  --font-sans: "Archivo", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
-/* Night: same roles, inverted. Green and red keep their meaning; surfaces painted green keep dark
-   ink so text on them stays readable. Set by lib/theme.ts on <html data-theme="dark">. */
+/* Night is the system's native look: neutral #0C0C0B, off-white #ECEAE4, slate borders.
+   Set by lib/theme.ts on <html data-theme="dark"> (the default). */
 :root[data-theme="dark"] {
-  --color-canvas: #0e0f0f;
-  --color-line: #2c2e2d;
-  --color-ink: #e9e9e7;
-  --color-muted: #8e928f;
-  --color-red: #ff4d4d;
-  --color-term: #000000;
+  --color-canvas: #0c0c0b;
+  --color-line: #374151;
+  --color-ink: #eceae4;
+  --color-muted: #a9a79f;
+  --color-red: #ff4f2b;
+  --color-term: #111111;
   color-scheme: dark;
 }
-:root[data-theme="dark"] [class*="bg-green"] {
-  --color-ink: #111111;
-  --color-canvas: #e9e9e7;
-  --color-muted: #3d3f3e;
+/* Text on the accent stays near-black in both themes, for contrast on the orange. */
+[class*="bg-green"] {
+  --color-ink: #0c0c0b;
+  --color-canvas: #eceae4;
+  --color-muted: #3a2a24;
   color: var(--color-ink);
 }
 
@@ -47,6 +50,7 @@ body {
   background: var(--color-canvas);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  font-weight: 300;
   margin: 0;
   -webkit-font-smoothing: antialiased;
 }
@@ -57,7 +61,7 @@ body {
   gap: 1px;
   background: var(--color-line);
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
 }
 .blueprint > * {
@@ -66,11 +70,36 @@ body {
 }
 
 .label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+/* Pill button: transparent, 1px outline, 44px tall. The fill lifts only on hover. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--color-ink);
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-ink);
+  background: transparent;
+  transition: background-color 180ms ease, color 180ms ease, scale 160ms var(--ease-out);
+}
+.btn:hover { background: color-mix(in srgb, var(--color-ink) 9%, transparent); }
+.btn-sm { min-height: 32px; padding: 0 14px; font-size: 13px; }
+
+/* Serif display type sits at natural tracking; the grotesk headlines keep their tight tracking. */
+.font-display { letter-spacing: 0; font-weight: 700; }
 
 .halftone {
   background-image: radial-gradient(var(--color-ink) 1.1px, transparent 1.3px);
@@ -82,9 +111,9 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ink);
+  outline: 1px solid var(--color-ink);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px var(--color-green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-green) 60%, transparent);
 }
 
 /* ---------------------------------------------------------------- motion

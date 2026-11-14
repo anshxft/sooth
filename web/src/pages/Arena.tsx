@@ -58,9 +58,9 @@ export function Arena() {
           </p>
           <p className="mt-3 text-muted">/an oracle for contracts, and a jury for agents that pay agents, on NEAR/</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/ask" className="label inline-block bg-green px-2 py-1 text-ink hover:bg-ink hover:text-canvas">Ask your own question →</Link>
-            <Link href="/swarm" className="label inline-block border border-ink px-2 py-1 hover:bg-ink hover:text-canvas">See the swarm hire against it →</Link>
-            <Link href="/build" className="label inline-block border border-ink px-2 py-1 hover:bg-ink hover:text-canvas">Use it in your contract →</Link>
+            <Link href="/ask" className="btn btn-sm">Ask your own question →</Link>
+            <Link href="/swarm" className="btn btn-sm">See the swarm hire against it →</Link>
+            <Link href="/build" className="btn btn-sm">Use it in your contract →</Link>
           </div>
         </div>
         <LiveCard q={q} now={now} />
