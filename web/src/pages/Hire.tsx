@@ -53,7 +53,7 @@ export function Hire() {
     setBrief(null)
     const link = uri.trim()
     try {
-      if (!/^https:\/\//.test(link)) throw new Error('Use an https link to the raw text of your brief.')
+      if (!link.startsWith('https://')) throw new Error('Use an https link to the raw text of your brief.')
       if (link.length > MAX_URI_LEN) throw new Error(`The link must be at most ${MAX_URI_LEN} characters (it is ${link.length}).`)
       const res = await fetch(link)
       if (!res.ok) throw new Error(`That link returned HTTP ${res.status}.`)
