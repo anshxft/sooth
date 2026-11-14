@@ -1,17 +1,16 @@
-// Real logos. Wallets: the official icons from the near-connect wallet manifest, which is exactly the
-// list the "Connect wallet" popup offers. Stack: Simple Icons (CC0), drawn as masks so they take the
+// Real logos. Wallets: the official icons from the near-connect wallet manifest, limited to the ones
+// its "Connect wallet" popup offers on testnet. Stack: Simple Icons (CC0), drawn as masks so they take the
 // theme's ink colour. Files live in public/logos.
 import { cn } from './utils'
 
+// The wallets the Connect popup offers on NEAR testnet (checked against the live popup).
 const WALLETS: [string, string][] = [
-  ['HOT Wallet', 'hot-wallet.png'],
   ['Meteor', 'meteor-wallet.svg'],
-  ['MyNearWallet', 'mynearwallet.png'],
   ['Intear', 'intear-wallet.svg'],
-  ['OKX Wallet', 'okx-wallet.svg'],
   ['Nightly', 'nightly-wallet.webp'],
-  ['WalletConnect', 'wallet-connect.svg'],
   ['Ledger', 'ledger.svg'],
+  ['Ethereum wallets', 'ethereum-wallets.svg'],
+  ['NEAR CLI', 'near-cli.svg'],
 ]
 
 /** "Sign in with": the wallets that can sign SOOTH transactions. */
